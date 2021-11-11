@@ -10,20 +10,18 @@ class Render
 private:
 
 	ImDrawList* drawList;
-	
-public:
-	
-	// todo, maybe few draw lists with mutexes https://github.com/spirthack/CSGOSimple/blob/df4bb4ef20aef408b54b8eb2f99fb1637a5d97e8/CSGOSimple/render.hpp
 
+public:
+
+	// todo, maybe few draw lists with mutexes https://github.com/spirthack/CSGOSimple/blob/df4bb4ef20aef408b54b8eb2f99fb1637a5d97e8/CSGOSimple/render.hpp
 
 	// 3d circle https://github.com/spirthack/CSGOSimple/blob/master/CSGOSimple/render.cpp#L114
 	// or https://github.com/KebsCS/KBot/blob/9dd5894bb8141e90e2b6887eb93c9a34baa98838/KBot/Draw.cpp#L65
 
-
 	void RenderScene();
 
 	template <class T>
-	inline void Text(std::string str, T x, T y, float size, ImColor color, bool center = true, bool outline = true , ImFont* pFont = Globals::pDefaultFont)
+	inline void Text(std::string str, T x, T y, float size = 13.f, ImColor color = ImColor(1.f, 1.f, 1.f), bool center = true, bool outline = true, ImFont* pFont = Globals::pDefaultFont)
 	{
 		ImVec2 textSize = pFont->CalcTextSizeA(size, FLT_MAX, 0.0f, str.c_str());
 		if (!pFont->ContainerAtlas)
@@ -42,7 +40,7 @@ public:
 			drawList->AddText(pFont, size, ImVec2(x - 1, y + 1), black, str.c_str());
 		}
 
-		drawList->AddText(pFont, size, ImVec2(x,y), color, str.c_str());
+		drawList->AddText(pFont, size, ImVec2(x, y), color, str.c_str());
 
 		drawList->PopTextureID();
 	}
@@ -59,7 +57,7 @@ public:
 		Line(x1 + w - iw, y1, x1 + w, y1, color, th);			// right
 		Line(x1, y1, x1, y1 + ih, color, th);					// top left
 		Line(x1 + w - 1, y1, x1 + w - 1, y1 + ih, color, th);	// top right
-																	// bottom
+		// bottom
 		Line(x1, y1 + h, x1 + iw, y1 + h, color, th);			// left
 		Line(x1 + w - iw, y1 + h, x1 + w, y1 + h, color, th);	// right
 		Line(x1, y1 + h - ih, x1, y1 + h, color, th);			// bottom left
@@ -76,7 +74,7 @@ public:
 		Box(r.left, r.top, r.right, r.bottom, color, thickness, rounding);
 	}
 	template <class T>
-	inline void BoxFilled(T x1, T y1, T x2, T y2, ImColor color, float thickness = 1.f, float rounding = 0.f) 
+	inline void BoxFilled(T x1, T y1, T x2, T y2, ImColor color, float thickness = 1.f, float rounding = 0.f)
 	{
 		drawList->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), color, rounding, 15);
 	}
@@ -95,7 +93,6 @@ public:
 	{
 		drawList->AddCircleFilled(ImVec2(x, y), radius, color, points);
 	}
-
 };
 
 inline Render render;

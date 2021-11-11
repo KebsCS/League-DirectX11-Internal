@@ -10,6 +10,9 @@
 
 #ifdef _DEBUG
 //#error Compile in Release mode
+#else
+// disable exceptions caused by stl
+#define _HAS_EXCEPTIONS 0
 #endif
 #ifdef _WIN64
 #error Compile in x86
@@ -17,11 +20,8 @@
 
 // Windows Header Files
 #include <Windows.h>
-#include <process.h>
 #include <thread>
 #include <chrono>
 #include <vector>
 #include <string>
-#include <WinInet.h>
 #include <mutex>
-#include <ShlObj_core.h>

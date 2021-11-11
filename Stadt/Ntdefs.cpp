@@ -1,6 +1,6 @@
-#include <Windows.h>
-
 #include "Ntdefs.h"
+
+#include "lazy_importer.h"
 
 HMODULE GetKernel32Handle(void)
 {
@@ -100,7 +100,7 @@ void* GetModuleBase(LPCSTR moduleName)
 #endif
 
 	wchar_t wModuleName[100];
-	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, moduleName, -1, wModuleName, 100);
+	LI_FN(MultiByteToWideChar)(CP_ACP, MB_PRECOMPOSED, moduleName, -1, wModuleName, 100);
 
 	pPeb = *reinterpret_cast<decltype(pPeb)*>(pPeb + LdrOffset);
 	PLDR_DATA_TABLE_ENTRY pModuleList = *reinterpret_cast<PLDR_DATA_TABLE_ENTRY*>(pPeb + ListOffset);

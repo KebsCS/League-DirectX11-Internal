@@ -2,11 +2,19 @@
 
 #include "pch.h"
 
+#include "XorString.h"
+
+#include "Definitions.h"
+
 #include "json.h"
 #include "lazy_importer.h"
 
+//#define USEMINHOOK
+
+#ifdef USEMINHOOK
 #include "MinHook.h"
 #pragma comment(lib, "libMinHook.x86.lib")
+#endif
 
 #include "Offsets.h"
 #include "XorString.h"

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Ntdefs.h"
+#include "lazy_importer.h"
 
 template <typename T = NTSTATUS>
 class Syscall
@@ -28,7 +29,7 @@ template <typename T>
 Syscall<T>::~Syscall()
 {
 	if (executableMemory)
-		VirtualFreeEx((HANDLE)-1, executableMemory, NULL, MEM_RELEASE);
+		LI_FN(VirtualFreeEx)((HANDLE)-1, executableMemory, NULL, MEM_RELEASE);
 }
 
 template <typename T>
@@ -58,7 +59,7 @@ void Syscall<T>::Create(std::vector<BYTE>index, LPCSTR func, uintptr_t offset, s
 	{
 		//constexpr const char szNtdll[] = { 'n', 't', 'd', 'l', 'l', '.', 'd', 'l', 'l','\0' };
 		std::string szNtdll = XorStr("ntdll.dll");
-		hNtdll = reinterpret_cast<HMODULE>(GetModuleBase(/*XorStr*/(szNtdll.c_str())));
+		hNtdll = reinterpret_cast<HMODULE>(GetModuleBase((szNtdll.c_str())));
 	}
 
 #ifdef _WIN64 // idk shellcode is fine but doesnt work
@@ -122,11 +123,4 @@ void Syscall<T>::Create(std::vector<BYTE>index, LPCSTR func, uintptr_t offset, s
 	memcpy(executableMemory, shellcode, sizeof(shellcode));
 
 #endif
-
-#ifndef NDEBUG
-
-	//for (int i = 0; i < sizeof(shellcode); i++)
-	//	std::cout << std::hex << (int)executableMemory[i] << ", " << std::dec;
-
-#endif // NDEBUG
 }

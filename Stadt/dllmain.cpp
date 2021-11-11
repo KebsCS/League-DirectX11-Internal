@@ -33,14 +33,11 @@ HWND FindMainWindow(DWORD dwPID)
 
 void OnExit() noexcept
 {
+	// restore original wndproc
+	LI_FN(SetWindowLongW)(Globals::Hwnd, GWLP_WNDPROC, (LONG_PTR)Globals::WndProc);
+
 	// delete hooks and d3d
 	Hooks::Release();
-
-	// wait for last hooks to finish
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-	// restore original hwnd
-	LI_FN(SetWindowLongW)(Globals::Hwnd, GWLP_WNDPROC, (LONG_PTR)Globals::WndProc);
 }
 
 __declspec(safebuffers)void WINAPI InitThread(HMODULE hModule) noexcept
@@ -51,9 +48,14 @@ __declspec(safebuffers)void WINAPI InitThread(HMODULE hModule) noexcept
 	Globals::Hwnd = FindMainWindow(Globals::dwPid);
 	Globals::WndProc = reinterpret_cast<WNDPROC>(LI_FN(SetWindowLongW)(Globals::Hwnd, GWLP_WNDPROC, (LONG_PTR)WndProc));
 
+	/*if (!*(DWORD*)RVA(oLocalPlayer) && *(float*)RVA(oGameTime) < 1.f)
+	{
+		MessageBoxA(0, "Outdated offsets", "Error", 0);
+	}*/
+
 	if (Hooks::Init())
 	{
-		while (!LI_FN(GetAsyncKeyState).cached()(VK_END))
+		while (!LI_FN(GetAsyncKeyState).get()(VK_END))
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
@@ -93,7 +95,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		{
 			if (hThread != INVALID_HANDLE_VALUE)
 			{
-				LI_FN(CloseHandle).safe_cached()(hThread);
+				LI_FN(CloseHandle).safe()(hThread);
 			}
 		}
 		//CloseHandle((HANDLE)_beginthreadex(nullptr, 0, reinterpret_cast<_beginthreadex_proc_type>(InitThread), hModule, 0, nullptr));
@@ -108,7 +110,13 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		LI_FN(FreeLibrary).get()(hModule);
 		if (hThread != INVALID_HANDLE_VALUE)
 		{
-			LI_FN(CloseHandle).safe_cached()(hThread);
+			// todo very rarely crashes on unload, "invalid handle was specified"
+			// or "NtClose was called on a handle that was protected from close via NtSetInformationOnject"
+			try
+			{
+				//LI_FN(CloseHandle).safe()(hThread);
+			}
+			catch (...) {};
 		}
 		break;
 	}

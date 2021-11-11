@@ -2931,7 +2931,8 @@ ImGuiWindow::ImGuiWindow(ImGuiContext* context, const char* name) : DrawListInst
 	NameBufLen = (int)strlen(name) + 1;
 	ID = ImHashStr(name);
 	IDStack.push_back(ID);
-	MoveId = GetID("#MOVE");
+	std::string szMOVE = XorStr("#MOVE");
+	MoveId = GetID(szMOVE.c_str());
 	ScrollTarget = ImVec2(FLT_MAX, FLT_MAX);
 	ScrollTargetCenterRatio = ImVec2(0.5f, 0.5f);
 	AutoFitFramesX = AutoFitFramesY = -1;
@@ -3525,7 +3526,7 @@ ImDrawList* ImGui::GetBackgroundDrawList()
 
 ImDrawList* ImGui::GetForegroundDrawList(ImGuiViewport* viewport)
 {
-	std::string szForeground = "##Foreground";
+	std::string szForeground = XorStr("##Foreground");
 	return GetViewportDrawList((ImGuiViewportP*)viewport, 1, szForeground.c_str());
 }
 
@@ -5380,7 +5381,8 @@ ImGuiID ImGui::GetWindowResizeCornerID(ImGuiWindow* window, int n)
 {
 	IM_ASSERT(n >= 0 && n < 4);
 	ImGuiID id = window->ID;
-	id = ImHashStr("#RESIZE", 0, id);
+	std::string szRESIZE = XorStr("#RESIZE");
+	id = ImHashStr(szRESIZE.c_str(), 0, id);
 	id = ImHashData(&n, sizeof(int), id);
 	return id;
 }
@@ -5391,7 +5393,8 @@ ImGuiID ImGui::GetWindowResizeBorderID(ImGuiWindow* window, ImGuiDir dir)
 	IM_ASSERT(dir >= 0 && dir < 4);
 	int n = (int)dir + 4;
 	ImGuiID id = window->ID;
-	id = ImHashStr("#RESIZE", 0, id);
+	std::string szRESIZE = XorStr("#RESIZE");
+	id = ImHashStr(szRESIZE.c_str(), 0, id);
 	id = ImHashData(&n, sizeof(int), id);
 	return id;
 }

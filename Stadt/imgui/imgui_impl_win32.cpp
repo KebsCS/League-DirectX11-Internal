@@ -13,6 +13,8 @@
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
 #include "XorString.h"
+#include "lazy_importer.h"
+#include "Ntdefs.h" // for GetProcedureAddress
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"
@@ -24,7 +26,7 @@
 #include <dwmapi.h>
 
 // Configuration flags to add in your imconfig.h file:
-//#define IMGUI_IMPL_WIN32_DISABLE_GAMEPAD              // Disable gamepad support. This was meaningful before <1.81 but we now load XInput dynamically so the option is now less relevant.
+#define IMGUI_IMPL_WIN32_DISABLE_GAMEPAD              // Disable gamepad support. This was meaningful before <1.81 but we now load XInput dynamically so the option is now less relevant.
 
 // Using XInput for gamepad (will load DLL dynamically)
 #ifndef IMGUI_IMPL_WIN32_DISABLE_GAMEPAD
@@ -105,9 +107,9 @@ bool    ImGui_ImplWin32_Init(void* hwnd)
 	IM_ASSERT(io.BackendPlatformUserData == NULL && "Already initialized a platform backend!");
 
 	INT64 perf_frequency, perf_counter;
-	if (!::QueryPerformanceFrequency((LARGE_INTEGER*)&perf_frequency))
+	if (!LI_FN(QueryPerformanceFrequency)((LARGE_INTEGER*)&perf_frequency))
 		return false;
-	if (!::QueryPerformanceCounter((LARGE_INTEGER*)&perf_counter))
+	if (!LI_FN(QueryPerformanceCounter)((LARGE_INTEGER*)&perf_counter))
 		return false;
 
 	// Setup backend capabilities flags
@@ -200,7 +202,8 @@ static bool ImGui_ImplWin32_UpdateMouseCursor()
 	if (imgui_cursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
 	{
 		// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
-		::SetCursor(NULL);
+		LI_FN(SetCursor).get()(NULL);
+		//::SetCursor(NULL);
 	}
 	else
 	{
@@ -218,7 +221,8 @@ static bool ImGui_ImplWin32_UpdateMouseCursor()
 		case ImGuiMouseCursor_Hand:         win32_cursor = IDC_HAND; break;
 		case ImGuiMouseCursor_NotAllowed:   win32_cursor = IDC_NO; break;
 		}
-		::SetCursor(::LoadCursor(NULL, win32_cursor));
+		LI_FN(SetCursor).get()(LI_FN(LoadCursorW).get()(NULL, win32_cursor));
+		//::SetCursor(LI_FN(LoadCursorW).get()(NULL, win32_cursor));
 	}
 	return true;
 }
@@ -233,12 +237,12 @@ static void ImGui_ImplWin32_UpdateMousePos()
 	io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
 
 	// Obtain focused and hovered window. We forward mouse input when focused or when hovered (and no other window is capturing)
-	HWND focused_window = ::GetForegroundWindow();
+	HWND focused_window = LI_FN(GetForegroundWindow)();
 	HWND hovered_window = bd->MouseHwnd;
 	HWND mouse_window = NULL;
-	if (hovered_window && (hovered_window == bd->hWnd || ::IsChild(hovered_window, bd->hWnd)))
+	if (hovered_window && (hovered_window == bd->hWnd || LI_FN(IsChild)(hovered_window, bd->hWnd)))
 		mouse_window = hovered_window;
-	else if (focused_window && (focused_window == bd->hWnd || ::IsChild(focused_window, bd->hWnd)))
+	else if (focused_window && (focused_window == bd->hWnd || LI_FN(IsChild)(focused_window, bd->hWnd)))
 		mouse_window = focused_window;
 	if (mouse_window == NULL)
 		return;
@@ -247,13 +251,13 @@ static void ImGui_ImplWin32_UpdateMousePos()
 	if (io.WantSetMousePos)
 	{
 		POINT pos = { (int)mouse_pos_prev.x, (int)mouse_pos_prev.y };
-		if (::ClientToScreen(bd->hWnd, &pos))
-			::SetCursorPos(pos.x, pos.y);
+		if (LI_FN(ClientToScreen)(bd->hWnd, &pos))
+			LI_FN(SetCursorPos)(pos.x, pos.y);
 	}
 
 	// Set Dear ImGui mouse position from OS position
 	POINT pos;
-	if (::GetCursorPos(&pos) && ::ScreenToClient(mouse_window, &pos))
+	if (LI_FN(GetCursorPos)(&pos) && LI_FN(ScreenToClient)(mouse_window, &pos))
 		io.MousePos = ImVec2((float)pos.x, (float)pos.y);
 }
 
@@ -315,12 +319,12 @@ void    ImGui_ImplWin32_NewFrame()
 
 	// Setup display size (every frame to accommodate for window resizing)
 	RECT rect = { 0, 0, 0, 0 };
-	::GetClientRect(bd->hWnd, &rect);
+	LI_FN(GetClientRect)(bd->hWnd, &rect);
 	io.DisplaySize = ImVec2((float)(rect.right - rect.left), (float)(rect.bottom - rect.top));
 
 	// Setup time step
 	INT64 current_time = 0;
-	::QueryPerformanceCounter((LARGE_INTEGER*)&current_time);
+	LI_FN(QueryPerformanceCounter)((LARGE_INTEGER*)&current_time);
 	io.DeltaTime = (float)(current_time - bd->Time) / bd->TicksPerSecond;
 	bd->Time = current_time;
 
@@ -375,7 +379,7 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARA
 		if (!bd->MouseTracked)
 		{
 			TRACKMOUSEEVENT tme = { sizeof(tme), TME_LEAVE, hwnd, 0 };
-			::TrackMouseEvent(&tme);
+			LI_FN(TrackMouseEvent)(&tme);
 			bd->MouseTracked = true;
 		}
 		break;
@@ -394,8 +398,8 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARA
 		if (msg == WM_RBUTTONDOWN || msg == WM_RBUTTONDBLCLK) { button = 1; }
 		if (msg == WM_MBUTTONDOWN || msg == WM_MBUTTONDBLCLK) { button = 2; }
 		if (msg == WM_XBUTTONDOWN || msg == WM_XBUTTONDBLCLK) { button = (GET_XBUTTON_WPARAM(wParam) == XBUTTON1) ? 3 : 4; }
-		if (!ImGui::IsAnyMouseDown() && ::GetCapture() == NULL)
-			::SetCapture(hwnd);
+		if (!ImGui::IsAnyMouseDown() && LI_FN(GetCapture)() == NULL)
+			LI_FN(SetCapture)(hwnd);
 		io.MouseDown[button] = true;
 		return 0;
 	}
@@ -410,8 +414,8 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARA
 		if (msg == WM_MBUTTONUP) { button = 2; }
 		if (msg == WM_XBUTTONUP) { button = (GET_XBUTTON_WPARAM(wParam) == XBUTTON1) ? 3 : 4; }
 		io.MouseDown[button] = false;
-		if (!ImGui::IsAnyMouseDown() && ::GetCapture() == hwnd)
-			::ReleaseCapture();
+		if (!ImGui::IsAnyMouseDown() && LI_FN(GetCapture)() == hwnd)
+			LI_FN(ReleaseCapture)();
 		return 0;
 	}
 	case WM_MOUSEWHEEL:
@@ -471,32 +475,34 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARA
 // If you are trying to implement your own backend for your own engine, you may ignore that noise.
 //---------------------------------------------------------------------------------------------------------
 
+// --------------------------------------- Removed this, as our app requires win10 to run
+
 // Perform our own check with RtlVerifyVersionInfo() instead of using functions from <VersionHelpers.h> as they
 // require a manifest to be functional for checks above 8.1. See https://github.com/ocornut/imgui/issues/4200
-static BOOL _IsWindowsVersionOrGreater(WORD major, WORD minor, WORD)
-{
-	typedef LONG(WINAPI* PFN_RtlVerifyVersionInfo)(OSVERSIONINFOEXW*, ULONG, ULONGLONG);
-	static PFN_RtlVerifyVersionInfo RtlVerifyVersionInfoFn = NULL;
-	if (RtlVerifyVersionInfoFn == NULL)
-		if (HMODULE ntdllModule = ::GetModuleHandleA("ntdll.dll"))
-			RtlVerifyVersionInfoFn = (PFN_RtlVerifyVersionInfo)GetProcAddress(ntdllModule, "RtlVerifyVersionInfo");
-	if (RtlVerifyVersionInfoFn == NULL)
-		return FALSE;
+//static BOOL _IsWindowsVersionOrGreater(WORD major, WORD minor, WORD)
+//{
+//	typedef LONG(WINAPI* PFN_RtlVerifyVersionInfo)(OSVERSIONINFOEXW*, ULONG, ULONGLONG);
+//	static PFN_RtlVerifyVersionInfo RtlVerifyVersionInfoFn = NULL;
+//	if (RtlVerifyVersionInfoFn == NULL)
+//		if (HMODULE ntdllModule = ::GetModuleHandleA("ntdll.dll"))
+//			RtlVerifyVersionInfoFn = (PFN_RtlVerifyVersionInfo)GetProcAddress(ntdllModule, "RtlVerifyVersionInfo");
+//	if (RtlVerifyVersionInfoFn == NULL)
+//		return FALSE;
+//
+//	RTL_OSVERSIONINFOEXW versionInfo = { };
+//	ULONGLONG conditionMask = 0;
+//	versionInfo.dwOSVersionInfoSize = sizeof(RTL_OSVERSIONINFOEXW);
+//	versionInfo.dwMajorVersion = major;
+//	versionInfo.dwMinorVersion = minor;
+//	VER_SET_CONDITION(conditionMask, VER_MAJORVERSION, VER_GREATER_EQUAL);
+//	VER_SET_CONDITION(conditionMask, VER_MINORVERSION, VER_GREATER_EQUAL);
+//	return (RtlVerifyVersionInfoFn(&versionInfo, VER_MAJORVERSION | VER_MINORVERSION, conditionMask) == 0) ? TRUE : FALSE;
+//}
 
-	RTL_OSVERSIONINFOEXW versionInfo = { };
-	ULONGLONG conditionMask = 0;
-	versionInfo.dwOSVersionInfoSize = sizeof(RTL_OSVERSIONINFOEXW);
-	versionInfo.dwMajorVersion = major;
-	versionInfo.dwMinorVersion = minor;
-	VER_SET_CONDITION(conditionMask, VER_MAJORVERSION, VER_GREATER_EQUAL);
-	VER_SET_CONDITION(conditionMask, VER_MINORVERSION, VER_GREATER_EQUAL);
-	return (RtlVerifyVersionInfoFn(&versionInfo, VER_MAJORVERSION | VER_MINORVERSION, conditionMask) == 0) ? TRUE : FALSE;
-}
-
-#define _IsWindowsVistaOrGreater()   _IsWindowsVersionOrGreater(HIBYTE(0x0600), LOBYTE(0x0600), 0) // _WIN32_WINNT_VISTA
-#define _IsWindows8OrGreater()       _IsWindowsVersionOrGreater(HIBYTE(0x0602), LOBYTE(0x0602), 0) // _WIN32_WINNT_WIN8
-#define _IsWindows8Point1OrGreater() _IsWindowsVersionOrGreater(HIBYTE(0x0603), LOBYTE(0x0603), 0) // _WIN32_WINNT_WINBLUE
-#define _IsWindows10OrGreater()      _IsWindowsVersionOrGreater(HIBYTE(0x0A00), LOBYTE(0x0A00), 0) // _WIN32_WINNT_WINTHRESHOLD / _WIN32_WINNT_WIN10
+//#define _IsWindowsVistaOrGreater()   _IsWindowsVersionOrGreater(HIBYTE(0x0600), LOBYTE(0x0600), 0) // _WIN32_WINNT_VISTA
+//#define _IsWindows8OrGreater()       _IsWindowsVersionOrGreater(HIBYTE(0x0602), LOBYTE(0x0602), 0) // _WIN32_WINNT_WIN8
+//#define _IsWindows8Point1OrGreater() _IsWindowsVersionOrGreater(HIBYTE(0x0603), LOBYTE(0x0603), 0) // _WIN32_WINNT_WINBLUE
+//#define _IsWindows10OrGreater()      _IsWindowsVersionOrGreater(HIBYTE(0x0A00), LOBYTE(0x0A00), 0) // _WIN32_WINNT_WINTHRESHOLD / _WIN32_WINNT_WIN10
 
 #ifndef DPI_ENUMS_DECLARED
 typedef enum { PROCESS_DPI_UNAWARE = 0, PROCESS_SYSTEM_DPI_AWARE = 1, PROCESS_PER_MONITOR_DPI_AWARE = 2 } PROCESS_DPI_AWARENESS;
@@ -516,26 +522,30 @@ typedef DPI_AWARENESS_CONTEXT(WINAPI* PFN_SetThreadDpiAwarenessContext)(DPI_AWAR
 // Helper function to enable DPI awareness without setting up a manifest
 void ImGui_ImplWin32_EnableDpiAwareness()
 {
-	if (_IsWindows10OrGreater())
-	{
-		static HINSTANCE user32_dll = ::LoadLibraryA("user32.dll"); // Reference counted per-process
-		if (PFN_SetThreadDpiAwarenessContext SetThreadDpiAwarenessContextFn = (PFN_SetThreadDpiAwarenessContext)::GetProcAddress(user32_dll, "SetThreadDpiAwarenessContext"))
+	//if (_IsWindows10OrGreater())
+	{ //todo test if this is working
+		std::string szUser32 = XorStr("user32.dll");
+		static HINSTANCE user32_dll = reinterpret_cast<HINSTANCE>(GetModuleBase(szUser32.c_str()));		//LI_FN(LoadLibraryA)("user32.dll"); // Reference counted per-process
+		std::string szSetThreadDpiAwarenessContext = XorStr("SetThreadDpiAwarenessContext");
+		if (PFN_SetThreadDpiAwarenessContext SetThreadDpiAwarenessContextFn = (PFN_SetThreadDpiAwarenessContext)GetProcedureAddress(user32_dll, szSetThreadDpiAwarenessContext.c_str()))
 		{
 			SetThreadDpiAwarenessContextFn(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 			return;
 		}
 	}
-	if (_IsWindows8Point1OrGreater())
+	//if (_IsWindows8Point1OrGreater())
 	{
-		static HINSTANCE shcore_dll = ::LoadLibraryA("shcore.dll"); // Reference counted per-process
-		if (PFN_SetProcessDpiAwareness SetProcessDpiAwarenessFn = (PFN_SetProcessDpiAwareness)::GetProcAddress(shcore_dll, "SetProcessDpiAwareness"))
+		std::string szShcore = XorStr("shcore.dll");
+		static HINSTANCE shcore_dll = reinterpret_cast<HINSTANCE>(GetModuleBase(szShcore.c_str()));		//LI_FN(LoadLibraryA)("shcore.dll"); // Reference counted per-process
+		std::string szSetProcessDpiAwareness = XorStr("SetProcessDpiAwareness");
+		if (PFN_SetProcessDpiAwareness SetProcessDpiAwarenessFn = (PFN_SetProcessDpiAwareness)GetProcedureAddress(shcore_dll, szSetProcessDpiAwareness.c_str()))
 		{
 			SetProcessDpiAwarenessFn(PROCESS_PER_MONITOR_DPI_AWARE);
 			return;
 		}
 	}
 #if _WIN32_WINNT >= 0x0600
-	::SetProcessDPIAware();
+	LI_FN(SetProcessDPIAware)();
 #endif
 }
 
@@ -546,12 +556,18 @@ void ImGui_ImplWin32_EnableDpiAwareness()
 float ImGui_ImplWin32_GetDpiScaleForMonitor(void* monitor)
 {
 	UINT xdpi = 96, ydpi = 96;
-	if (_IsWindows8Point1OrGreater())
+	//if (_IsWindows8Point1OrGreater())
 	{
-		static HINSTANCE shcore_dll = ::LoadLibraryA("shcore.dll"); // Reference counted per-process
+		std::string szShcore = XorStr("shcore.dll");
+		static HINSTANCE shcore_dll = reinterpret_cast<HINSTANCE>(GetModuleBase(szShcore.c_str()));		//LI_FN(LoadLibraryA)("shcore.dll"); // Reference counted per-process
+
+		//static HINSTANCE shcore_dll = ::LoadLibraryA("shcore.dll"); // Reference counted per-process
 		static PFN_GetDpiForMonitor GetDpiForMonitorFn = NULL;
 		if (GetDpiForMonitorFn == NULL && shcore_dll != NULL)
-			GetDpiForMonitorFn = (PFN_GetDpiForMonitor)::GetProcAddress(shcore_dll, "GetDpiForMonitor");
+		{
+			std::string szGetDpiForMonitor = XorStr("GetDpiForMonitor");
+			GetDpiForMonitorFn = (PFN_GetDpiForMonitor)GetProcedureAddress(shcore_dll, szGetDpiForMonitor.c_str());
+		}
 		if (GetDpiForMonitorFn != NULL)
 		{
 			GetDpiForMonitorFn((HMONITOR)monitor, MDT_EFFECTIVE_DPI, &xdpi, &ydpi);
@@ -561,8 +577,8 @@ float ImGui_ImplWin32_GetDpiScaleForMonitor(void* monitor)
 	}
 #ifndef NOGDI
 	const HDC dc = ::GetDC(NULL);
-	xdpi = ::GetDeviceCaps(dc, LOGPIXELSX);
-	ydpi = ::GetDeviceCaps(dc, LOGPIXELSY);
+	xdpi = LI_FN(GetDeviceCaps)(dc, LOGPIXELSX);
+	ydpi = LI_FN(GetDeviceCaps)(dc, LOGPIXELSY);
 	IM_ASSERT(xdpi == ydpi); // Please contact me if you hit this assert!
 	::ReleaseDC(NULL, dc);
 #endif
@@ -571,7 +587,7 @@ float ImGui_ImplWin32_GetDpiScaleForMonitor(void* monitor)
 
 float ImGui_ImplWin32_GetDpiScaleForHwnd(void* hwnd)
 {
-	HMONITOR monitor = ::MonitorFromWindow((HWND)hwnd, MONITOR_DEFAULTTONEAREST);
+	HMONITOR monitor = LI_FN(MonitorFromWindow)((HWND)hwnd, MONITOR_DEFAULTTONEAREST);
 	return ImGui_ImplWin32_GetDpiScaleForMonitor(monitor);
 }
 
@@ -588,31 +604,31 @@ float ImGui_ImplWin32_GetDpiScaleForHwnd(void* hwnd)
 // (the Dwm* functions are Vista era functions but we are borrowing logic from GLFW)
 void ImGui_ImplWin32_EnableAlphaCompositing(void* hwnd)
 {
-	if (!_IsWindowsVistaOrGreater())
-		return;
+	//if (!_IsWindowsVistaOrGreater())
+		//return;
 
 	BOOL composition;
-	if (FAILED(::DwmIsCompositionEnabled(&composition)) || !composition)
+	if (FAILED(LI_FN(DwmIsCompositionEnabled)(&composition)) || !composition)
 		return;
 
-	BOOL opaque;
-	DWORD color;
-	if (_IsWindows8OrGreater() || (SUCCEEDED(::DwmGetColorizationColor(&color, &opaque)) && !opaque))
+	//BOOL opaque;
+	//DWORD color;
+	//if (_IsWindows8OrGreater() || (SUCCEEDED(::DwmGetColorizationColor(&color, &opaque)) && !opaque))
 	{
-		HRGN region = ::CreateRectRgn(0, 0, -1, -1);
+		HRGN region = LI_FN(CreateRectRgn)(0, 0, -1, -1);
 		DWM_BLURBEHIND bb = {};
 		bb.dwFlags = DWM_BB_ENABLE | DWM_BB_BLURREGION;
 		bb.hRgnBlur = region;
 		bb.fEnable = TRUE;
-		::DwmEnableBlurBehindWindow((HWND)hwnd, &bb);
-		::DeleteObject(region);
+		LI_FN(DwmEnableBlurBehindWindow)((HWND)hwnd, &bb);
+		LI_FN(DeleteObject)(region);
 	}
-	else
+	/*else
 	{
 		DWM_BLURBEHIND bb = {};
 		bb.dwFlags = DWM_BB_ENABLE;
 		::DwmEnableBlurBehindWindow((HWND)hwnd, &bb);
-	}
+	}*/
 }
 
 //---------------------------------------------------------------------------------------------------------

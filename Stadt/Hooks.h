@@ -2,9 +2,6 @@
 
 #include "Includes.h"
 
-#define SCREENWIDTH ::GetSystemMetrics(SM_CXSCREEN)
-#define SCREENHEIGHT ::GetSystemMetrics(SM_CYSCREEN)
-
 LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 namespace Hooks

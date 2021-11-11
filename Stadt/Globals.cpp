@@ -9,4 +9,5 @@ namespace Globals
 	DWORD dwPid = 0;
 	bool bMenuOpen = true;
 	ImFont* pDefaultFont;
+	float fGameTime = 0.f;
 }

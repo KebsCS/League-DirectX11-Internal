@@ -1,6 +1,10 @@
 #include "Hooks.h"
 #include "Ntdefs.h"
 #include "Render.h"
+#include "Tahoma.h"
+#include "Ntfuncs.h"
+
+#include "FuncHook.h"
 
 typedef HRESULT(__stdcall* D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 typedef void(__stdcall* D3D11DrawIndexedHook) (ID3D11DeviceContext* pContext, UINT IndexCount, UINT StartIndexLocation, INT BaseVertexLocation);
@@ -20,11 +24,17 @@ ID3D11DeviceContext* pContext = nullptr;
 ID3D11RenderTargetView* pRenderTargetView = nullptr;
 ID3D11Texture2D* pBackbuffer = nullptr;
 
+FuncHook FHPresent;
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (uMsg == WM_KEYDOWN && wParam == VK_INSERT)
-		Globals::bMenuOpen = !Globals::bMenuOpen;
+	// hotkeys
+	if (uMsg == WM_KEYDOWN)
+	{
+		if (wParam == VK_INSERT)
+			Globals::bMenuOpen = !Globals::bMenuOpen;
+	}
 
 	if (Globals::bMenuOpen)
 	{
@@ -32,7 +42,7 @@ LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return true;
 	}
 
-	return LI_FN(CallWindowProcW)(Globals::WndProc, hwnd, uMsg, wParam, lParam);
+	return LI_FN(CallWindowProcW).get()(Globals::WndProc, hwnd, uMsg, wParam, lParam);
 }
 //
 //void __stdcall DrawIndexedHook(ID3D11DeviceContext* pContext, UINT IndexCount, UINT StartIndexLocation, INT BaseVertexLocation)
@@ -86,15 +96,14 @@ LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 bool Hooks::Init()
 {
 	D3D_FEATURE_LEVEL FeatureLevelsRequested[] = { D3D_FEATURE_LEVEL_11_0/*, D3D_FEATURE_LEVEL_10_1 */ };
-	UINT numFeatureLevelsRequested = 1;
 	D3D_FEATURE_LEVEL FeatureLevelsSupported;
 
 	DXGI_SWAP_CHAIN_DESC sd;
 	{
 		ZeroMemory(&sd, sizeof(sd));
 
-		sd.BufferDesc.Width = 0; // SCREENWIDTH;
-		sd.BufferDesc.Height = 0; // SCREENHEIGHT;
+		sd.BufferDesc.Width = 0;
+		sd.BufferDesc.Height = 0;
 		sd.BufferDesc.RefreshRate.Numerator = 60;
 		sd.BufferDesc.RefreshRate.Denominator = 1;
 		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -116,28 +125,35 @@ bool Hooks::Init()
 
 	std::string szd3d11 = XorStr("d3d11.dll");
 	std::string szD3D11CreateDeviceAndSwapChain = XorStr("D3D11CreateDeviceAndSwapChain");
+
 	// todo maybe LI_FN instead of ModuleCall
 	HRESULT hr = ModuleCall<HRESULT>(szd3d11.c_str(), szD3D11CreateDeviceAndSwapChain.c_str(), nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, FeatureLevelsRequested, sizeof(FeatureLevelsRequested) / sizeof(D3D_FEATURE_LEVEL), D3D11_SDK_VERSION, &sd, &pSwapchain, &pDevice, &FeatureLevelsSupported, &pContext);
 	if (FAILED(hr))
 		return false;
 
-	//pSwapChainVTable = (DWORD_PTR*)(pSwapchain);
-	//pSwapChainVTable = (DWORD_PTR*)(pSwapChainVTable[0]);
-
-	//pDeviceVTable = (DWORD_PTR*)(pDevice);
-	//pDeviceVTable = (DWORD_PTR*)pDeviceVTable[0];
-
-	//pDeviceContextVTable = (DWORD_PTR*)(pContext);
-	//pDeviceContextVTable = (DWORD_PTR*)(pDeviceContextVTable[0]);
-
+	// Get VMT addresses
 	void** pSwapchainVMT = *(void***)pSwapchain;
 	void** pDeviceVMT = *(void***)pDevice;
 	void** pDeviceContextVMT = *(void***)pContext;
 
-	// todo dont use minhook, maybe https://github.com/reahly/valorant-internal/blob/main/vitasnella-valorant/hooks/hooks.cpp#L63
+	// Free our pointers, as we will be using the taget's now
+	if (pSwapchain) { pSwapchain->Release(); pSwapchain = nullptr; }
+	if (pDevice) { pDevice->Release(); pDevice = nullptr; }
+	if (pContext) { pContext->Release(); pContext = nullptr; }
+
+#ifdef USEMINHOOK
 	if (MH_Initialize() != MH_OK) { return false; }
 	if (MH_CreateHook((DWORD_PTR*)pSwapchainVMT[8], PresentHook, reinterpret_cast<void**>(&phookD3D11Present)) != MH_OK) { return false; }
 	if (MH_EnableHook((DWORD_PTR*)pSwapchainVMT[8]) != MH_OK) { return false; }
+#else
+
+	FHPresent = FuncHook((uintptr_t)pSwapchainVMT[8], (uintptr_t)PresentHook);
+	FHPresent.hook();
+
+#endif
+
+	// List of VMTs https://github.com/guided-hacking/GH_D3D11_Hook/blob/master/GH_D3D11_Hook/D3D_VMT_Indices.h
+
 	//if (MH_CreateHook((DWORD_PTR*)pDeviceContextVMT[12], DrawIndexedHook, reinterpret_cast<void**>(&phookD3D11DrawIndexed)) != MH_OK) { return 1; }
 	//if (MH_EnableHook((DWORD_PTR*)pDeviceContextVMT[12]) != MH_OK) { return 1; }
 	//if (MH_CreateHook((DWORD_PTR*)pDeviceVMT[24], hookD3D11CreateQuery, reinterpret_cast<void**>(&phookD3D11CreateQuery)) != MH_OK) { return 1; }
@@ -147,9 +163,6 @@ bool Hooks::Init()
 	//if (MH_CreateHook((DWORD_PTR*)pSwapchainVMT[50], ClearRenderTargetViewHook, reinterpret_cast<void**>(&phookD3D11ClearRenderTargetViewHook)) != MH_OK) { return 1; }
 	//if (MH_EnableHook((DWORD_PTR*)pSwapchainVMT[50]) != MH_OK) { return 1; }
 
-	//DWORD old_protect;
-	//VirtualProtect(phookD3D11Present, 2, PAGE_EXECUTE_READWRITE, &old_protect);
-
 	return true;
 }
 
@@ -157,13 +170,19 @@ void Hooks::Release()
 {
 	Globals::bMenuOpen = false;
 
-	MH_DisableHook(MH_ALL_HOOKS);
-
 	/*::ImGui_ImplDX11_Shutdown();
 	::ImGui_ImplWin32_Shutdown();
 	::ImGui::DestroyContext();*/
 
+#ifdef USEMINHOOK
+	MH_DisableHook(MH_ALL_HOOKS);
 	MH_Uninitialize();
+#else
+	FHPresent.unhook();
+#endif
+
+	// wait for last hooks to finish
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	if (pDevice) { pDevice->Release(); pDevice = nullptr; }
 	if (pSwapchain) { pSwapchain->Release(); pSwapchain = nullptr; }
@@ -182,29 +201,43 @@ HRESULT __stdcall Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterv
 			InitImgui(pSwapChain);
 		});
 
+	// todo sometimes on unloading pContext was nullptr, maybe make a mutex of some sort
+	pContext->OMSetRenderTargets(1, &pRenderTargetView, nullptr);
+
 	::ImGui_ImplDX11_NewFrame();
 	::ImGui_ImplWin32_NewFrame();
 	::ImGui::NewFrame();
 
 	if (Globals::bMenuOpen)
+	{
 		::ImGui::ShowDemoWindow();
+		::ImGui::ShowMetricsWindow();
+	}
 
-	//drawings
 	render.RenderScene();
 
+	// VISUALS GO HERE
+	// -----
 	render.Box(20, 100, 100, 200, ImColor(1.f, 0.f, 0.f));
 
-	render.Text("xddd", 50, 50, 20.f, ImColor(1.f, 0.f, 0.f), true, true);
+	ImGuiIO& io = ImGui::GetIO();
+	ImVec2 mpos = io.MousePos;
+	render.Text("xddd", mpos.x, mpos.y, 20.f, ImColor(1.f, 0.f, 0.f), true, true);
 
 	render.CornerBox(300, 300, 400, 400, ImColor(0.f, 1.f, 0.f));
+
+	// -----
 
 	::ImGui::EndFrame();
 	::ImGui::Render();
 
-	pContext->OMSetRenderTargets(1, &pRenderTargetView, nullptr);
 	::ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
+#ifdef USEMINHOOK
 	return phookD3D11Present(pSwapChain, SyncInterval, Flags);
+#else
+	return FHPresent.Call<HRESULT>(pSwapChain, SyncInterval, Flags);
+#endif
 }
 
 bool Hooks::InitD3D(IDXGISwapChain* pSwapchain)
@@ -232,17 +265,20 @@ bool Hooks::InitD3D(IDXGISwapChain* pSwapchain)
 
 bool Hooks::InitImgui(IDXGISwapChain* pSwapchain)
 {
-	// todo style
-
 	::ImGui::CreateContext();
 
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.Fonts->AddFontDefault();
+	//io.Fonts->AddFontDefault();
+
+	// https://github.com/ocornut/imgui/blob/master/misc/fonts/binary_to_compressed_c.cpp
+	ImFontConfig fontConfig;
+	io.Fonts->AddFontFromMemoryCompressedBase85TTF(Tahoma_compressed_data_base85, 13.f, &fontConfig);
 	Globals::pDefaultFont = io.Fonts->Fonts[0];
 
 	io.IniFilename = nullptr;
 	io.LogFilename = nullptr;
 
+	// todo style
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.AntiAliasedFill = true;
 	style.AntiAliasedLines = true;

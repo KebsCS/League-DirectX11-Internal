@@ -13,4 +13,5 @@ namespace Globals
 	extern DWORD dwPid;
 	extern bool bMenuOpen;
 	extern ImFont* pDefaultFont;
+	extern float fGameTime;
 }

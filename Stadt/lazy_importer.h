@@ -558,11 +558,11 @@ namespace li {
 						while (export_index--)
 							if (hash(exports.name(export_index)) == Hash)
 								return (F)(exports.address(export_index));
-			}
-		} while (e.next());
-		return {};
+					}
+				} while (e.next());
+				return {};
 #endif
-	}
+			}
 
 			template<class F = T, class Enum = unsafe_module_enumerator>
 			LAZY_IMPORTER_FORCEINLINE static F forwarded() noexcept
@@ -688,7 +688,7 @@ namespace li {
 			{
 				return in_safe_cached<F>(ldr_data_entry()->load_order_next()->DllBase);
 			}
-};
+		};
 	}
 } // namespace li::detail
 
