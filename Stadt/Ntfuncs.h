@@ -32,22 +32,6 @@ typedef BOOL(WINAPI* tWriteProcessMemory)(
 // todo
 BOOL FWriteProcessMemory(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten);
 
-//
-//HMODULE FLoadLibraryA(LPCSTR lpLibName)
-//{
-//	typedef HMODULE(WINAPI* tLoadLibraryA)(IN LPCSTR);
-//	tLoadLibraryA pLoadLibraryA = NULL;
-//
-//	if (!pLoadLibraryA)
-//	{
-//		constexpr const char NtApi[] = { 'L', 'o', 'a', 'd', 'L', 'i', 'b', 'r', 'a', 'r', 'y','A','\0' };
-//
-//		pLoadLibraryA = (tLoadLibraryA)(GetProcedureAddress(_getKernel32Handle(), NtApi));
-//	}
-//
-//	return static_cast<HMODULE>(pLoadLibraryA(lpLibName));
-//}
-
 typedef HANDLE(WINAPI* tCreateToolhelp32Snapshot)
 (
 	DWORD dwFlags,
@@ -97,3 +81,5 @@ NTSTATUS FNtCreateThreadEx(_Out_ PHANDLE ThreadHandle,
 	_In_opt_ SIZE_T StackSize,
 	_In_opt_ SIZE_T MaximumStackSize,
 	_In_opt_ PVOID AttributeList);
+
+HMODULE LoadDll(LPCSTR lpFileName);

@@ -1,3 +1,6 @@
+// todo move this to images.cpp
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "Includes.h"
 #include "Hooks.h"
 #include "Ntdefs.h"
@@ -75,6 +78,8 @@ __declspec(safebuffers)void WINAPI InitThread(HMODULE hModule) noexcept
 #define THREAD_CREATE_FLAGS_INITIAL_THREAD 0x00000080
 
 HANDLE hThread = 0;
+
+//#pragma comment(linker, "/nodefaultlib /subsystem:windows /ENTRY:DllMain")
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {

@@ -1,0 +1,10 @@
+.vs
+Debug
+Release
+x64
+Stadt/Debug
+Stadt/Images
+Stadt/Release
+Stadt/x64
+Stadt/config.JSON
+LolImagesToByteArrayParser/Release

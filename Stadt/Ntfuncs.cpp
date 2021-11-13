@@ -145,22 +145,6 @@ BOOL FWriteProcessMemory(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer
 	return 1; // todo
 }
 
-//
-//HMODULE FLoadLibraryA(LPCSTR lpLibName)
-//{
-//	typedef HMODULE(WINAPI* tLoadLibraryA)(IN LPCSTR);
-//	tLoadLibraryA pLoadLibraryA = NULL;
-//
-//	if (!pLoadLibraryA)
-//	{
-//		constexpr const char NtApi[] = { 'L', 'o', 'a', 'd', 'L', 'i', 'b', 'r', 'a', 'r', 'y','A','\0' };
-//
-//		pLoadLibraryA = (tLoadLibraryA)(GetProcedureAddress(_getKernel32Handle(), NtApi));
-//	}
-//
-//	return static_cast<HMODULE>(pLoadLibraryA(lpLibName));
-//}
-
 tCreateToolhelp32Snapshot pCreateToolhelp32Snapshot = NULL;
 
 HANDLE FCreateToolhelp32Snapshot(DWORD dwFlags, DWORD th32ProcessID)
@@ -215,4 +199,67 @@ NTSTATUS FNtCreateThreadEx(_Out_ PHANDLE ThreadHandle,
 	NTSTATUS ntStatus = Syscall<NTSTATUS>({ 0xC1 }, RtlInterlockedCompareExchange64, 0x170, { 0x2C })
 		(ThreadHandle, DesiredAccess, ObjectAttributes, ProcessHandle, StartRoutine, Argument, CreateFlags, ZeroBits, StackSize, MaximumStackSize, AttributeList);
 	return ntStatus;
+}
+
+typedef NTSTATUS(WINAPI* fLdrLoadDll) //LdrLoadDll function prototype
+(
+	IN PWCHAR PathToFile OPTIONAL,
+	IN ULONG Flags OPTIONAL,
+	IN PUNICODE_STRING ModuleFileName,
+	OUT HMODULE* ModuleHandle
+	);
+
+/**************************************************************************
+  *      RtlInitUnicodeString   (NTDLL.@)
+  *
+  * Initializes a buffered unicode string.
+  *
+  * RETURNS
+  *  Nothing.
+  *
+  * NOTES
+  *  Assigns source to target->Buffer. The length of source is assigned to
+  *  target->Length and target->MaximumLength. If source is NULL the length
+  *  of source is assumed to be 0.
+  */
+void WINAPI RtlInitUnicodeString(
+	PUNICODE_STRING target, /* [I/O] Buffered unicode string to be initialized */
+	PCWSTR source)          /* [I]   '\0' terminated unicode string used to initialize target */
+{
+	if ((target->Buffer = (PWSTR)source))
+	{
+		unsigned int length = lstrlenW(source) * sizeof(WCHAR);
+		if (length > 0xfffc)
+			length = 0xfffc;
+		target->Length = length;
+		target->MaximumLength = target->Length + sizeof(WCHAR);
+	}
+	else target->Length = target->MaximumLength = 0;
+}
+
+fLdrLoadDll   _LdrLoadDll = NULL;
+
+HMODULE LoadDll(LPCSTR lpFileName)
+{
+	if (!hNtdll)
+	{
+		std::string szNtdll = XorStr("ntdll.dll");
+		hNtdll = reinterpret_cast<HMODULE>(GetModuleBase((szNtdll.c_str())));
+	}
+	if (!_LdrLoadDll)
+	{
+		std::string szLdrLoadDll = XorStr("LdrLoadDll");
+		_LdrLoadDll = (fLdrLoadDll)GetProcedureAddress(hNtdll, szLdrLoadDll.c_str());
+	}
+
+	wchar_t wFileName[100];
+	LI_FN(MultiByteToWideChar)(CP_ACP, MB_PRECOMPOSED, lpFileName, -1, wFileName, 100);
+
+	UNICODE_STRING usDllFile;
+	RtlInitUnicodeString(&usDllFile, wFileName);
+
+	HMODULE hModule = NULL;
+	NTSTATUS result = _LdrLoadDll(NULL, NULL, &usDllFile, &hModule);
+
+	return hModule;
 }

@@ -6,12 +6,14 @@
 #include "Ntdefs.h"
 #include "lazy_importer.h"
 
+inline HMODULE hNtdll = nullptr;
+
 template <typename T = NTSTATUS>
 class Syscall
 {
 private:
 	char* executableMemory = nullptr;
-	HMODULE hNtdll = nullptr;
+	//HMODULE hNtdll = nullptr;
 
 public:
 

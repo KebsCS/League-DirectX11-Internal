@@ -26,6 +26,16 @@ ID3D11Texture2D* pBackbuffer = nullptr;
 
 FuncHook FHPresent;
 
+bool Hooks::InitImages(ID3D11Device* pDevice)
+{
+	imageManager.SetDevice(pDevice);
+
+	imageManager.AddImage("aatrox_square", (char*)&Images::aatrox_square, sizeof(Images::aatrox_square));
+	imageManager.AddImage("talonw", (char*)&Images::talonw, sizeof(Images::talonw));
+
+	return true;
+}
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -123,11 +133,20 @@ bool Hooks::Init()
 		sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	}
 
-	std::string szd3d11 = XorStr("d3d11.dll");
-	std::string szD3D11CreateDeviceAndSwapChain = XorStr("D3D11CreateDeviceAndSwapChain");
-
 	// todo maybe LI_FN instead of ModuleCall
-	HRESULT hr = ModuleCall<HRESULT>(szd3d11.c_str(), szD3D11CreateDeviceAndSwapChain.c_str(), nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, FeatureLevelsRequested, sizeof(FeatureLevelsRequested) / sizeof(D3D_FEATURE_LEVEL), D3D11_SDK_VERSION, &sd, &pSwapchain, &pDevice, &FeatureLevelsSupported, &pContext);
+
+	// 	std::string szd3d11 = XorStr("d3d11.dll");
+	// std::string szD3D11CreateDeviceAndSwapChain = XorStr("D3D11CreateDeviceAndSwapChain");
+	//HRESULT hr = ModuleCall<HRESULT>(szd3d11.c_str(), szD3D11CreateDeviceAndSwapChain.c_str(),
+	//	nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, FeatureLevelsRequested,
+	//	sizeof(FeatureLevelsRequested) / sizeof(D3D_FEATURE_LEVEL), D3D11_SDK_VERSION,
+	//	&sd, &pSwapchain, &pDevice, &FeatureLevelsSupported, &pContext);
+
+	HRESULT hr = LI_FN(D3D11CreateDeviceAndSwapChain).in(LI_MODULE("d3d11.dll").cached())(nullptr,
+		D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, FeatureLevelsRequested,
+		sizeof(FeatureLevelsRequested) / sizeof(D3D_FEATURE_LEVEL), D3D11_SDK_VERSION,
+		&sd, &pSwapchain, &pDevice, &FeatureLevelsSupported, &pContext);
+
 	if (FAILED(hr))
 		return false;
 
@@ -184,6 +203,8 @@ void Hooks::Release()
 	// wait for last hooks to finish
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
+	imageManager.Unload();
+
 	if (pDevice) { pDevice->Release(); pDevice = nullptr; }
 	if (pSwapchain) { pSwapchain->Release(); pSwapchain = nullptr; }
 	if (pContext) { pContext->Release(); pContext = nullptr; }
@@ -218,11 +239,16 @@ HRESULT __stdcall Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterv
 
 	// VISUALS GO HERE
 	// -----
+
 	render.Box(20, 100, 100, 200, ImColor(1.f, 0.f, 0.f));
 
 	ImGuiIO& io = ImGui::GetIO();
 	ImVec2 mpos = io.MousePos;
-	render.Text("xddd", mpos.x, mpos.y, 20.f, ImColor(1.f, 0.f, 0.f), true, true);
+	//render.Text("xddd", mpos.x, mpos.y, 20.f, ImColor(1.f, 0.f, 0.f), true, true);
+	Image aatroxe = imageManager.GetImageInfoByName("aatrox_square");
+	render.Image(mpos.x, mpos.y, aatroxe.width, aatroxe.height, aatroxe.pShaderResource, true);
+
+	render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName("talonw"), true);
 
 	render.CornerBox(300, 300, 400, 400, ImColor(0.f, 1.f, 0.f));
 
@@ -259,6 +285,8 @@ bool Hooks::InitD3D(IDXGISwapChain* pSwapchain)
 
 		pContext->OMSetRenderTargets(1, &pRenderTargetView, nullptr);
 	}
+
+	InitImages(pDevice);
 
 	return true;
 }

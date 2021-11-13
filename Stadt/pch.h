@@ -25,3 +25,15 @@
 #include <vector>
 #include <string>
 #include <mutex>
+
+#include <d3d11.h>
+#define DIRECTINPUT_VERSION 0x0800
+#include <tchar.h>
+#include <dinput.h>
+#include <dxgi1_3.h>
+#include <d3d11_2.h>
+#include <dcomp.h>
+#include <D3DX11tex.h>
+#pragma comment(lib, "dcomp.lib")
+#pragma comment(lib, "d3d11.lib")
+//#pragma comment(lib, "D3DX11.lib")

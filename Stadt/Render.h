@@ -2,6 +2,7 @@
 
 #include "Includes.h"
 #include "Globals.h"
+#include "Image.h"
 
 #pragma warning(disable : 4244)
 
@@ -62,6 +63,41 @@ public:
 		Line(x1 + w - iw, y1 + h, x1 + w, y1 + h, color, th);	// right
 		Line(x1, y1 + h - ih, x1, y1 + h, color, th);			// bottom left
 		Line(x1 + w - 1, y1 + h - ih, x1 + w - 1, y1 + h, color, th);	// bottom right
+	}
+
+	inline void Image(ImVec2 pos, ImVec2 size, ID3D11ShaderResourceView* image)
+	{
+		Image(pos.x, pos.y, size.x, size.y, image);
+	}
+
+	template <class T>
+	inline void Image(T x, T y, float width, float height, ID3D11ShaderResourceView* image, bool centered = false)
+	{
+		if (image == nullptr)
+			return;
+
+		if (centered)
+		{
+			x -= width / 2.f;
+			y -= height / 2.f;
+		}
+
+		drawList->AddImage(image, ImVec2(x, y), ImVec2(x + width, y + height));
+	}
+
+	inline void ImageBordered(int x, int y, float width, float height, ID3D11ShaderResourceView* image, bool centered = false)
+	{
+		if (centered)
+		{
+			x -= width / 2.f;
+			y -= height / 2.f;
+		}
+		int x2 = x + width;
+		int y2 = y + height;
+		Box(x, y, x2, y2, ImColor(0.f, 0.f, 0.f), 5.f);
+
+		// centered false, because we already pass correct x and y
+		Image(x, y, width, height, image, false);
 	}
 
 	template <class T>
