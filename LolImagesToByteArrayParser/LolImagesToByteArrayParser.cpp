@@ -85,15 +85,35 @@ void DownloadAllIcons()
 				http->DownloadFile(portraitName, "", url);
 			}
 		}
+
 	}
+
+	// summoner spells
+	std::string url = "https://raw.communitydragon.org/latest/game/data/spells/icons2d/";
+	std::string getSumms = http->Request("GET", url);
+	std::smatch summsMatch;
+	while (std::regex_search(getSumms, summsMatch, regex))
+	{
+		getSumms = summsMatch.suffix();
+		std::string portraitName = summsMatch[1].str();
+		std::string portraitUrl = url + portraitName;
+		if (portraitName.find("summoner") == std::string::npos)
+			continue;
+
+		if (portraitName.find(".png") != std::string::npos)
+		{
+			http->DownloadFile(portraitName, "", url);
+		}
+	}
+
 }
 
 int main(int argc, char** argv)
 {
-	DownloadAllIcons();
+	//DownloadAllIcons();
 
 	// output filename
-	std::string file = "out.txt";
+	std::string file = "Images.h";
 	std::ofstream outFile(file);
 
 	outFile << "#pragma once\n\nnamespace Images\n{\n\n";
@@ -104,6 +124,10 @@ int main(int argc, char** argv)
 
 		// ignore itself and output file
 		if ((inputFile.path() == argv[0]) || file == inputFileName)
+			continue;
+
+		// todo get name from argv[0]
+		if (inputFileName.find("LolImagesTo") != std::string::npos)
 			continue;
 
 		// array names cant start with a digit

@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <atomic>
+#include <mutex>
 
 enum HookType
 {
@@ -25,6 +26,8 @@ private:
 	void rehook32(intptr_t offset);
 
 public:
+
+
 	FuncHook(HookType type = HOOKTYPE_FORWARD_OVERWRITE)
 		: pFunc(NULL), pHook(NULL), bEnabled(false), bStarted(false), type(type)
 	{
@@ -83,6 +86,7 @@ public:
 		hook.hook();
 	}
 };
+
 
 template <typename Result, typename... Args>
 Result WINAPI FuncHook::Call(Args ... args)

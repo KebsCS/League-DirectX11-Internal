@@ -239,6 +239,7 @@ void WINAPI RtlInitUnicodeString(
 
 fLdrLoadDll   _LdrLoadDll = NULL;
 
+// LoadLibrary wrapper, unsafe
 HMODULE LoadDll(LPCSTR lpFileName)
 {
 	if (!hNtdll)

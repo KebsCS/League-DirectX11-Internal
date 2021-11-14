@@ -113,12 +113,14 @@ public:
 		{
 			if (obj.pShaderResource)
 			{
-				obj.pShaderResource->Release(); obj.pShaderResource = nullptr;
+				obj.pShaderResource->Release(); 
+				obj.pShaderResource = nullptr;
 			};
 		}
 		if (this->pDevice)
 		{
-			pDevice->Release(); pDevice = nullptr;
+			pDevice->Release();
+			pDevice = nullptr;
 		}
 	}
 
@@ -169,6 +171,7 @@ public:
 				return obj;
 			}
 		}
+		// todo return a value
 	}
 
 	std::vector<Image>* GetVector()

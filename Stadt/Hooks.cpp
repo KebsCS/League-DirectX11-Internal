@@ -30,8 +30,24 @@ bool Hooks::InitImages(ID3D11Device* pDevice)
 {
 	imageManager.SetDevice(pDevice);
 
-	imageManager.AddImage("aatrox_square", (char*)&Images::aatrox_square, sizeof(Images::aatrox_square));
-	imageManager.AddImage("talonw", (char*)&Images::talonw, sizeof(Images::talonw));
+	imageManager.AddImage(XorStr("aatrox_square"), (char*)&Images::aatrox_square, sizeof(Images::aatrox_square));
+
+	imageManager.AddImage(XorStr("talon_square"), (char*)&Images::talon_square_0, sizeof(Images::talon_square_0));
+	imageManager.AddImage(XorStr("talon_w"), (char*)&Images::talonw, sizeof(Images::talonw));
+	imageManager.AddImage(XorStr("talon_r"), (char*)&Images::talonr, sizeof(Images::talonr));
+
+	imageManager.AddImage(XorStr("xpbar"), (char*)&Images::xpbar, sizeof(Images::xpbar));
+	imageManager.AddImage(XorStr("xpbarblack"), (char*)&Images::xpbarblack, sizeof(Images::xpbarblack));
+	imageManager.AddImage(XorStr("hudicon"), (char*)&Images::hudicon, sizeof(Images::hudicon));
+	imageManager.AddImage(XorStr("hudcircle"), (char*)&Images::hudcircle, sizeof(Images::hudcircle));
+	imageManager.AddImage(XorStr("hudleft"), (char*)&Images::hudleft, sizeof(Images::hudleft));
+	imageManager.AddImage(XorStr("manabar"), (char*)&Images::manabar, sizeof(Images::manabar));
+	imageManager.AddImage(XorStr("hpbar"), (char*)&Images::hpbar, sizeof(Images::hpbar));
+	imageManager.AddImage(XorStr("hpbarblack"), (char*)&Images::hpbarblack, sizeof(Images::hpbarblack));
+
+
+	imageManager.AddImage(XorStr("summoner_flash"), (char*)&Images::summoner_flash, sizeof(Images::summoner_flash));
+	imageManager.AddImage(XorStr("summoner_heal"), (char*)&Images::summoner_heal, sizeof(Images::summoner_heal));
 
 	return true;
 }
@@ -197,9 +213,10 @@ void Hooks::Release()
 	MH_DisableHook(MH_ALL_HOOKS);
 	MH_Uninitialize();
 #else
+
 	FHPresent.unhook();
 #endif
-
+	
 	// wait for last hooks to finish
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -245,13 +262,19 @@ HRESULT __stdcall Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterv
 	ImGuiIO& io = ImGui::GetIO();
 	ImVec2 mpos = io.MousePos;
 	//render.Text("xddd", mpos.x, mpos.y, 20.f, ImColor(1.f, 0.f, 0.f), true, true);
-	Image aatroxe = imageManager.GetImageInfoByName("aatrox_square");
-	render.Image(mpos.x, mpos.y, aatroxe.width, aatroxe.height, aatroxe.pShaderResource, true);
+	//Image aatroxe = imageManager.GetImageInfoByName("aatrox_square");
+	//render.Image(mpos.x, mpos.y, aatroxe.width, aatroxe.height, aatroxe.pShaderResource, true);
 
-	render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName("talonw"), true);
+	render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName(XorStr("talon_w")), true);
 
 	render.CornerBox(300, 300, 400, 400, ImColor(0.f, 1.f, 0.f));
 
+	static float cd = 200.f;
+	if (cd < -200.f)
+		cd = 200.f;
+
+	render.FancyIcon(150, 150, XorStr("talon"), cd / 200.f, cd / 200.f,cd / 200.f, 1,cd,XorStr("summoner_flash"),cd,XorStr("summoner_heal"),cd);
+	cd -= 1.f;
 	// -----
 
 	::ImGui::EndFrame();
