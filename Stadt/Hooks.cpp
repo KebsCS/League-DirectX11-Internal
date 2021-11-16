@@ -8,6 +8,8 @@
 #include "FuncHook.h"
 #include "VMTHook.h"
 
+#include <sstream>
+
 // todo move this
 constexpr auto oChatClientPtr = 0x30ffbacL;
 constexpr auto oSendChat = 0x5fc400L;
@@ -45,7 +47,7 @@ IDirectInput8W* pDirectInput = nullptr;
 FuncHook FHPresent;
 VMTHook VMTHGetDeviceData;
 FuncHook FHGetDeviceData;
-VMTHook VMTHOnProcessSpellCast;
+VMTHook VMTHOnProcessSpellCast[10];
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -98,21 +100,40 @@ HRESULT WINAPI GetDeviceDataHook(IDirectInputDevice8W* pThis, DWORD cbObjectData
 	return ret;
 }
 
-// todo finish the class
+class SpellInfo
+{
+public:
+	char pad_0000[24]; //0x0000
+	LolString name; //0x0018
+};
+
 class SpellCastInfo
 {
-};
+public:
+	SpellInfo* spellInfo; //0x0000
+	char pad_0004[92]; //0x0004
+	char pad_005D[31]; //0x005D
+//	Vector3 StartPos; //0x007C
+	//Vector3 EndPos; //0x0088
+	//Vector3 EndPos2; //0x0094
+	char pad_00A0[4024]; //0x00A0
+}; //Size: 0x1058
 
 // todo move this
 uintptr_t pOnProcessSpellCast;
-DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, /*SpellCastInfo**/ void* spellCastInfo, int a6)
+DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellCastInfo* spellCastInfo, int a6)
 {
-	static auto fn = reinterpret_cast<DWORD * (__thiscall*)(void*, int, void*, int)>(pOnProcessSpellCast);
+	static auto fn = reinterpret_cast<DWORD * (__thiscall*)(void*, int, SpellCastInfo*, int)>(pOnProcessSpellCast);
 
 	if (spellCastInfo != nullptr)
 	{
 		// todo an event manager
-		SendChat(std::to_string((DWORD)spellCastInfo).c_str());
+		std::string name = spellCastInfo->spellInfo->name;
+		//std::string name = *reinterpret_cast<LolString*>(*reinterpret_cast<DWORD*>(spellCastInfo) + 0x18);
+		std::stringstream ss;
+		ss << std::hex << (DWORD)spellCastInfo;
+		std::string str2 = name + "   " + ss.str() + "   " + std::to_string(state);
+		SendChat(str2.c_str());
 	}
 
 	return fn(thisptr, state, spellCastInfo, a6);
@@ -133,11 +154,13 @@ HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterval,
 			// and move herolist initalize somewhere else
 			DWORD pHeroList = *reinterpret_cast<DWORD*>(Globals::dwBaseAddress + oHeroList);
 			DWORD pHeroArray = *reinterpret_cast<DWORD*>(pHeroList + 0x04);
-			int nHeroArrayLen = *reinterpret_cast<int*>(pHeroArray + 0x08);
+			int nHeroArrayLen = *reinterpret_cast<int*>(pHeroList + 0x08);
+
 			for (int i = 0; i < nHeroArrayLen * 4; i += 4)
 			{
 				DWORD dwOnProcessSpell = *reinterpret_cast<DWORD*>(pHeroArray + i) + 0xE6C;
-				pOnProcessSpellCast = VMTHOnProcessSpellCast.Hook((void*)dwOnProcessSpell, 29, (uintptr_t)&OnProcessSpellCast);
+				//SendChat(std::to_string(dwOnProcessSpell).c_str());
+				pOnProcessSpellCast = VMTHOnProcessSpellCast[i / 4].Hook((void*)dwOnProcessSpell, 29, (uintptr_t)&OnProcessSpellCast);
 			}
 		});
 
@@ -154,31 +177,31 @@ HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterval,
 		{
 			::ImGui::ShowDemoWindow();
 			::ImGui::ShowMetricsWindow();
+
+			render.RenderScene();
+
+			// VISUALS GO HERE
+			// -----
+
+			render.Box(20, 100, 100, 200, ImColor(1.f, 0.f, 0.f));
+
+			ImGuiIO& io = ImGui::GetIO();
+			ImVec2 mpos = io.MousePos;
+			//render.Text("xddd", mpos.x, mpos.y, 20.f, ImColor(1.f, 0.f, 0.f), true, true);
+			//Image aatroxe = imageManager.GetImageInfoByName("aatrox_square");
+			//render.Image(mpos.x, mpos.y, aatroxe.width, aatroxe.height, aatroxe.pShaderResource, true);
+
+			render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName(XorStr("talon_w")), true);
+
+			render.CornerBox(300, 300, 400, 400, ImColor(0.f, 1.f, 0.f));
+
+			static float cd = 200.f;
+			if (cd < -200.f)
+				cd = 200.f;
+
+			render.FancyIcon(150, 150, XorStr("talon"), cd / 200.f, cd / 200.f, cd / 200.f, 1, cd, XorStr("summoner_flash"), cd, XorStr("summoner_heal"), cd);
+			cd -= 1.f;
 		}
-
-		render.RenderScene();
-
-		// VISUALS GO HERE
-		// -----
-
-		render.Box(20, 100, 100, 200, ImColor(1.f, 0.f, 0.f));
-
-		ImGuiIO& io = ImGui::GetIO();
-		ImVec2 mpos = io.MousePos;
-		//render.Text("xddd", mpos.x, mpos.y, 20.f, ImColor(1.f, 0.f, 0.f), true, true);
-		//Image aatroxe = imageManager.GetImageInfoByName("aatrox_square");
-		//render.Image(mpos.x, mpos.y, aatroxe.width, aatroxe.height, aatroxe.pShaderResource, true);
-
-		render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName(XorStr("talon_w")), true);
-
-		render.CornerBox(300, 300, 400, 400, ImColor(0.f, 1.f, 0.f));
-
-		static float cd = 200.f;
-		if (cd < -200.f)
-			cd = 200.f;
-
-		render.FancyIcon(150, 150, XorStr("talon"), cd / 200.f, cd / 200.f, cd / 200.f, 1, cd, XorStr("summoner_flash"), cd, XorStr("summoner_heal"), cd);
-		cd -= 1.f;
 		// -----
 
 		::ImGui::EndFrame();
@@ -291,7 +314,8 @@ void Hooks::Release()
 	VMTHGetDeviceData.UnHook();
 #endif
 
-	VMTHOnProcessSpellCast.UnHook();
+	for (VMTHook& vmt : VMTHOnProcessSpellCast)
+		vmt.UnHook();
 
 	// wait for last hooks to finish
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -397,6 +421,9 @@ bool Hooks::InitDInput()
 	//void* pVMT = lpdiKeyboard;
 	//phookGetDeviceData = reinterpret_cast<IDirectInputDeviceGetDeviceDataHook>(VMTHGetDeviceData.Hook(pVMT, 10, (uintptr_t)&GetDeviceDataHook));
 #endif
+
+	if (lpdiKeyboard)
+		lpdiKeyboard->Release();
 
 	return true;
 }
