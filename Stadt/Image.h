@@ -109,11 +109,11 @@ public:
 
 	void Unload()
 	{
-		for (auto obj : this->vImages)
+		for (auto& obj : this->vImages)
 		{
 			if (obj.pShaderResource)
 			{
-				obj.pShaderResource->Release(); 
+				obj.pShaderResource->Release();
 				obj.pShaderResource = nullptr;
 			};
 		}
@@ -141,7 +141,7 @@ public:
 
 	bool HasImage(std::string name)
 	{
-		for (auto obj : this->vImages)
+		for (const auto& obj : this->vImages)
 		{
 			if (name.compare(obj.name) == 0)
 				return true;
@@ -151,7 +151,7 @@ public:
 
 	ID3D11ShaderResourceView* GetImageByName(std::string name)
 	{
-		for (auto obj : this->vImages)
+		for (const auto& obj : this->vImages)
 		{
 			if (name.compare(obj.name) == 0)
 			{
@@ -164,7 +164,7 @@ public:
 
 	Image GetImageInfoByName(std::string name)
 	{
-		for (auto obj : this->vImages)
+		for (const auto& obj : this->vImages)
 		{
 			if (name.compare(obj.name) == 0)
 			{

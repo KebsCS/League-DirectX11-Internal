@@ -12,4 +12,5 @@ namespace Hooks
 	bool InitD3D(IDXGISwapChain* pSwapchain);
 	bool InitImgui(IDXGISwapChain* pSwapchain);
 	bool InitImages(ID3D11Device* pDevice);
+	bool InitDInput();
 };

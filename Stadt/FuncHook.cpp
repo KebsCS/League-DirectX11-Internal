@@ -24,7 +24,7 @@ public:
 	}
 };
 
-void FuncHook::rehook32(intptr_t offset)
+void FuncHook::ReHook32(intptr_t offset)
 {
 	protect_guard guard(pFunc - JMP_32_SIZE, JMP_32_SIZE * 2);
 
@@ -105,7 +105,7 @@ void FuncHook::rehook32(intptr_t offset)
 	}
 }
 
-void FuncHook::hook()
+void FuncHook::Hook()
 {
 	if (bEnabled)
 		return;
@@ -137,10 +137,10 @@ void FuncHook::hook()
 
 	intptr_t offset = pHook - pFunc - JMP_32_SIZE;
 
-	rehook32(offset);
+	ReHook32(offset);
 }
 
-void FuncHook::unhook()
+void FuncHook::UnHook()
 {
 	if (!bEnabled)
 		return;

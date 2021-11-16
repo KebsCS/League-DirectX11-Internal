@@ -105,9 +105,6 @@
     <ClInclude Include="Render.h">
       <Filter>Render</Filter>
     </ClInclude>
-    <ClInclude Include="Tahoma.h">
-      <Filter>Libs\imgui\Fonts</Filter>
-    </ClInclude>
     <ClInclude Include="FuncHook.h">
       <Filter>Hooks</Filter>
     </ClInclude>
@@ -128,6 +125,15 @@
     </ClInclude>
     <ClInclude Include="stb_image.h">
       <Filter>Libs</Filter>
+    </ClInclude>
+    <ClInclude Include="Fonts\CascadiaMono.h">
+      <Filter>Libs\imgui\Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="Fonts\Tahoma.h">
+      <Filter>Libs\imgui\Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="VMTHook.h">
+      <Filter>Hooks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +187,9 @@
     </ClCompile>
     <ClCompile Include="Ntdefs.cpp">
       <Filter>Syscalls</Filter>
+    </ClCompile>
+    <ClCompile Include="VMTHook.cpp">
+      <Filter>Hooks</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -147,7 +147,7 @@ public:
 
 	// xp 0.f to 1.f
 	template <class T>
-	inline void FancyIcon(T x, T y, std::string champ, float hp, float mana,float xp, int level, float ultCD, std::string summ1, float summ1CD, std::string summ2, float summ2CD)
+	inline void FancyIcon(T x, T y, std::string champ, float hp, float mana, float xp, int level, float ultCD, std::string summ1, float summ1CD, std::string summ2, float summ2CD)
 	{
 		// to see better
 		BoxFilled(x - 50, y - 50, 400, 400, ImColor(1.f, 1.f, 1.f));
@@ -162,7 +162,7 @@ public:
 		drawList->AddImage(imageManager.GetImageByName(XorStr("xpbarblack")), ImVec2(x + 136, y + 17), ImVec2(x + 136 + 47, y + 17 + 120));
 		drawList->AddImage(imageManager.GetImageByName(XorStr("xpbar")), ImVec2(x + 136, y + 17 + 120 * xp), ImVec2(x + 136 + 47, y + 17 + 120), uv0, uv1);
 
-		this->Image(x+8, y+10, 66, 143, imageManager.GetImageByName(XorStr("hpbarblack")));
+		this->Image(x + 8, y + 10, 66, 143, imageManager.GetImageByName(XorStr("hpbarblack")));
 
 		//this->Image(x + 6, y + 9, 49, 135, imageManager.GetImageByName("hpbar"));
 		uv0 = ImVec2(0.f, ((135 * hp) / 135));
@@ -171,7 +171,6 @@ public:
 		//this->Image(x + 22, y + 16, 49, 122, imageManager.GetImageByName("manabar"));
 		uv0 = ImVec2(0.f, ((122 * mana) / 122));
 		drawList->AddImage(imageManager.GetImageByName(XorStr("manabar")), ImVec2(x + 22, y + 16 + 122 * mana), ImVec2(x + 22 + 49, y + 16 + 122), uv0, uv1);
-
 
 		this->Image(x, y, 193, 176, imageManager.GetImageByName(XorStr("hudicon")));
 
@@ -188,7 +187,6 @@ public:
 			Text(std::to_string((int)ultCD), x + 106, y + 27 - fontSize / 2, fontSize, ImColor(1.f, 1.f, 1.f), true, true);
 		}
 
-
 		this->Image(x + 47, y + 130, 48, 48, imageManager.GetImageByName(XorStr("hudcircle")), true);
 		this->ImageRounded(x + 47, y + 130, 36, 36, imageManager.GetImageByName(summ1), 150.f, true);
 		if (summ1CD > 0.f)
@@ -204,7 +202,6 @@ public:
 			CircleFilled(x + 86, y + 149, 20, 12, ImColor(0.f, 0.f, 0.f, 0.6f));
 			Text(std::to_string((int)summ2CD), x + 86, y + 149 - fontSize / 2, fontSize, ImColor(1.f, 1.f, 1.f), true, true);
 		}
-
 
 		Text(std::to_string(level), x + 141, y + 144 - fontSize / 2, fontSize, ImColor(1.f, 1.f, 1.f), true, true);
 	}

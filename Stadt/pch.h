@@ -36,4 +36,6 @@
 #include <D3DX11tex.h>
 #pragma comment(lib, "dcomp.lib")
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "dinput8")
+#pragma comment(lib, "dxguid")
 //#pragma comment(lib, "D3DX11.lib")

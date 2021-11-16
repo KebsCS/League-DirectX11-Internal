@@ -11,6 +11,7 @@ enum HookType
 	HOOKTYPE_REVERSE_CHAIN
 };
 
+// todo clean this up
 class FuncHook
 {
 private:
@@ -20,13 +21,12 @@ private:
 	std::atomic_bool bEnabled; // is hook enabled
 	std::atomic_bool bStarted; // was hook enabled at least once
 	HookType type;
-	uint8_t arrOriginal[5]; // stores bytes of the original function
-	uint8_t arrReHook[5]; // stores bytes of changed function for restoring the hook
+	uint8_t arrOriginal[5] = { 0 }; // stores bytes of the original function
+	uint8_t arrReHook[5] = { 0 }; // stores bytes of changed function for restoring the hook
 
-	void rehook32(intptr_t offset);
+	void ReHook32(intptr_t offset);
 
 public:
-
 
 	FuncHook(HookType type = HOOKTYPE_FORWARD_OVERWRITE)
 		: pFunc(NULL), pHook(NULL), bEnabled(false), bStarted(false), type(type)
@@ -44,27 +44,27 @@ public:
 	{
 	}
 
-	FuncHook& operator=(const FuncHook& lhs)
+	FuncHook& operator=(const FuncHook& rhs)
 	{
-		this->pCallable = lhs.pCallable;
-		this->pFunc = lhs.pFunc;
-		this->pHook = lhs.pHook;
-		this->bEnabled = lhs.bEnabled.load();
-		this->bStarted = lhs.bStarted.load();
-		this->type = lhs.type;
-		memcpy(arrOriginal, lhs.arrOriginal, sizeof(arrOriginal));
-		memcpy(arrReHook, lhs.arrReHook, sizeof(arrReHook));
+		this->pCallable = rhs.pCallable;
+		this->pFunc = rhs.pFunc;
+		this->pHook = rhs.pHook;
+		this->bEnabled = rhs.bEnabled.load();
+		this->bStarted = rhs.bStarted.load();
+		this->type = rhs.type;
+		memcpy(arrOriginal, rhs.arrOriginal, sizeof(arrOriginal));
+		memcpy(arrReHook, rhs.arrReHook, sizeof(arrReHook));
 		return *this;
 	}
 
 	~FuncHook()
 	{
 		if (bEnabled)
-			unhook();
+			UnHook();
 	}
 
-	void hook();
-	void unhook();
+	void Hook();
+	void UnHook();
 
 	template <typename Result, typename... Args>
 	Result WINAPI Call(Args ... args);
@@ -78,15 +78,14 @@ public:
 	hook_guard(FuncHook& func_hook)
 		: hook(func_hook)
 	{
-		hook.unhook();
+		hook.UnHook();
 	}
 
 	~hook_guard()
 	{
-		hook.hook();
+		hook.Hook();
 	}
 };
-
 
 template <typename Result, typename... Args>
 Result WINAPI FuncHook::Call(Args ... args)
