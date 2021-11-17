@@ -172,6 +172,7 @@
     <ClInclude Include="Fonts\CascadiaMono.h" />
     <ClInclude Include="Fonts\Tahoma.h" />
     <ClInclude Include="FuncHook.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="Image.h" />
@@ -192,16 +193,25 @@
     <ClInclude Include="Includes.h" />
     <ClInclude Include="json.h" />
     <ClInclude Include="lazy_importer.h" />
+    <ClInclude Include="LeagueClasses.h" />
+    <ClInclude Include="LeagueFuncs.h" />
+    <ClInclude Include="Matrix4x4.h" />
+    <ClInclude Include="Menu.h" />
     <ClInclude Include="MinHook.h" />
     <ClInclude Include="Ntdefs.h" />
     <ClInclude Include="Ntfuncs.h" />
+    <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="Offsets.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Render.h" />
+    <ClInclude Include="SpellCastInfo.h" />
+    <ClInclude Include="SpellData.h" />
+    <ClInclude Include="SpellInfo.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Syscall.h" />
     <ClInclude Include="Vector2.h" />
     <ClInclude Include="Vector3.h" />
+    <ClInclude Include="Vector4.h" />
     <ClInclude Include="VMTHook.h" />
     <ClInclude Include="XorString.h" />
   </ItemGroup>
@@ -217,6 +227,7 @@
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Ntdefs.cpp" />
     <ClCompile Include="Ntfuncs.cpp" />
     <ClCompile Include="pch.cpp">

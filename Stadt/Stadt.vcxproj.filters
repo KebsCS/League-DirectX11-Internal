@@ -40,11 +40,14 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{bf90e252-ce19-4f35-8aae-42336c85b166}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Classes">
+      <UniqueIdentifier>{551ab78c-5865-44cf-a7c5-e036d27f3bfa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Offsets.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="imgui\imconfig.h">
       <Filter>Libs\imgui</Filter>
     </ClInclude>
@@ -135,6 +138,39 @@
     <ClInclude Include="VMTHook.h">
       <Filter>Hooks</Filter>
     </ClInclude>
+    <ClInclude Include="LeagueFuncs.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="SpellCastInfo.h">
+      <Filter>Game\Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="SpellInfo.h">
+      <Filter>Game\Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="SpellData.h">
+      <Filter>Game\Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="LeagueClasses.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectManager.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Offsets.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector4.h">
+      <Filter>Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix4x4.h">
+      <Filter>Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Game\Classes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -190,6 +226,9 @@
     </ClCompile>
     <ClCompile Include="VMTHook.cpp">
       <Filter>Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Render</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

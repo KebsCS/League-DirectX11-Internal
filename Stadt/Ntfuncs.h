@@ -18,19 +18,7 @@ LPVOID FVirtualAllocEx(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD  
 
 SIZE_T FVirtualQueryEx(HANDLE hProcess, LPCVOID lpAddress, PMEMORY_BASIC_INFORMATION lpBuffer, SIZE_T dwLength);
 
-// todo
 BOOL FVirtualProtectEx(HANDLE hProcess, PVOID lpBaseAddress, PSIZE_T dwSize, ULONG flNewProtect, PULONG lpflOldPRotect);
-typedef BOOL(WINAPI* tWriteProcessMemory)(
-	HANDLE  hProcess,
-	LPVOID  lpBaseAddress,
-	LPCVOID lpBuffer,
-	SIZE_T  nSize,
-	SIZE_T* lpNumberOfBytesWritten
-	);
-
-//https://github.com/jjzhang166/WindowsUtil2/blob/0e8eae92d850db173620e60e012f688381b229f0/Process/WriteProcessMemory.cpp
-// todo
-BOOL FWriteProcessMemory(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten);
 
 typedef HANDLE(WINAPI* tCreateToolhelp32Snapshot)
 (
@@ -69,6 +57,16 @@ typedef HANDLE(WINAPI* tThread32Next)
 	);
 
 HANDLE FThread32Next(HANDLE hSnapshot, LPTHREADENTRY32 lpte);
+
+#define THREAD_ALL_ACCESS_VISTA         (STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | \
+	0xFFFF)
+
+#define THREAD_CREATE_FLAGS_CREATE_SUSPENDED 0x00000001
+#define THREAD_CREATE_FLAGS_SKIP_THREAD_ATTACH 0x00000002
+#define THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER 0x00000004
+#define THREAD_CREATE_FLAGS_HAS_SECURITY_DESCRIPTOR 0x00000010
+#define THREAD_CREATE_FLAGS_ACCESS_CHECK_IN_TARGET 0x00000020
+#define THREAD_CREATE_FLAGS_INITIAL_THREAD 0x00000080
 
 NTSTATUS FNtCreateThreadEx(_Out_ PHANDLE ThreadHandle,
 	_In_ ACCESS_MASK DesiredAccess,

@@ -143,6 +143,8 @@ int main(int argc, char** argv)
 		size_t length = inFile.tellg();
 		inFile.seekg(0, std::ios_base::beg);
 
+		// todo user compression https://github.com/ocornut/imgui/blob/master/misc/fonts/binary_to_compressed_c.cpp#L82
+
 		std::vector<char> buffer;
 		buffer.reserve(length);
 		std::copy(std::istreambuf_iterator<char>(inFile),

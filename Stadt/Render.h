@@ -134,6 +134,10 @@ public:
 	{
 		drawList->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), color, thickness);
 	}
+	inline void Line(ImVec2 pos1, ImVec2 pos2, ImColor color, float thickness = 1.f)
+	{
+		drawList->AddLine(pos1, pos2, color, thickness);
+	}
 	template <class T>
 	inline void Circle(T x, T y, float radius, int points, ImColor color, float thickness = 1.f)
 	{
@@ -150,7 +154,7 @@ public:
 	inline void FancyIcon(T x, T y, std::string champ, float hp, float mana, float xp, int level, float ultCD, std::string summ1, float summ1CD, std::string summ2, float summ2CD)
 	{
 		// to see better
-		BoxFilled(x - 50, y - 50, 400, 400, ImColor(1.f, 1.f, 1.f));
+		//BoxFilled(x - 50, y - 50, 400, 400, ImColor(1.f, 1.f, 1.f));
 
 		// x31, y6
 

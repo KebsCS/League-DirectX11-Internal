@@ -18,7 +18,7 @@ HANDLE FOpenProcess(DWORD dwDesiredAccess, DWORD dwProcessId)
 	NTSTATUS ntStatus = Syscall<NTSTATUS>({ 0x26 }, RtlInterlockedCompareExchange64, 0x170, { 0x10 })(
 		&hProcess, dwDesiredAccess, &objectAttributes, &clientId);
 
-	SetLastError(ntStatus);
+	//SetLastError(ntStatus);
 	return hProcess;
 }
 
@@ -33,7 +33,7 @@ HANDLE FOpenThread(DWORD dwDesiredAccess, DWORD dwThreadId)
 	NTSTATUS ntStatus = Syscall<NTSTATUS>({ 0x2E,0x01 }, RtlInterlockedCompareExchange64, 0x170, { 0x10 })
 		(&hThread, dwDesiredAccess, &objectAttributes, &clientId);
 
-	SetLastError(ntStatus);
+	//SetLastError(ntStatus);
 	return hThread;
 }
 
@@ -97,52 +97,12 @@ SIZE_T FVirtualQueryEx(HANDLE hProcess, LPCVOID lpAddress, PMEMORY_BASIC_INFORMA
 	return ReturnLength;
 }
 
-// todo
+// todo, handle the args, but works fine anyway
 BOOL FVirtualProtectEx(HANDLE hProcess, PVOID lpBaseAddress, PSIZE_T dwSize, ULONG flNewProtect, PULONG lpflOldPRotect)
 {
 	NTSTATUS ntStatus = Syscall<NTSTATUS>({ 0x50 }, RtlInterlockedCompareExchange64, 0x170, { 0x14 })
 		(hProcess, &lpBaseAddress, dwSize, flNewProtect, lpflOldPRotect);
 	return 1;
-}
-
-tWriteProcessMemory WPM = NULL;
-
-//https://github.com/jjzhang166/WindowsUtil2/blob/0e8eae92d850db173620e60e012f688381b229f0/Process/WriteProcessMemory.cpp
-// todo
-BOOL FWriteProcessMemory(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten)
-{
-	//NtProtectVirtualMemory(hProcess,lpBaseAddress,);
-	//SIZE_T queryLength = 0;
-	//NTSTATUS ntStatus = NtQueryVirtualMemory(hProcess, lpBaseAddress, (MEMORY_INFORMATION_CLASS)0, 0, 0, &queryLength);
-
-	//PVOID lpPageStartAddress = lpBaseAddress;
-	//SIZE_T lpPageSize = nSize;
-	//SIZE_T oldProtect = 0;
-
-	//NTSTATUS status = NtProtectVirtualMemory(hProcess, &lpPageStartAddress, &lpPageSize, PAGE_EXECUTE_READWRITE, &oldProtect);
-	//if (!NT_SUCCESS(status))
-	//{
-	//	std::cerr << "NtProtectVirtualMemory failed " << status;
-	//	exit(0);
-	//}
-	//VirtualProtectEx(hProcess, lpBaseAddress, lpPageSize, PAGE_EXECUTE_READWRITE, &oldProtect);
-
-	//NtWriteVirtualMemory(hProcess, lpBaseAddress, &lpBuffer, nSize, lpNumberOfBytesWritten);
-
-	//VirtualProtectEx(hProcess, lpBaseAddress, lpPageSize, oldProtect, &oldProtect);
-	////NtProtectVirtualMemory(hProcess, &lpPageStartAddress, &lpPageSize, oldProtect, &oldProtect);
-	if (!WPM)
-	{
-		//constexpr const char szWPM[] = { 'W', 'r', 'i', 't', 'e', 'P', 'r', 'o', 'c', 'e', 's','s','M','e','m','o','r','y','\0' };
-		std::string szWPM = XorStr("WriteProcessMemory");
-		WPM = (tWriteProcessMemory)(GetProcedureAddress(GetKernel32Handle(), szWPM.c_str()));
-	}
-
-	WPM(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
-
-	//WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
-
-	return 1; // todo
 }
 
 tCreateToolhelp32Snapshot pCreateToolhelp32Snapshot = NULL;

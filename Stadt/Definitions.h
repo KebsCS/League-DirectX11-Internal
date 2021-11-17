@@ -1,8 +1,10 @@
 #pragma once
 
 #include <string>
+#include <Windows.h>
 
 #define M_PI	3.14159265358979323846264338327950288419716939937510
+#define RAD2DEG( x )  ( (float)(x) * (float)(180.f / M_PI) )
 
 // Relative Virtual Address
 #define RVA(address) (Globals::dwBaseAddress + address)

@@ -9,7 +9,7 @@
 #define NOMINMAX
 
 #ifdef _DEBUG
-//#error Compile in Release mode
+#error Compile in Release mode
 #else
 // disable exceptions caused by stl
 #define _HAS_EXCEPTIONS 0
@@ -25,17 +25,18 @@
 #include <vector>
 #include <string>
 #include <mutex>
+#include <sstream>
 
-#include <d3d11.h>
 #define DIRECTINPUT_VERSION 0x0800
+#include <d3d11.h>
 #include <tchar.h>
 #include <dinput.h>
 #include <dxgi1_3.h>
 #include <d3d11_2.h>
 #include <dcomp.h>
-#include <D3DX11tex.h>
-#pragma comment(lib, "dcomp.lib")
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "dinput8")
-#pragma comment(lib, "dxguid")
+//#include <D3DX11tex.h>
+//#pragma comment(lib, "dcomp.lib")
+//#pragma comment(lib, "d3d11.lib")
+//#pragma comment(lib, "dinput8")
+//#pragma comment(lib, "dxguid")
 //#pragma comment(lib, "D3DX11.lib")
