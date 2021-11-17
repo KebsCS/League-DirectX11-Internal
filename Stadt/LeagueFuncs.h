@@ -6,27 +6,36 @@
 
 namespace LeagueFuncs
 {
-	typedef void(__thiscall* tPrintChat)(DWORD ChatClient, const char* Message, int Color);
+	typedef void(__thiscall* tSendChat)(DWORD ChatClient, const char* Message, int Color);
 	static void SendChat(const char* message, int color = 0)
 	{
-		static tPrintChat fnPrintChat = (tPrintChat)(Globals::dwBaseAddress + oSendChat);
+		static tSendChat fnSendChat = (tSendChat)(Globals::dwBaseAddress + oSendChat);
+		fnSendChat(*(DWORD*)(Globals::dwBaseAddress + oChatClientPtr), message, color);
+	}
+
+	// could be unsafe, haven't checked
+	typedef void(__thiscall* tPrintChat)(DWORD ChatClient, const char* Message, int Color);
+	static void PrintChat(const char* message, int color = 0)
+	{
+		static tPrintChat fnPrintChat = (tPrintChat)(Globals::dwBaseAddress + oPrintChat);
 		fnPrintChat(*(DWORD*)(Globals::dwBaseAddress + oChatClientPtr), message, color);
 	}
 
-	float* GetViewMatrix()
+	Matrix4x4 GetViewMatrix()
 	{
-		return (float*)((DWORD)Globals::dwBaseAddress + oViewMatrix);
+		return *reinterpret_cast<Matrix4x4*>(Globals::dwBaseAddress + oViewMatrix);
 	}
 
-	float* GetProjectionMatrix()
+	Matrix4x4 GetProjectionMatrix()
 	{
-		return (float*)((DWORD)Globals::dwBaseAddress + oViewMatrix + 0x40);
+		return *reinterpret_cast<Matrix4x4*>(Globals::dwBaseAddress + oViewMatrix + 0x40);
 	}
-	// todo, crash, i think wrong viewmatrix offset
+
 	static ImVec2 WorldToScreen(const Vector3& pos)
 	{
 		float matrix[16];
-		Matrix4x4::MultiplyMatrices(matrix, GetViewMatrix(), GetProjectionMatrix());
+
+		Matrix4x4::MultiplyMatrices(matrix, GetViewMatrix().matrix, GetProjectionMatrix().matrix);
 
 		ImVec2 returnVec = ImVec2(0, 0);
 
@@ -48,7 +57,10 @@ namespace LeagueFuncs
 		temp.y = clipCoords.y / clipCoords.w;
 		temp.z = clipCoords.z / clipCoords.w;
 
-		ImVec2 windowSize = ImGui::GetWindowSize();
+		// todo move this
+		static DWORD dwRenderer = *reinterpret_cast<DWORD*>(Globals::dwBaseAddress + oRenderer);
+		static ImVec2 windowSize = ImVec2(*reinterpret_cast<int*>(dwRenderer + oRendererWidth), *reinterpret_cast<int*>(dwRenderer + oRendererHeight));
+
 		returnVec.x = (windowSize.x / 2.0f * temp.x) + (temp.x + windowSize.x / 2.0f);
 		returnVec.y = -(windowSize.y / 2.0f * temp.y) + (temp.y + windowSize.y / 2.0f);
 

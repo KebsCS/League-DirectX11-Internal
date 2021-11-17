@@ -99,7 +99,7 @@ void* GetModuleBase(LPCSTR moduleName)
 		return *reinterpret_cast<void**>(pPeb + 0x08);
 #endif
 
-	wchar_t wModuleName[100];
+	wchar_t wModuleName[100] = { 0 };
 	LI_FN(MultiByteToWideChar)(CP_ACP, MB_PRECOMPOSED, moduleName, -1, wModuleName, 100);
 
 	pPeb = *reinterpret_cast<decltype(pPeb)*>(pPeb + LdrOffset);

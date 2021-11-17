@@ -2,7 +2,6 @@
 
 #include "Includes.h"
 
-
 class Menu
 {
 public:
@@ -27,8 +26,6 @@ public:
 		{
 			if (ImGui::BeginTabItem(XorStr("A")))
 			{
-
-
 				ImGui::EndTabItem();
 			}
 		}
@@ -40,4 +37,3 @@ public:
 	/*static void Tab1();
 	static void Tab2();*/
 };
-

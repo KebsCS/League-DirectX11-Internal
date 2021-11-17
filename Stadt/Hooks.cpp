@@ -91,6 +91,8 @@ HRESULT WINAPI GetDeviceDataHook(IDirectInputDevice8A* pThis, DWORD cbObjectData
 	return ret;
 }
 
+static std::vector<ImVec2>testpos;
+
 // todo move this
 uintptr_t pOnProcessSpellCast;
 DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellCastInfo* spellCastInfo, int a6)
@@ -101,13 +103,15 @@ DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellC
 	{
 		// todo an event manager
 		std::string name = spellCastInfo->spellInfo->name;
-		//ImVec2 startpos = LeagueFuncs::WorldToScreen(spellCastInfo->StartPos);
-		Vector3 startpos = spellCastInfo->StartPos;
+		ImVec2 startpos = LeagueFuncs::WorldToScreen(spellCastInfo->StartPos);
+		ImVec2 endpos = LeagueFuncs::WorldToScreen(spellCastInfo->EndPos);
+		//Vector3 startpos = spellCastInfo->StartPos;
 		std::stringstream ss;
-		ss << std::hex << name << "  " << (DWORD)spellCastInfo << " " << startpos.x << " , " << startpos.y << "  " << startpos.z;
+		ss << std::hex << name << "  " << (DWORD)spellCastInfo << " "
+			<< startpos.x << " , " << startpos.y << " endpos: " << endpos.x << " , " << endpos.y;
 
-		//ImVec2 endpos = LeagueFuncs::WorldToScreen(spellCastInfo->EndPos);
-		//render.Line(startpos, endpos, ImColor(1.f, 0.f, 0.f));
+		render.Line(startpos, endpos, ImColor(1.f, 0.f, 0.f));
+		testpos.emplace_back(endpos);
 
 		LeagueFuncs::SendChat(ss.str().c_str());
 	}
@@ -173,8 +177,12 @@ HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterval,
 			render.FancyIcon(150, 150, XorStr("talon"), cd / 200.f, cd / 200.f, cd / 200.f, 1, cd, XorStr("summoner_flash"), cd, XorStr("summoner_heal"), cd);
 			cd -= 1.f;
 
+			for (auto& pos : testpos)
+				render.Circle(pos.x, pos.y, 32, 16, ImColor(1.f, 0.f, 0.f));
+
 			Menu::Render();
 		}
+		else testpos.clear();
 		// -----
 
 		::ImGui::EndFrame();

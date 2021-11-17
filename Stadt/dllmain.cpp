@@ -67,7 +67,6 @@ __declspec(safebuffers)void WINAPI InitThread(HMODULE hModule) noexcept
 	LI_FN(FreeLibraryAndExitThread).get()(hModule, ERROR_SUCCESS);
 }
 
-
 HANDLE hThread = 0;
 
 //#pragma comment(linker, "/nodefaultlib /subsystem:windows /ENTRY:DllMain")
