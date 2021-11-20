@@ -59,7 +59,7 @@ LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return LI_FN(CallWindowProcW).get()(Globals::WndProc, hwnd, uMsg, wParam, lParam);
 }
 
-HRESULT WINAPI GetDeviceDataHook(IDirectInputDevice8A* pThis, DWORD cbObjectData, LPDIDEVICEOBJECTDATA rgdod, LPDWORD pdwInOut, DWORD dwFlags)
+static HRESULT WINAPI Hooks::GetDeviceDataHook(IDirectInputDevice8A* pThis, DWORD cbObjectData, LPDIDEVICEOBJECTDATA rgdod, LPDWORD pdwInOut, DWORD dwFlags)
 {
 	// Call original function to get actual keypresses
 #ifdef USEMINHOOK
@@ -92,6 +92,7 @@ HRESULT WINAPI GetDeviceDataHook(IDirectInputDevice8A* pThis, DWORD cbObjectData
 }
 
 static std::vector<ImVec2>testpos;
+static std::vector<Geometry::Polygon>testpoly;
 
 // todo move this
 uintptr_t pOnProcessSpellCast;
@@ -113,13 +114,22 @@ DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellC
 		render.Line(startpos, endpos, ImColor(1.f, 0.f, 0.f));
 		testpos.emplace_back(endpos);
 
+		if (name == "ThreshQ")
+		{
+			Vector3 extended = spellCastInfo->StartPos.Extend(spellCastInfo->EndPos, 1100);
+			Vector3 sp = spellCastInfo->StartPos;
+			extended.y = 100;
+			sp.y = 100;
+			Geometry::Polygon poly = Geometry::Rectangle(sp, extended, 70).ToPolygon(65.f);
+			testpoly.emplace_back(poly);
+		}
 		LeagueFuncs::SendChat(ss.str().c_str());
 	}
 
 	return fn(thisptr, state, spellCastInfo, a6);
 }
 
-HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
+static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
 {
 	static std::once_flag isInitialized;
 
@@ -180,9 +190,16 @@ HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterval,
 			for (auto& pos : testpos)
 				render.Circle(pos.x, pos.y, 32, 16, ImColor(1.f, 0.f, 0.f));
 
+			for (auto& poly : testpoly)
+				render.Polygon(poly, ImColor(0.f, 1.f, 0.f));
+
 			Menu::Render();
 		}
-		else testpos.clear();
+		else
+		{
+			testpos.clear();
+			testpoly.clear();
+		}
 		// -----
 
 		::ImGui::EndFrame();
@@ -417,7 +434,7 @@ bool Hooks::InitDInput()
 #endif
 
 	return true;
-}
+	}
 
 bool Hooks::InitImages(ID3D11Device* pDevice)
 {

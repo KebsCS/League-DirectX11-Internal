@@ -15,20 +15,11 @@
     <Filter Include="Hooks">
       <UniqueIdentifier>{1913fdf3-a5da-48a5-88bb-dfc75d9d466a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Libs">
-      <UniqueIdentifier>{c86eab80-8692-4059-94cf-583d58811002}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Libs\imgui">
-      <UniqueIdentifier>{1057cb74-e8bf-41c7-8295-72bd8ee46522}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Vector">
       <UniqueIdentifier>{c6f9000e-ac24-4454-8e42-f769c41d7684}</UniqueIdentifier>
     </Filter>
     <Filter Include="Render">
       <UniqueIdentifier>{a6f25365-9d6a-4844-ac87-60179507de8d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Libs\imgui\Fonts">
-      <UniqueIdentifier>{be79542a-9989-4bf8-aed6-c6316a68585a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Syscalls">
       <UniqueIdentifier>{76f0b9c6-3501-4200-b12d-d88e3e03ee19}</UniqueIdentifier>
@@ -45,6 +36,18 @@
     </Filter>
     <Filter Include="Game\Classes">
       <UniqueIdentifier>{551ab78c-5865-44cf-a7c5-e036d27f3bfa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs">
+      <UniqueIdentifier>{c86eab80-8692-4059-94cf-583d58811002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\imgui">
+      <UniqueIdentifier>{1057cb74-e8bf-41c7-8295-72bd8ee46522}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\imgui\Fonts">
+      <UniqueIdentifier>{be79542a-9989-4bf8-aed6-c6316a68585a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\Geometry">
+      <UniqueIdentifier>{3261d105-cbfb-47c7-aa7d-a28f877a1289}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +174,15 @@
     <ClInclude Include="GameObject.h">
       <Filter>Game\Classes</Filter>
     </ClInclude>
+    <ClInclude Include="VFuncHook.h">
+      <Filter>Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="clipper.h">
+      <Filter>Libs\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry.h">
+      <Filter>Libs\Geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -229,6 +241,12 @@
     </ClCompile>
     <ClCompile Include="Menu.cpp">
       <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="VFuncHook.cpp">
+      <Filter>Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="clipper.cpp">
+      <Filter>Libs\Geometry</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

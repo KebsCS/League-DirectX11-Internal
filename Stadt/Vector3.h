@@ -1,76 +1,121 @@
 #pragma once
 
-// todo cluean this up, add more funcs
+#include <cmath>
+#include <limits>
 
-struct Vector3
+#ifndef M_PI
+#define M_PI 3.14159265358979323846f
+#define M_PI_F (float)M_PI
+#endif
+
+struct ProjectionInfo;
+struct IntersectionResult;
+
+class Vector3
 {
-	float   x, y, z;
+public:
+	float x, y, z;
 
+	Vector3(float xx, float yy, float zz) : x(xx), y(yy), z(zz) {}
 	Vector3();
-	Vector3(float _x, float _y, float _z);
-	Vector3(const Vector3& v);
+	operator float* ();
 
-	// operator =
-	Vector3& operator = (const Vector3& v);
-	Vector3& operator = (float f);
+	bool IsValid() const;
+	Vector3 toGround() const;
+	bool operator==(const Vector3& other) const;
+	bool operator!=(const Vector3& other) const;
+	/*Vector3& operator/=(const Vector3& v);
+	Vector3& operator/=(float fl);*/
+	bool IsZero(float tolerance = 0.01f) const;
 
-	// operator ==, !=
-	bool operator == (const Vector3& v) const;
-	bool operator == (const float f) const;
+	float DistanceLine(Vector3 segmentStart, Vector3 segmentEnd, bool onlyIfOnSegment, bool squared);
 
-	bool operator != (const Vector3& v) const;
+	float Distance(const Vector3& v) const;
 
-	// operator +
-	Vector3 operator + (const Vector3& v)   const;
-	Vector3 operator + (float f)    const;
+	float distanceTo(const Vector3& v) const;
+	float LengthSquared() const;
+	float Distance(Vector3 const& segment_start, Vector3 const& segment_end, bool only_if_on_segment = false, bool squared = false) const;
+	float DistanceSquared(Vector3 const& to) const;
 
-	// operator +=
-	Vector3 operator += (const Vector3& v);
-	Vector3 operator += (float f);
+	Vector3& operator*=(const Vector3& v);
+	Vector3& operator*=(float s);
 
-	// operator -
-	Vector3 operator - (const Vector3& v)   const;
-	Vector3 operator - (float f)    const;
-	Vector3 operator - (int)    const;
+	Vector3& operator/=(const Vector3& v);
+	Vector3& operator/=(float s);
 
-	// operator -=
-	Vector3 operator -= (const Vector3& v);
-	Vector3 operator -= (float f);
+	Vector3& operator+=(const Vector3& v);
+	Vector3& operator+=(float fl);
 
-	// operator *
-	Vector3 operator * (const Vector3& v)   const;
-	Vector3 operator * (float f)    const;
+	Vector3& operator-=(const Vector3& v);
+	Vector3& operator-=(float fl);
 
-	// operator *=
-	Vector3 operator *= (const Vector3& v);
-	Vector3 operator *= (float f);
+	Vector3 operator-(const Vector3& v) const;
+	Vector3 operator-(float mod) const;
+	Vector3 operator+(const Vector3& v) const;
+	Vector3 operator+(float mod) const;
 
-	// operator /
-	Vector3 operator / (const Vector3& v)   const;
-	Vector3 operator / (float f)    const;
+	Vector3 operator/(const Vector3& v) const;
+	Vector3 operator/(float mod) const;
+	Vector3 operator*(const Vector3& v) const;
+	Vector3 operator*(float mod) const;
 
-	// operator /=
-	Vector3 operator /= (const Vector3& v);
-	Vector3 operator /= (float f);
+	Vector3& operator=(const Vector3& v);
 
-	float Length()  const;
-	float DistTo(const Vector3& v)    const;
-	//void Normalize();
-	float Dot(const Vector3& v) const;
-	float Angle(const Vector3& v)   const;
-	Vector3 Cross(const Vector3& v) const;
+	Vector3& SwitchYZ();
+	Vector3& Negate();
 
-	// w = 0
-	//Vector3 TransformNormal(const Matrix& m)    const;
+	float Length() const;
+	Vector3 Rotate_x(float angle) const;
+	Vector3 Rotate_y(float angle) const;
+	Vector3 Normalized() const;
+	float NormalizeInPlace() const;
 
-	// w = 1
-  //  Vector3 TransformCoord(const Matrix& m) const;
+	float DotProduct(Vector3 const& other) const;
+	float CrossProduct(Vector3 const& other) const;
+	float Polar() const;
+	float AngleBetween(Vector3 const& other) const;
 
-	static float Length(const Vector3& v);
-	static float Distance(const Vector3& v, const Vector3& v1);
-	static Vector3 Normalize(const Vector3& v);
+	bool Close(float a, float b, float eps) const;
 
-	static Vector3  Zero;
-	static Vector3  One;
-	//  static Vector3  Axis[AXIS_END];
+	Vector3 Rotated(float angle) const;
+	Vector3 Perpendicular() const;
+	Vector3 Perpendicular2() const;
+	Vector3 Extend(Vector3 const& to, float distance) const;
+
+	Vector3 Append(Vector3 pos1, Vector3 pos2, float dist) const;
+
+	ProjectionInfo ProjectOn(Vector3 const& segment_start, Vector3 const& segment_end) const;
+	IntersectionResult Intersection(Vector3 const& line_segment_end, Vector3 const& line_segment2_start, Vector3 const& line_segment2_end) const;
+
+	Vector3 Scale(float s)
+	{
+		return Vector3(x * s, y * s, z * s);
+	}
+
+	Vector3 Rotate(Vector3 startPos, float theta)
+	{
+		float dx = this->x - startPos.x;
+		float dz = this->z - startPos.z;
+
+		float px = dx * cos(theta) - dz * sin(theta);
+		float pz = dx * sin(theta) + dz * cos(theta);
+		return { px + startPos.x, this->y, pz + startPos.z };
+	}
+};
+
+struct ProjectionInfo
+{
+	bool IsOnSegment;
+	Vector3 LinePoint;
+	Vector3 SegmentPoint;
+
+	ProjectionInfo(bool is_on_segment, Vector3 const& segment_point, Vector3 const& line_point);
+};
+
+struct IntersectionResult
+{
+	bool Intersects;
+	Vector3 Point;
+
+	IntersectionResult(bool intersects = false, Vector3 const& point = Vector3());
 };

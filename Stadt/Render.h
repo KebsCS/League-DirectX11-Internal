@@ -3,6 +3,8 @@
 #include "Includes.h"
 #include "Globals.h"
 #include "Image.h"
+#include "Geometry.h"
+#include "LeagueFuncs.h"
 
 #pragma warning(disable : 4244)
 
@@ -24,9 +26,13 @@ public:
 	template <class T>
 	inline void Text(std::string str, T x, T y, float size = 13.f, ImColor color = ImColor(1.f, 1.f, 1.f), bool center = true, bool outline = true, ImFont* pFont = Globals::pDefaultFont)
 	{
+		if (str.empty())
+			return;
+
 		ImVec2 textSize = pFont->CalcTextSizeA(size, FLT_MAX, 0.0f, str.c_str());
 		if (!pFont->ContainerAtlas)
-			return;// 0.f;
+			return;
+
 		drawList->PushTextureID(pFont->ContainerAtlas->TexID);
 
 		if (center)
@@ -147,6 +153,21 @@ public:
 	inline void CircleFilled(T x, T y, float radius, int points, ImColor color)
 	{
 		drawList->AddCircleFilled(ImVec2(x, y), radius, color, points);
+	}
+
+	inline void Polygon(const Geometry::Polygon poly, ImColor color, float tick = 1.f)
+	{
+		static ImVec2 points[200];
+		int i = 0;
+		for (const auto& point : poly.Points)
+		{
+			ImVec2 pos = LeagueFuncs::WorldToScreen(point);
+			points[i].x = pos.x;
+			points[i].y = pos.y;
+			i++;
+		}
+
+		drawList->AddPolyline(points, i, color, true, tick);
 	}
 
 	// xp 0.f to 1.f

@@ -168,11 +168,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="clipper.h" />
     <ClInclude Include="Definitions.h" />
     <ClInclude Include="Fonts\CascadiaMono.h" />
     <ClInclude Include="Fonts\Tahoma.h" />
     <ClInclude Include="FuncHook.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Geometry.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="Image.h" />
@@ -212,10 +214,12 @@
     <ClInclude Include="Vector2.h" />
     <ClInclude Include="Vector3.h" />
     <ClInclude Include="Vector4.h" />
+    <ClInclude Include="VFuncHook.h" />
     <ClInclude Include="VMTHook.h" />
     <ClInclude Include="XorString.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="clipper.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="FuncHook.cpp" />
     <ClCompile Include="Globals.cpp" />
@@ -237,6 +241,7 @@
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Vector2.cpp" />
     <ClCompile Include="Vector3.cpp" />
+    <ClCompile Include="VFuncHook.cpp" />
     <ClCompile Include="VMTHook.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

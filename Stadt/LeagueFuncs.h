@@ -21,12 +21,12 @@ namespace LeagueFuncs
 		fnPrintChat(*(DWORD*)(Globals::dwBaseAddress + oChatClientPtr), message, color);
 	}
 
-	Matrix4x4 GetViewMatrix()
+	static Matrix4x4 GetViewMatrix()
 	{
 		return *reinterpret_cast<Matrix4x4*>(Globals::dwBaseAddress + oViewMatrix);
 	}
 
-	Matrix4x4 GetProjectionMatrix()
+	static Matrix4x4 GetProjectionMatrix()
 	{
 		return *reinterpret_cast<Matrix4x4*>(Globals::dwBaseAddress + oViewMatrix + 0x40);
 	}
