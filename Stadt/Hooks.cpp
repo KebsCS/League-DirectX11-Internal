@@ -117,6 +117,7 @@ DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellC
 
 		GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
 
+		ss << "  " << local->name << "  " << &local->networkId;
 		if (name == "ThreshQ")
 		{
 			Vector3 extended = spellCastInfo->StartPos.Extend(spellCastInfo->EndPos, 1100);
@@ -202,6 +203,11 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			for (auto h : ObjectManager::HeroList())
 				render.Circle3D(h->GetAiManager()->serverPos, h->GetBoundingRadius(), ImColor(0.f, 1.f, 0.f));
 
+			render.Circle3D(LeagueFuncs::GetMouseWorldPos(), 65.f, ImColor(0.f, 1.f, 0.f));
+			GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
+
+			render.Circle3D(local->position, local->GetBoundingRadius() - 5.f, ImColor(1.f, 0.f, 0.f));
+
 			Menu::Render();
 		}
 		else
@@ -222,7 +228,7 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 #else
 	return FHPresent.Call<HRESULT>(pSwapChain, SyncInterval, Flags);
 #endif
-	}
+}
 
 bool Hooks::Init()
 {
@@ -443,7 +449,7 @@ bool Hooks::InitDInput()
 #endif
 
 	return true;
-	}
+}
 
 bool Hooks::InitImages(ID3D11Device* pDevice)
 {

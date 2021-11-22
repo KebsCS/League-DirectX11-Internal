@@ -66,4 +66,20 @@ namespace LeagueFuncs
 
 		return returnVec;
 	}
+
+	static Vector3 GetMouseWorldPos()
+	{
+		//auto aux1 = *reinterpret_cast<DWORD*>(RVA(oHudInstance));
+		//aux1 += 0x14;
+		//auto aux2 = *reinterpret_cast<DWORD*>(aux1);
+		//aux2 += 0x1C;
+		//float X = *reinterpret_cast<float*>(aux2 + 0x0);
+		//float Y = *reinterpret_cast<float*>(aux2 + 0x4);
+		//float Z = *reinterpret_cast<float*>(aux2 + 0x8);
+		//return Vector3{ X, Y, Z };
+
+		DWORD HudInstance = *reinterpret_cast<DWORD*>(RVA(oHudInstance));
+
+		return *reinterpret_cast<Vector3*>(HudInstance + 0x11C);
+	}
 }
