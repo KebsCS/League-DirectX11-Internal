@@ -132,3 +132,9 @@ Result WINAPI ModuleCall(LPCSTR module, LPCSTR procName, Args ... args)
 }
 
 uintptr_t GetCurrentPID();
+
+template <typename T, typename ... Args>
+T VFuncCall(void* object, size_t index, Args...args)
+{
+	return reinterpret_cast<T(__thiscall*)(void*, Args...args)>((*(void***)object)[index])(object, args...);
+}

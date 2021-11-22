@@ -16,22 +16,6 @@ bool Vector3::operator!=(Vector3 const& other) const
 	return other.x == this->x && other.y == this->y && other.z == this->z;
 }
 
-/*Vector3& Vector3::operator/=(const Vector3& v)
-{
-	x /= v.x;
-	y /= v.y;
-	z /= v.z;
-	return *this;
-}
-
-Vector3& Vector3::operator/=(float fl)
-{
-	x /= fl;
-	y /= fl;
-	z /= fl;
-	return *this;
-}*/
-
 bool Vector3::IsValid() const
 {
 	return this->x != 0/* && this->y != 0*/ && this->z != 0;
@@ -249,8 +233,9 @@ Vector3 Vector3::Rotate_x(float angle) const {
 	);
 }
 
-Vector3 Vector3::Rotate_y(float angle) const {
-	Vector3 result(this->x * cos(angle) - this->y * sin(angle), this->x * sin(angle) + this->y * cos(angle), this->z);
+Vector3 Vector3::Rotate_y(float angle) const
+{
+	Vector3 result(this->x * cos(angle) - this->z * sin(angle), this->y, this->x * sin(angle) + this->z * cos(angle));
 	return result;
 }
 
@@ -285,10 +270,17 @@ float Vector3::DotProduct(Vector3 const& other) const
 {
 	return this->x * other.x + this->y * other.y + this->z * other.z;
 }
-//todo
+
 float Vector3::CrossProduct(Vector3 const& other) const
 {
-	return other.y * this->x - other.x * this->y;
+	return (this->y * other.z - this->z * other.y) +
+		(this->z * other.x - this->x * other.z) + (this->x * other.y - this->y * other.x);
+	//	return other.y * this->x - other.x * this->y;
+}
+
+Vector3 Vector3::Center(Vector3 const& other) const
+{
+	return(*this + other) / 2;
 }
 
 float Vector3::Polar() const

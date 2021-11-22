@@ -16,3 +16,14 @@ static constexpr auto oViewMatrix = 0x31322A8;
 static constexpr auto oRenderer = 0x3135148;
 static constexpr auto oRendererWidth = 0xC;
 static constexpr auto oRendererHeight = oRendererWidth + 0x4;
+
+// 148/149th index in object vtable
+// push ecx
+// movzx eax, byte [ecx+offset]
+static constexpr auto oAiManager = 0x2C98;
+
+namespace oVFunc
+{
+	static constexpr auto BoundingRadius = 35;
+	static constexpr auto AiManager = 149;
+}

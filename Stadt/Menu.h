@@ -10,7 +10,7 @@ public:
 	{
 		ImGui::SetNextWindowPos(ImVec2(904, 349), ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSize(ImVec2(419, 421), ImGuiCond_FirstUseEver);;
-		ImGui::Begin(XorStr("Project Stadt"));// , ImGuiWindowFlags_AlwaysAutoResize);
+		ImGui::Begin(XorStr("a"));// , ImGuiWindowFlags_AlwaysAutoResize);
 		//if (ImGui::BeginPopupContextItem())
 		//{
 		//	//if (ImGui::MenuItem(XorStr("Open Console")))

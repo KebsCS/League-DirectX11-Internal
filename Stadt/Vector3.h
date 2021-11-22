@@ -24,8 +24,6 @@ public:
 	Vector3 toGround() const;
 	bool operator==(const Vector3& other) const;
 	bool operator!=(const Vector3& other) const;
-	/*Vector3& operator/=(const Vector3& v);
-	Vector3& operator/=(float fl);*/
 	bool IsZero(float tolerance = 0.01f) const;
 
 	float DistanceLine(Vector3 segmentStart, Vector3 segmentEnd, bool onlyIfOnSegment, bool squared);
@@ -72,6 +70,7 @@ public:
 
 	float DotProduct(Vector3 const& other) const;
 	float CrossProduct(Vector3 const& other) const;
+	Vector3 Center(Vector3 const& other) const;
 	float Polar() const;
 	float AngleBetween(Vector3 const& other) const;
 

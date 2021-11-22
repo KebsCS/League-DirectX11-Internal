@@ -8,6 +8,7 @@
 #include "LeagueFuncs.h"
 #include "ObjectManager.h"
 #include "Menu.h"
+#include "GameObject.h"
 
 #include "FuncHook.h"
 #include "VMTHook.h"
@@ -91,7 +92,7 @@ static HRESULT WINAPI Hooks::GetDeviceDataHook(IDirectInputDevice8A* pThis, DWOR
 	return ret;
 }
 
-static std::vector<ImVec2>testpos;
+static std::vector<Vector3>testpos;
 static std::vector<Geometry::Polygon>testpoly;
 
 // todo move this
@@ -112,15 +113,17 @@ DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellC
 			<< startpos.x << " , " << startpos.y << " endpos: " << endpos.x << " , " << endpos.y;
 
 		render.Line(startpos, endpos, ImColor(1.f, 0.f, 0.f));
-		testpos.emplace_back(endpos);
+		testpos.emplace_back(spellCastInfo->EndPos);
+
+		GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
 
 		if (name == "ThreshQ")
 		{
 			Vector3 extended = spellCastInfo->StartPos.Extend(spellCastInfo->EndPos, 1100);
 			Vector3 sp = spellCastInfo->StartPos;
-			extended.y = 100;
-			sp.y = 100;
-			Geometry::Polygon poly = Geometry::Rectangle(sp, extended, 70).ToPolygon(65.f);
+			//extended.y = 100;
+			//sp.y = 100;
+			Geometry::Polygon poly = Geometry::Rectangle(sp, extended, 70.f).ToPolygon();
 			testpoly.emplace_back(poly);
 		}
 		LeagueFuncs::SendChat(ss.str().c_str());
@@ -140,9 +143,9 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 
 			InitDInput();
 
-			for (int i = 0; DWORD hero : ObjectManager::HeroList())
+			for (int i = 0; auto hero : ObjectManager::HeroList())
 			{
-				DWORD dwOnProcessSpell = hero + 0xE6C;
+				DWORD dwOnProcessSpell = (DWORD)hero + 0xE6C;
 				//SendChat(std::to_string(dwOnProcessSpell).c_str());
 				pOnProcessSpellCast = VMTHOnProcessSpellCast[i].Hook((void*)dwOnProcessSpell, 29, (uintptr_t)&OnProcessSpellCast);
 				i++;
@@ -188,10 +191,16 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			cd -= 1.f;
 
 			for (auto& pos : testpos)
-				render.Circle(pos.x, pos.y, 32, 16, ImColor(1.f, 0.f, 0.f));
+			{
+				Vector2 pos2d = LeagueFuncs::WorldToScreen(pos);
+				render.Circle(pos2d.x, pos2d.y, 32, 16, ImColor(1.f, 0.f, 0.f));
+			}
 
 			for (auto& poly : testpoly)
-				render.Polygon(poly, ImColor(0.f, 1.f, 0.f));
+				render.Polygon(poly, ImColor(0.f, 0.f, 1.f));
+
+			for (auto h : ObjectManager::HeroList())
+				render.Circle3D(h->GetAiManager()->serverPos, h->GetBoundingRadius(), ImColor(0.f, 1.f, 0.f));
 
 			Menu::Render();
 		}
@@ -213,7 +222,7 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 #else
 	return FHPresent.Call<HRESULT>(pSwapChain, SyncInterval, Flags);
 #endif
-}
+	}
 
 bool Hooks::Init()
 {

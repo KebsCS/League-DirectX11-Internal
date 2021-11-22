@@ -121,6 +121,29 @@ public:
 		this->Image(x, y, width, height, image, false);
 	}
 
+	inline void Circle3D(const Vector3& worldPos, float radius, ImColor color, float thickness = 1.f, int numPoints = 16, bool filled = false) const
+	{
+		if (numPoints >= 200)
+			return;
+		static ImVec2 points[200];
+
+		float step = 6.2831f / numPoints;
+		float theta = 0.f;
+		for (int i = 0; i < numPoints; i++, theta += step)
+		{
+			Vector3 worldSpace = { worldPos.x + radius * cos(theta), worldPos.y, worldPos.z - radius * sin(theta) };
+			ImVec2 screenSpace = LeagueFuncs::WorldToScreen(worldSpace);
+
+			points[i].x = screenSpace.x;
+			points[i].y = screenSpace.y;
+		}
+
+		if (filled)
+			drawList->AddConvexPolyFilled(points, numPoints, color);
+		else
+			drawList->AddPolyline(points, numPoints, color, true, thickness);
+	}
+
 	template <class T>
 	inline void Box(T x1, T y1, T x2, T y2, ImColor color, float thickness = 1.f, float rounding = 0.f)
 	{

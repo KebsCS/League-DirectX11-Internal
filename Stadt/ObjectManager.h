@@ -2,6 +2,7 @@
 
 #include "Includes.h"
 #include "Offsets.h"
+#include "GameObject.h"
 
 class ObjectManager
 {
@@ -10,9 +11,9 @@ private:
 public:
 
 	// todo, init heroes once on load
-	static std::list<DWORD/*GameObject**/>HeroList()
+	static std::list<GameObject*>HeroList()
 	{
-		std::list<DWORD/*GameObject**/>objList;
+		std::list<GameObject*>objList;
 
 		DWORD pHeroList = *reinterpret_cast<DWORD*>(Globals::dwBaseAddress + oHeroList);
 		DWORD pHeroArray = *reinterpret_cast<DWORD*>(pHeroList + 0x04);
@@ -20,7 +21,7 @@ public:
 
 		for (int i = 0; i < nHeroArrayLen * 4; i += 4)
 		{
-			objList.emplace_back(*reinterpret_cast<DWORD*>(pHeroArray + i));
+			objList.emplace_back((GameObject*)(*reinterpret_cast<DWORD*>(pHeroArray + i)));
 		}
 		return objList;
 	}

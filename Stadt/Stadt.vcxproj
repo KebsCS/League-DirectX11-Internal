@@ -168,6 +168,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AiManager.h" />
     <ClInclude Include="clipper.h" />
     <ClInclude Include="Definitions.h" />
     <ClInclude Include="Fonts\CascadiaMono.h" />

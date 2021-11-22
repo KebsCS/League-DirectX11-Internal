@@ -183,6 +183,9 @@
     <ClInclude Include="Geometry.h">
       <Filter>Libs\Geometry</Filter>
     </ClInclude>
+    <ClInclude Include="AiManager.h">
+      <Filter>Game\Classes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
