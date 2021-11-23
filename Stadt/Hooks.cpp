@@ -105,23 +105,24 @@ DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellC
 	{
 		// todo an event manager
 		std::string name = spellCastInfo->spellInfo->name;
-		ImVec2 startpos = LeagueFuncs::WorldToScreen(spellCastInfo->StartPos);
-		ImVec2 endpos = LeagueFuncs::WorldToScreen(spellCastInfo->EndPos);
+		ImVec2 startpos = LeagueFuncs::WorldToScreen(spellCastInfo->startPos);
+		ImVec2 endpos = LeagueFuncs::WorldToScreen(spellCastInfo->endPos);
 		//Vector3 startpos = spellCastInfo->StartPos;
 		std::stringstream ss;
-		ss << std::hex << name << "  " << (DWORD)spellCastInfo << " "
-			<< startpos.x << " , " << startpos.y << " endpos: " << endpos.x << " , " << endpos.y;
+		ss << std::hex << name << "  " << (DWORD)spellCastInfo << " ";
+		/*<< startpos.x << " , " << startpos.y << " endpos: " << endpos.x << " , " << endpos.y;*/
 
 		render.Line(startpos, endpos, ImColor(1.f, 0.f, 0.f));
-		testpos.emplace_back(spellCastInfo->EndPos);
+		testpos.emplace_back(spellCastInfo->endPos);
 
 		GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
+		ss << " aimngr: " << local->GetAiManager();
 
-		ss << "  " << local->name << "  " << &local->networkId;
+		//ss << "  " << local->name << "  " << &local->networkId;
 		if (name == "ThreshQ")
 		{
-			Vector3 extended = spellCastInfo->StartPos.Extend(spellCastInfo->EndPos, 1100);
-			Vector3 sp = spellCastInfo->StartPos;
+			Vector3 extended = spellCastInfo->startPos.Extend(spellCastInfo->endPos, spellCastInfo->spellInfo->spellData->castRangeDisplayOverride);
+			Vector3 sp = spellCastInfo->startPos;
 			//extended.y = 100;
 			//sp.y = 100;
 			Geometry::Polygon poly = Geometry::Rectangle(sp, extended, 70.f).ToPolygon();
@@ -180,7 +181,7 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			//Image aatroxe = imageManager.GetImageInfoByName("aatrox_square");
 			//render.Image(mpos.x, mpos.y, aatroxe.width, aatroxe.height, aatroxe.pShaderResource, true);
 
-			render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName(XorStr("talon_w")), true);
+			/*render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName(XorStr("talon_w")), true);
 
 			render.CornerBox(300, 300, 400, 400, ImColor(0.f, 1.f, 0.f));
 
@@ -189,7 +190,7 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 				cd = 200.f;
 
 			render.FancyIcon(150, 150, XorStr("talon"), cd / 200.f, cd / 200.f, cd / 200.f, 1, cd, XorStr("summoner_flash"), cd, XorStr("summoner_heal"), cd);
-			cd -= 1.f;
+			cd -= 1.f;*/
 
 			for (auto& pos : testpos)
 			{
@@ -197,14 +198,47 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 				render.Circle(pos2d.x, pos2d.y, 32, 16, ImColor(1.f, 0.f, 0.f));
 			}
 
-			for (auto& poly : testpoly)
+			/*for (auto& poly : testpoly)
+				render.Polygon(poly, ImColor(0.f, 0.f, 1.f));*/
+
+			auto danger_polygons = Geometry::Geometry::ToPolygons(Geometry::Geometry::ClipPolygons(testpoly));
+
+			for (auto& poly : danger_polygons)
 				render.Polygon(poly, ImColor(0.f, 0.f, 1.f));
 
 			for (auto h : ObjectManager::HeroList())
 				render.Circle3D(h->GetAiManager()->serverPos, h->GetBoundingRadius(), ImColor(0.f, 1.f, 0.f));
 
-			render.Circle3D(LeagueFuncs::GetMouseWorldPos(), 65.f, ImColor(0.f, 1.f, 0.f));
+			ImColor mousecol;
+			if (LeagueFuncs::IsBrush(LeagueFuncs::GetMouseWorldPos()))
+				mousecol = ImColor(1.f, 0.f, 0.f);
+			else
+				mousecol = ImColor(0.f, 1.f, 0.f);
+
+			render.Circle3D(LeagueFuncs::GetMouseWorldPos(), 65.f, mousecol);
 			GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
+
+			//std::vector<Vector3>points = *reinterpret_cast<std::vector<Vector3>*>(local->GetAiManager() + 0x1E4);
+
+			//Vector3 points = **reinterpret_cast<Vector3**>(local->GetAiManager() + 0x1E4);
+			//DWORD arr = *reinterpret_cast<DWORD*>(local->GetAiManager() + 0x1E4);
+			//Vector3 points = *reinterpret_cast<Vector3*>(arr);
+			//render.Circle3D(points, 30.f, ImColor(1.f, 1.f, 1.f));
+
+			Vector3 waypoint = local->GetAiManager()->navBegin;
+
+			render.Circle3D(waypoint, local->GetBoundingRadius(), ImColor(1.f, 1.f, 0.f));
+
+			for (auto minion : ObjectManager::MinionList())
+			{
+				if (minion->maxhealth == 3.f && minion->health > 0.f)
+					render.RealWardRange(minion->position, ImColor(1.f, 1.f, 1.f));
+
+				if (minion && minion->health > 0.f && minion->GetBoundingRadius())
+				{
+					render.Circle3D(minion->position, minion->GetBoundingRadius(), ImColor(1.f, 0.f, 0.f));
+				}
+			}
 
 			render.Circle3D(local->position, local->GetBoundingRadius() - 5.f, ImColor(1.f, 0.f, 0.f));
 
@@ -433,7 +467,7 @@ bool Hooks::InitDInput()
 		lpdiKeyboard->Unacquire();
 		lpdiKeyboard->Release();
 		lpdiKeyboard = nullptr;
-	}
+}
 
 #ifdef USEMINHOOK
 

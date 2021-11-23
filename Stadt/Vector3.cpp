@@ -280,21 +280,21 @@ float Vector3::CrossProduct(Vector3 const& other) const
 
 Vector3 Vector3::Center(Vector3 const& other) const
 {
-	return(*this + other) / 2;
+	return (*this + other) / 2;
 }
 
 float Vector3::Polar() const
 {
 	if (this->Close(x, 0.f, 0.f))
 	{
-		if (y > 0.f)
+		if (z > 0.f)
 		{
 			return 90.f;
 		}
-		return y < 0.f ? 270.f : 0.f;
+		return z < 0.f ? 270.f : 0.f;
 	}
 
-	auto theta = atan(y / x) * 180.f / M_PI;
+	auto theta = atan(z / x) * 180.f / M_PI;
 	if (x < 0.f)
 	{
 		theta = theta + 180.f;

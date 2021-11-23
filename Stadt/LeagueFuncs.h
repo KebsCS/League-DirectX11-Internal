@@ -21,6 +21,27 @@ namespace LeagueFuncs
 		fnPrintChat(*(DWORD*)(Globals::dwBaseAddress + oChatClientPtr), message, color);
 	}
 
+	typedef bool(__cdecl* tIsNotWall)(Vector3*, unsigned __int16);
+	static bool IsNotWall(Vector3 pos)
+	{
+		static tIsNotWall fnIsNotWall = (tIsNotWall)(Globals::dwBaseAddress + oIsNotWall);
+		return fnIsNotWall(&pos, (unsigned __int16)0);
+	}
+
+	typedef bool(__cdecl* tIsBrush)(Vector3*);
+	static bool IsBrush(Vector3 pos)
+	{
+		static tIsBrush fnIsBrush = (tIsBrush)(Globals::dwBaseAddress + oIsBrush);
+		return fnIsBrush(&pos);
+	}
+
+	//typedef bool(__cdecl* tTestFunc)(Vector3*);
+	//static bool TestFunc(Vector3 pos)
+	//{
+	//	static tTestFunc fnTestFunc = (tTestFunc)(Globals::dwBaseAddress + 0x9A96D0);
+	//	return fnTestFunc(&pos);
+	//}
+
 	static Matrix4x4 GetViewMatrix()
 	{
 		return *reinterpret_cast<Matrix4x4*>(Globals::dwBaseAddress + oViewMatrix);

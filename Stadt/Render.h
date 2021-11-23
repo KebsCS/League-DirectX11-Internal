@@ -178,7 +178,42 @@ public:
 		drawList->AddCircleFilled(ImVec2(x, y), radius, color, points);
 	}
 
-	inline void Polygon(const Geometry::Polygon poly, ImColor color, float tick = 1.f)
+	inline void RealWardRange(Vector3 position, ImColor color, float range = 1100.f, bool brushes = true)
+	{
+		const auto pointCount = 30;
+		static ImVec2 points[pointCount];
+		int i = 0;
+
+		// todo, improve this so it doesnt count only own brush
+		if (brushes)
+		{
+			if (LeagueFuncs::IsBrush(position))
+				brushes = false;
+		}
+
+		float flPoint = M_PI * 2.0f / pointCount;
+		for (float theta = 0; theta < (M_PI * 2.0f); theta += flPoint)
+		{
+			Vector3 p = Vector3(0.f, 0.f, 0.f);
+
+			for (float i = 20.f; i <= range; i += 20.f)
+			{
+				Vector3 p2 = Vector3(position.x + (i * cos(theta)), position.y, position.z - (i * sin(theta)));
+				if (!LeagueFuncs::IsNotWall(p2) || i == range || (brushes && LeagueFuncs::IsBrush(p2)))
+				{
+					p = p2;
+					break;
+				}
+			}
+			ImVec2 pos = LeagueFuncs::WorldToScreen(p);
+			points[i].x = pos.x;
+			points[i].y = pos.y;
+			i++;
+		}
+		drawList->AddPolyline(points, i, color, true, 1.f);
+	}
+
+	inline void Polygon(const Geometry::Polygon poly, ImColor color, float thickness = 1.f)
 	{
 		static ImVec2 points[200];
 		int i = 0;
@@ -190,7 +225,7 @@ public:
 			i++;
 		}
 
-		drawList->AddPolyline(points, i, color, true, tick);
+		drawList->AddPolyline(points, i, color, true, thickness);
 	}
 
 	// xp 0.f to 1.f

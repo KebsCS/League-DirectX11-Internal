@@ -24,15 +24,16 @@ namespace Geometry
 			return !IsOutside(point);
 		}
 
+		// todo , i think when clipper lib uses z, then z is the height, double check this
 		bool IsOutside(const Vector3& point)
 		{
-			const auto p = ClipperLib::IntPoint(point.x, point.y);
+			const auto p = ClipperLib::IntPoint(point.x, point.z, point.y);
 			return ClipperLib::PointInPolygon(p, ToClipperPath()) != 1;
 		}
 
 		int PointInPolygon(const Vector3& point)
 		{
-			const auto p = ClipperLib::IntPoint(point.x, point.y);
+			const auto p = ClipperLib::IntPoint(point.x, point.z, point.y);
 			return ClipperLib::PointInPolygon(p, ToClipperPath());
 		}
 
@@ -41,7 +42,7 @@ namespace Geometry
 			std::vector<ClipperLib::IntPoint> result;
 
 			for (const auto& point : Points)
-				result.emplace_back(point.x, point.y);
+				result.emplace_back(point.x, point.z, point.y);
 
 			return result;
 		}
@@ -156,7 +157,7 @@ namespace Geometry
 			{
 				angle += step;
 				Vector3 point = Vector3(Center.x + outRadius * (float)cos(angle),
-					Center.y + outRadius * (float)sin(angle), this->Center.z);
+					this->Center.y, Center.z + outRadius * (float)sin(angle));
 				result.Add(point);
 			}
 
@@ -229,7 +230,7 @@ namespace Geometry
 				float angle = i * 2 * M_PI / CircleLineSegmentN;
 				auto point = Vector3(
 					this->Center.x - outRadius * cosf(angle),
-					this->Center.y - outRadius * sinf(angle), this->Center.z);
+					this->Center.y, this->Center.z - outRadius * sinf(angle));
 
 				result.Add(point);
 			}
@@ -238,7 +239,7 @@ namespace Geometry
 				float angle = i * 2 * M_PI / CircleLineSegmentN;
 				auto point = Vector3(
 					this->Center.x - innerRadius * cosf(angle),
-					this->Center.y - innerRadius * sinf(angle), this->Center.z);
+					this->Center.y, this->Center.z - innerRadius * sinf(angle));
 
 				result.Add(point);
 			}
@@ -274,7 +275,7 @@ namespace Geometry
 			{
 				Vector3 cDirection = side1.Rotated(i * Angle / CircleLineSegmentN).Normalized();
 				result.Add(Vector3(Center.x + outRadius * cDirection.x,
-					Center.y + outRadius * cDirection.y, Center.z));
+					Center.y, Center.z + outRadius * cDirection.z));
 			}
 
 			return result;
@@ -346,11 +347,11 @@ namespace Geometry
 		static Vector3 Vector3MovementCollision(const Vector3& startPoint1, const Vector3& endPoint1, float v1, const Vector3& startPoint2, float v2, float& t1, float delay = 0.f)
 		{
 			auto sP1x = startPoint1.x;
-			auto sP1y = startPoint1.y;
+			auto sP1y = startPoint1.z;
 			auto eP1x = endPoint1.x;
-			auto eP1y = endPoint1.y;
+			auto eP1y = endPoint1.z;
 			auto sP2x = startPoint2.x;
-			auto sP2y = startPoint2.y;
+			auto sP2y = startPoint2.z;
 
 			float d = eP1x - sP1x, e = eP1y - sP1y;
 			float dist = (float)sqrt(d * d + e * e);
@@ -419,7 +420,7 @@ namespace Geometry
 				t1 = 0.f;
 			}
 
-			return (!isnan(t1)) ? Vector3(sP1x + S * t1, sP1y + K * t1, 0) : Vector3(0, 0, 0);
+			return (!isnan(t1)) ? Vector3(sP1x + S * t1, 0, sP1y + K * t1) : Vector3(0, 0, 0);
 		}
 
 		static Vector3 PositionAfter(std::vector<Vector3> self, int t, int speed, int delay = 0)
@@ -445,7 +446,7 @@ namespace Geometry
 		{
 			Polygon polygon = Polygon();
 			for (ClipperLib::IntPoint point : v)
-				polygon.Add(Vector3(point.X, point.Y, 0));
+				polygon.Add(Vector3(point.X, point.Z, point.Y));
 			return polygon;
 		}
 
