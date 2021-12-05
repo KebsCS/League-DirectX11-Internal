@@ -28,14 +28,14 @@ public:
 	int width = 0;
 	int height = 0;
 
-	Image(std::string name, char* ImageBytes, int Size, ID3D11Device* pDevice)
+	Image(const std::string& name, const char* imageBytes, const int& size, ID3D11Device* pDevice)
 	{
 		this->name = name;
 
 		// Load from byte array into a raw RGBA buffer
 		int image_width = 0;
 		int image_height = 0;
-		unsigned char* image_data = stbi_load_from_memory((unsigned char*)ImageBytes, Size, &image_width, &image_height, NULL, 4);
+		unsigned char* image_data = stbi_load_from_memory((unsigned char*)imageBytes, size, &image_width, &image_height, NULL, 4);
 
 		// Create texture
 		D3D11_TEXTURE2D_DESC desc;
@@ -124,9 +124,9 @@ public:
 		}
 	}
 
-	void SetDevice(ID3D11Device* pDevice)
+	void SetDevice(ID3D11Device* device)
 	{
-		this->pDevice = pDevice;
+		this->pDevice = device;
 	}
 
 	int ImagesCount()
@@ -134,12 +134,12 @@ public:
 		return this->vImages.size();
 	}
 
-	void AddImage(std::string name, char* Bytes, int Size)
+	void AddImage(const std::string& name, const char* bytes, const int& size)
 	{
-		this->vImages.push_back(Image(name, Bytes, Size, this->pDevice));
+		this->vImages.push_back(Image(name, bytes, size, this->pDevice));
 	}
 
-	bool HasImage(std::string name)
+	bool HasImage(const std::string& name)
 	{
 		for (const auto& obj : this->vImages)
 		{
@@ -149,7 +149,7 @@ public:
 		return false;
 	}
 
-	ID3D11ShaderResourceView* GetImageByName(std::string name)
+	ID3D11ShaderResourceView* GetImageByName(const std::string& name)
 	{
 		for (const auto& obj : this->vImages)
 		{
@@ -162,16 +162,28 @@ public:
 		return nullptr;
 	}
 
-	Image GetImageInfoByName(std::string name)
+	//Image GetImageInfoByName(const std::string& name)
+	//{
+	//	for (const auto& obj : this->vImages)
+	//	{
+	//		if (name.compare(obj.name) == 0)
+	//		{
+	//			return obj;
+	//		}
+	//	}
+	//	// todo return a value
+	//}
+
+	Vector2 GetImageSizeByName(const std::string& name)
 	{
 		for (const auto& obj : this->vImages)
 		{
 			if (name.compare(obj.name) == 0)
 			{
-				return obj;
+				return Vector2(static_cast<float>(obj.width), static_cast<float>(obj.height));
 			}
 		}
-		// todo return a value
+		return Vector2(0, 0);
 	}
 
 	std::vector<Image>* GetVector()

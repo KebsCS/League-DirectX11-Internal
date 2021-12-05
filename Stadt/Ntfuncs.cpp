@@ -188,7 +188,7 @@ void WINAPI RtlInitUnicodeString(
 {
 	if ((target->Buffer = (PWSTR)source))
 	{
-		unsigned int length = lstrlenW(source) * sizeof(WCHAR);
+		auto length = lstrlenW(source) * sizeof(WCHAR);
 		if (length > 0xfffc)
 			length = 0xfffc;
 		target->Length = length;

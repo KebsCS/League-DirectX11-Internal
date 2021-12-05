@@ -26,6 +26,7 @@
 #include <string>
 #include <mutex>
 #include <sstream>
+#include <numbers>
 
 #define DIRECTINPUT_VERSION 0x0800
 #include <d3d11.h>

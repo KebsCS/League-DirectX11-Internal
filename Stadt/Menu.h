@@ -21,7 +21,7 @@ public:
 		//}
 
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_Reorderable;
-		ImGuiTreeNodeFlags collapsing_header_flags = ImGuiTreeNodeFlags_DefaultOpen;
+		//ImGuiTreeNodeFlags collapsing_header_flags = ImGuiTreeNodeFlags_DefaultOpen;
 		if (ImGui::BeginTabBar(XorStr("Tabs"), tab_bar_flags))
 		{
 			if (ImGui::BeginTabItem(XorStr("A")))

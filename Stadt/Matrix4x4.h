@@ -18,7 +18,7 @@ struct Matrix4x4
 
 	static void MultiplyMatrices(float* out, float* a, float* b)
 	{
-		int size = 4 * 4;
+		//int size = 4 * 4;
 		for (int i = 0; i < 4; i++)
 		{
 			for (int j = 0; j < 4; j++)

@@ -19,7 +19,7 @@ public:
 		DWORD pArray = *reinterpret_cast<DWORD*>(pList + 0x04);
 		int nArrayLen = *reinterpret_cast<int*>(pList + 0x08);
 
-		for (int i = 0; i < nArrayLen * 4; i += 4)
+		for (auto i = 0; i < nArrayLen * 4; i += 4)
 		{
 			objList.emplace_back((GameObject*)(*reinterpret_cast<DWORD*>(pArray + i)));
 		}
@@ -34,7 +34,7 @@ public:
 		DWORD pArray = *reinterpret_cast<DWORD*>(pList + 0x04);
 		int nArrayLen = *reinterpret_cast<int*>(pList + 0x08);
 
-		for (int i = 0; i < nArrayLen * 4; i += 4)
+		for (auto i = 0; i < nArrayLen * 4; i += 4)
 		{
 			objList.emplace_back((GameObject*)(*reinterpret_cast<DWORD*>(pArray + i)));
 		}

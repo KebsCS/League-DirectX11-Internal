@@ -38,9 +38,9 @@ public:
 
 	bool Init(void* original);
 
-	uintptr_t Hook(void* original, size_t index, uintptr_t function);
+	uintptr_t Hook(void* original, const size_t& index, const uintptr_t& function);
 
 	bool UnHook();
 
-	uintptr_t HookIndex(size_t index, uintptr_t function);
+	uintptr_t HookIndex(const size_t& index, const uintptr_t& function);
 };

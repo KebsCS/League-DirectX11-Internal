@@ -21,7 +21,7 @@ bool VMTHook::Init(void* original)
 	return ourVMT != nullptr;
 }
 
-uintptr_t VMTHook::Hook(void* original, size_t index, uintptr_t function)
+uintptr_t VMTHook::Hook(void* original, const size_t& index, const uintptr_t& function)
 {
 	if (!Init(original))
 		return false;
@@ -29,7 +29,7 @@ uintptr_t VMTHook::Hook(void* original, size_t index, uintptr_t function)
 	return HookIndex(index, function);
 }
 
-uintptr_t VMTHook::HookIndex(size_t index, uintptr_t function)
+uintptr_t VMTHook::HookIndex(const size_t& index, const uintptr_t& function)
 {
 	if (ourVMT && index < iMethods)
 	{

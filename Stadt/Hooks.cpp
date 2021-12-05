@@ -105,18 +105,24 @@ DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellC
 	{
 		// todo an event manager
 		std::string name = spellCastInfo->spellInfo->name;
-		ImVec2 startpos = LeagueFuncs::WorldToScreen(spellCastInfo->startPos);
-		ImVec2 endpos = LeagueFuncs::WorldToScreen(spellCastInfo->endPos);
+		//ImVec2 startpos = LeagueFuncs::WorldToScreen(spellCastInfo->startPos);
+		//ImVec2 endpos = LeagueFuncs::WorldToScreen(spellCastInfo->endPos);
 		//Vector3 startpos = spellCastInfo->StartPos;
 		std::stringstream ss;
 		ss << std::hex << name << "  " << (DWORD)spellCastInfo << " ";
 		/*<< startpos.x << " , " << startpos.y << " endpos: " << endpos.x << " , " << endpos.y;*/
 
-		render.Line(startpos, endpos, ImColor(1.f, 0.f, 0.f));
-		testpos.emplace_back(spellCastInfo->endPos);
+		//testpos.emplace_back(spellCastInfo->endPos);
 
 		GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
-		ss << " aimngr: " << local->GetAiManager();
+		ss << "  id: " << std::dec << spellCastInfo->slotId;
+
+		/*if (Globals::bMenuOpen)
+		{
+			std::stringstream ssAddy;
+			ssAddy << name << "  " << std::hex << (DWORD)(spellCastInfo);
+			MessageBoxA(0, ssAddy.str().c_str(), "", 0);
+		}*/
 
 		//ss << "  " << local->name << "  " << &local->networkId;
 		if (name == "ThreshQ")
@@ -126,6 +132,7 @@ DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellC
 			//extended.y = 100;
 			//sp.y = 100;
 			Geometry::Polygon poly = Geometry::Rectangle(sp, extended, 70.f).ToPolygon();
+
 			testpoly.emplace_back(poly);
 		}
 		LeagueFuncs::SendChat(ss.str().c_str());
@@ -181,7 +188,7 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			//Image aatroxe = imageManager.GetImageInfoByName("aatrox_square");
 			//render.Image(mpos.x, mpos.y, aatroxe.width, aatroxe.height, aatroxe.pShaderResource, true);
 
-			/*render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName(XorStr("talon_w")), true);
+			render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName(XorStr("talon_w")), true);
 
 			render.CornerBox(300, 300, 400, 400, ImColor(0.f, 1.f, 0.f));
 
@@ -190,7 +197,7 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 				cd = 200.f;
 
 			render.FancyIcon(150, 150, XorStr("talon"), cd / 200.f, cd / 200.f, cd / 200.f, 1, cd, XorStr("summoner_flash"), cd, XorStr("summoner_heal"), cd);
-			cd -= 1.f;*/
+			cd -= 1.f;
 
 			for (auto& pos : testpos)
 			{
@@ -467,7 +474,7 @@ bool Hooks::InitDInput()
 		lpdiKeyboard->Unacquire();
 		lpdiKeyboard->Release();
 		lpdiKeyboard = nullptr;
-}
+	}
 
 #ifdef USEMINHOOK
 

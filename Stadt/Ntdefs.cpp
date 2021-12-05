@@ -55,13 +55,13 @@ FARPROC GetProcedureAddress(HANDLE hModule, LPCSTR pszProcName)
 	IMAGE_EXPORT_DIRECTORY* iedExports = reinterpret_cast<IMAGE_EXPORT_DIRECTORY*>(pndNTHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + reinterpret_cast<long>(hModule));
 	long* pNames = reinterpret_cast<long*>(iedExports->AddressOfNames + reinterpret_cast<long>(hModule));
 	short wOrdinalIndex = -1;
-	for (int i = 0; i < iedExports->NumberOfFunctions; i++)
+	for (auto i = 0; i < iedExports->NumberOfFunctions; i++)
 	{
 		char* pszFunctionName = reinterpret_cast<char*>(pNames[i] + reinterpret_cast<long>(hModule));
 
 		if (lstrcmpA(pszFunctionName, pszProcName) == 0)
 		{
-			wOrdinalIndex = i;
+			wOrdinalIndex = static_cast<short>(i);
 			break;
 		}
 	}

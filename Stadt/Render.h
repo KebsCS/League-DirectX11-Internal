@@ -6,25 +6,53 @@
 #include "Geometry.h"
 #include "LeagueFuncs.h"
 
-#pragma warning(disable : 4244)
+//#pragma warning(disable : 4244)
 
 class Render
 {
 private:
 
+	// todo, maybe few draw lists with mutexes https://github.com/spirthack/CSGOSimple/blob/df4bb4ef20aef408b54b8eb2f99fb1637a5d97e8/CSGOSimple/render.hpp
 	ImDrawList* drawList;
+
+	unsigned circlePoints = 32;
+	std::vector<float>vSinTable;
+	std::vector<float>vCosTable;
+
+	void InitCirclePoints()
+	{
+		const auto oldSize = vSinTable.size();
+		vCosTable.resize(circlePoints);
+		vSinTable.resize(circlePoints);
+
+		for (auto i = oldSize; i < circlePoints; i++)
+		{
+			vCosTable[i] = cosf(static_cast<float>(i) * (std::numbers::pi * 2.f) / static_cast<float>(circlePoints - 1));
+			vSinTable[i] = sinf(static_cast<float>(i) * (std::numbers::pi * 2.f) / static_cast<float>(circlePoints - 1));
+		}
+	}
 
 public:
 
-	// todo, maybe few draw lists with mutexes https://github.com/spirthack/CSGOSimple/blob/df4bb4ef20aef408b54b8eb2f99fb1637a5d97e8/CSGOSimple/render.hpp
+	Render()
+	{
+		InitCirclePoints();
+	}
 
-	// 3d circle https://github.com/spirthack/CSGOSimple/blob/master/CSGOSimple/render.cpp#L114
-	// or https://github.com/KebsCS/KBot/blob/9dd5894bb8141e90e2b6887eb93c9a34baa98838/KBot/Draw.cpp#L65
+	void SetCirclePoints(const auto& points)
+	{
+		if (circlePoints != points)
+		{
+			circlePoints = points;
+			InitCirclePoints();
+		}
+	}
 
 	void RenderScene();
 
 	template <class T>
-	inline void Text(std::string str, T x, T y, float size = 13.f, ImColor color = ImColor(1.f, 1.f, 1.f), bool center = true, bool outline = true, ImFont* pFont = Globals::pDefaultFont)
+	inline void Text(const std::string& str, T x, T y, const float& size = 13.f, const ImColor& color = ImColor(1.f, 1.f, 1.f),
+		const bool& center = true, const bool& outline = true, const ImFont* pFont = Globals::pDefaultFont) const
 	{
 		if (str.empty())
 			return;
@@ -40,7 +68,7 @@ public:
 
 		if (outline)
 		{
-			ImColor black = ImColor(0.f, 0.f, 0.f, color.Value.w);
+			const ImColor black = ImColor(0.f, 0.f, 0.f, color.Value.w);
 			drawList->AddText(pFont, size, ImVec2(x + 1, y + 1), black, str.c_str());
 			drawList->AddText(pFont, size, ImVec2(x - 1, y - 1), black, str.c_str());
 			drawList->AddText(pFont, size, ImVec2(x + 1, y - 1), black, str.c_str());
@@ -53,7 +81,8 @@ public:
 	}
 
 	template <class T>
-	inline void CornerBox(T x1, T y1, T x2, T y2, ImColor color, float th = 1.f) {
+	inline void CornerBox(T x1, T y1, T x2, T y2, const ImColor& color, const float& th = 1.f)
+	{
 		int w = x2 - x1;
 		int h = y2 - y1;
 
@@ -71,13 +100,8 @@ public:
 		Line(x1 + w - 1, y1 + h - ih, x1 + w - 1, y1 + h, color, th);	// bottom right
 	}
 
-	inline void Image(ImVec2 pos, ImVec2 size, ID3D11ShaderResourceView* image)
-	{
-		this->Image(pos.x, pos.y, size.x, size.y, image);
-	}
-
 	template <class T>
-	inline void Image(T x, T y, float width, float height, ID3D11ShaderResourceView* image, bool centered = false)
+	inline void Image(T x, T y, const float& width, const float& height, ID3D11ShaderResourceView* image, const bool& centered = false)
 	{
 		if (image == nullptr)
 			return;
@@ -91,8 +115,13 @@ public:
 		drawList->AddImage(image, ImVec2(x, y), ImVec2(x + width, y + height));
 	}
 
+	inline void Image(ImVec2& pos, const ImVec2& size, ID3D11ShaderResourceView* image, const bool& centered = false)
+	{
+		Image(pos.x, pos.y, size.x, size.y, image, centered);
+	}
+
 	template <class T>
-	inline void ImageRounded(T x, T y, float width, float height, ID3D11ShaderResourceView* image, float rounding, bool centered = false)
+	inline void ImageRounded(T x, T y, const float& width, const float& height, ID3D11ShaderResourceView* image, const float& rounding, const bool& centered = false)
 	{
 		if (image == nullptr)
 			return;
@@ -106,42 +135,33 @@ public:
 		drawList->AddImageRounded(image, ImVec2(x, y), ImVec2(x + width, y + height), ImVec2(0, 0), ImVec2(1, 1), IM_COL32_WHITE, rounding);
 	}
 
-	inline void ImageBordered(int x, int y, float width, float height, ID3D11ShaderResourceView* image, bool centered = false)
+	template <class T>
+	inline void ImageBordered(T x, T y, float width, float height, ID3D11ShaderResourceView* image, const bool& centered = false)
 	{
 		if (centered)
 		{
 			x -= width / 2.f;
 			y -= height / 2.f;
 		}
-		int x2 = x + width;
-		int y2 = y + height;
-		Box(x, y, x2, y2, ImColor(0.f, 0.f, 0.f), 5.f);
+
+		Box(x, y, (T)(x + width), (T)(y + height), ImColor(0.f, 0.f, 0.f), 5.f);
 
 		// centered false, because we already pass correct x and y
 		this->Image(x, y, width, height, image, false);
 	}
 
-	inline void Circle3D(const Vector3& worldPos, float radius, ImColor color, float thickness = 1.f, int numPoints = 16, bool filled = false) const
+	inline void Circle3D(const Vector3& worldPos, const float& radius, const ImColor& color = ImColor(1.f, 1.f, 1.f), const float& thickness = 1.f) const
 	{
-		if (numPoints >= 200)
-			return;
-		static ImVec2 points[200];
+		Vector3 worldSpace = worldPos;
 
-		float step = 6.2831f / numPoints;
-		float theta = 0.f;
-		for (int i = 0; i < numPoints; i++, theta += step)
+		for (auto i = 0; i < circlePoints; i++)
 		{
-			Vector3 worldSpace = { worldPos.x + radius * cos(theta), worldPos.y, worldPos.z - radius * sin(theta) };
-			ImVec2 screenSpace = LeagueFuncs::WorldToScreen(worldSpace);
-
-			points[i].x = screenSpace.x;
-			points[i].y = screenSpace.y;
+			worldSpace.x = worldPos.x + vCosTable[i] * radius;
+			worldSpace.z = worldPos.z + vSinTable[i] * radius;
+			drawList->PathLineTo(LeagueFuncs::WorldToScreen(worldSpace));
 		}
 
-		if (filled)
-			drawList->AddConvexPolyFilled(points, numPoints, color);
-		else
-			drawList->AddPolyline(points, numPoints, color, true, thickness);
+		drawList->PathStroke(color, ImDrawFlags_None, thickness);
 	}
 
 	template <class T>
@@ -178,7 +198,7 @@ public:
 		drawList->AddCircleFilled(ImVec2(x, y), radius, color, points);
 	}
 
-	inline void RealWardRange(Vector3 position, ImColor color, float range = 1100.f, bool brushes = true)
+	inline void RealWardRange(const Vector3& position, const ImColor& color, const float& range = 1100.f, bool brushes = true)
 	{
 		const auto pointCount = 30;
 		static ImVec2 points[pointCount];
@@ -191,8 +211,8 @@ public:
 				brushes = false;
 		}
 
-		float flPoint = M_PI * 2.0f / pointCount;
-		for (float theta = 0; theta < (M_PI * 2.0f); theta += flPoint)
+		float flPoint = (static_cast<float>(std::numbers::pi) * 2.f) / pointCount;
+		for (float theta = 0; theta < (static_cast<float>(std::numbers::pi) * 2.f); theta += flPoint)
 		{
 			Vector3 p = Vector3(0.f, 0.f, 0.f);
 

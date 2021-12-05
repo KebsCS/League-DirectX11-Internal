@@ -384,7 +384,7 @@ ProjectionInfo Vector3::ProjectOn(Vector3 const& segment_start, Vector3 const& s
 	float ay = segment_start.y;
 	float by = segment_end.y;
 
-	float rl = float((cx - ax) * (bx - ax) + (cz - az) * (bz - az) + (cy - ay) * (by - ay)) / (pow(bx - ax, 2) + pow(bz - az, 2) + pow(by - ay, 2));
+	float rl = float((cx - ax) * (bx - ax) + (cz - az) * (bz - az) + (cy - ay) * (by - ay)) / (powf(bx - ax, 2) + powf(bz - az, 2) + powf(by - ay, 2));
 	Vector3 point_line = Vector3(ax + rl * (bx - ax), ay + rl * (by - ay), az + rl * (bz - az));
 
 	//	const auto rl = ((cx - ax) * (bx - ax) + (cz - az) * (bz - az)) / (pow(bx - ax, 2) + pow(bz - az, 2));

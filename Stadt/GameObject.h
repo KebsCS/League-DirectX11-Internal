@@ -48,8 +48,30 @@ public:
 		return (AiManager*)(dwAiManager);*/
 	}
 
+	bool IsAlive()
+	{
+		return VFuncCall<bool>(this, oVFunc::IsAlive);
+	}
+
 	float GetBoundingRadius()
 	{
 		return VFuncCall<float>(this, oVFunc::BoundingRadius);
+	}
+
+	int IsFunc(ObjectType type)
+	{
+		if (!this)
+			return 0;
+
+		int uVar2;
+		int puVar3;
+		int uStack4;
+
+		uStack4 = *reinterpret_cast<int*>((DWORD)this + 0x5c + (*reinterpret_cast<byte*>((DWORD)this + 0x58)) * 4);
+		puVar3 = (DWORD)this + 0x54;
+		uVar2 = *reinterpret_cast<int*>(puVar3);
+		uStack4 ^= ~uVar2;
+
+		return  (((int)type & uStack4) != 0);
 	}
 };

@@ -105,15 +105,15 @@ void Syscall<T>::Create(std::vector<BYTE>index, LPCSTR func, uintptr_t offset, s
 
 	for (size_t i = 0; i < index.size(); i++)
 	{
-		*(BYTE*)(shellcode + 1 + i) = index[i];
+		*static_cast<BYTE*>(shellcode + 1 + i) = index[i];
 	}
 
 	for (size_t i = 0; i < ret.size(); i++)
 	{
-		*(BYTE*)(shellcode + 13 + i) = ret[i];
+		*static_cast<BYTE*>(shellcode + 13 + i) = ret[i];
 	}
 
-	*(uintptr_t*)(shellcode + 6) = static_cast<uintptr_t>((uintptr_t)GetProcedureAddress(hNtdll, func) + offset);
+	*(uintptr_t*)(shellcode + 6) = static_cast<uintptr_t>(reinterpret_cast<uintptr_t>(GetProcedureAddress(hNtdll, func)) + offset);
 
 	// allocate executable memory for opcodes
 	executableMemory = static_cast<char*>(NtAllocateVirtualMemoryFunc((HANDLE)-1, nullptr, sizeof(shellcode), MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE));

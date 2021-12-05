@@ -30,5 +30,6 @@ static constexpr auto oHudInstance = 0x186cd58L;
 namespace oVFunc
 {
 	static constexpr auto BoundingRadius = 35;
+	static constexpr auto IsAlive = 126;
 	static constexpr auto AiManager = 149;
 }

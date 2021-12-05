@@ -222,7 +222,7 @@ namespace Geometry
 		{
 			Polygon result;
 
-			float outRadius = (float)(offset + this->Radius + this->RingRadius) / cosf(2 * M_PI / CircleLineSegmentN);
+			float outRadius = static_cast<float>(offset + this->Radius + this->RingRadius) / static_cast<float>(cosf(2 * static_cast<float>(M_PI) / CircleLineSegmentN));
 			float innerRadius = this->Radius - this->RingRadius - offset;
 
 			for (int i = 0; i <= CircleLineSegmentN; i++)
