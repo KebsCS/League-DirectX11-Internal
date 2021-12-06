@@ -26,6 +26,11 @@ public:
 		return std::string(c_str());
 	}
 
+	std::string str()
+	{
+		return std::string(c_str());
+	}
+
 private:
 	char* c_str(void)
 	{
@@ -82,6 +87,7 @@ enum SpellSlotID : int
 	// ViegoEMissile, ViegoPassiveAttack(possessing soul), EvelynnQLineMissile
 	//ViegoEWallFollowMis = 48
 	//ThreshBasicAttack1 = 49, // RyzeQ aswell
+	KayleBasicAttack = 50, // every kayle basic attack is id 50
 	// FleetFootwork_HealMis, RuinedKing_HealMis (grasp), BlessingOfTheLizardElderLines (obtaining red buff), CrestOfTheAncientGolemLines (blue buff)
 	// PlantHawkshot (destroying vision plant), PerkSouldFeastVisualMissile (triumph?)
 	//KeystoneProc = 52,

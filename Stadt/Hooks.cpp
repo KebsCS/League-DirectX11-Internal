@@ -247,6 +247,26 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 				}
 			}
 
+			for (auto obj : ObjectManager::ObjectMap())
+			{
+				if (obj.second && obj.first)
+				{
+					Vector2 objPos = LeagueFuncs::WorldToScreen(obj.second->position);
+
+					render.Text(obj.second->name, objPos.x, objPos.y);
+				}
+			}
+
+			/*	for (auto obj : ObjectManager::ObjectList())
+				{
+					if (obj)
+					{
+						Vector2 objPos = LeagueFuncs::WorldToScreen(obj->position);
+
+						render.Text(obj->name, objPos.x, objPos.y);
+					}
+				}*/
+
 			render.Circle3D(local->position, local->GetBoundingRadius() - 5.f, ImColor(1.f, 0.f, 0.f));
 
 			Menu::Render();

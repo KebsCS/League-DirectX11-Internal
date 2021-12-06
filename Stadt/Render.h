@@ -54,6 +54,9 @@ public:
 	inline void Text(const std::string& str, T x, T y, const float& size = 13.f, const ImColor& color = ImColor(1.f, 1.f, 1.f),
 		const bool& center = true, const bool& outline = true, const ImFont* pFont = Globals::pDefaultFont) const
 	{
+		if (x == 0 && y == 0)
+			return;
+
 		if (str.empty())
 			return;
 

@@ -44,6 +44,17 @@ public:
 		}
 		return objList;
 	}
+
+	[[nodiscard]] static std::map<DWORD, GameObject*>ObjectMap()
+	{
+		return *reinterpret_cast<std::map<DWORD, GameObject*>*>(*reinterpret_cast<DWORD*>(RVA(oObjectManager)) + 0x28);
+	}
+
+	// todo, is this a list, vector, and what offset
+	/*[[nodiscard]] static std::list<GameObject*>ObjectList()
+	{
+		return *reinterpret_cast<std::list<GameObject*>*>(*reinterpret_cast<DWORD*>(RVA(oObjectManager)) + 0x14);
+	}*/
 };
 
 // linker error fix
