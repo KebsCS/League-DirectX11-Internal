@@ -52,7 +52,7 @@ namespace LeagueFuncs
 		return *reinterpret_cast<Matrix4x4*>(Globals::dwBaseAddress + oViewMatrix + 0x40);
 	}
 
-	static ImVec2 WorldToScreen(const Vector3& pos)
+	[[nodiscard]] static ImVec2 WorldToScreen(const Vector3& pos)
 	{
 		float matrix[16];
 
@@ -88,7 +88,7 @@ namespace LeagueFuncs
 		return returnVec;
 	}
 
-	static Vector3 GetMouseWorldPos()
+	[[nodiscard]] static Vector3 GetMouseWorldPos()
 	{
 		//auto aux1 = *reinterpret_cast<DWORD*>(RVA(oHudInstance));
 		//aux1 += 0x14;

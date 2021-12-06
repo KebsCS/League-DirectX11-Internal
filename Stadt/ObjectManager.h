@@ -7,33 +7,37 @@
 class ObjectManager
 {
 private:
+	static std::vector<GameObject*>tempHeroList;
 
 public:
 
-	// todo, init heroes once on load
-	static std::list<GameObject*>HeroList()
+	[[nodiscard]] static std::vector<GameObject*>HeroList()
 	{
-		std::list<GameObject*>objList;
-
-		DWORD pList = *reinterpret_cast<DWORD*>(Globals::dwBaseAddress + oHeroList);
-		DWORD pArray = *reinterpret_cast<DWORD*>(pList + 0x04);
-		int nArrayLen = *reinterpret_cast<int*>(pList + 0x08);
-
-		for (auto i = 0; i < nArrayLen * 4; i += 4)
+		if (tempHeroList.empty())
 		{
-			objList.emplace_back((GameObject*)(*reinterpret_cast<DWORD*>(pArray + i)));
+			DWORD pList = *reinterpret_cast<DWORD*>(Globals::dwBaseAddress + oHeroList);
+			DWORD pArray = *reinterpret_cast<DWORD*>(pList + 0x04);
+			int nArrayLen = *reinterpret_cast<int*>(pList + 0x08);
+
+			tempHeroList.reserve(nArrayLen);
+			for (auto i = 0; i < nArrayLen * 4; i += 4)
+			{
+				tempHeroList.emplace_back((GameObject*)(*reinterpret_cast<DWORD*>(pArray + i)));
+			}
 		}
-		return objList;
+
+		return tempHeroList;
 	}
 
-	static std::list<GameObject*>MinionList()
+	[[nodiscard]] static std::vector<GameObject*>MinionList()
 	{
-		std::list<GameObject*>objList;
+		std::vector<GameObject*>objList;
 
 		DWORD pList = *reinterpret_cast<DWORD*>(Globals::dwBaseAddress + oMinionList);
 		DWORD pArray = *reinterpret_cast<DWORD*>(pList + 0x04);
 		int nArrayLen = *reinterpret_cast<int*>(pList + 0x08);
 
+		objList.reserve(nArrayLen);
 		for (auto i = 0; i < nArrayLen * 4; i += 4)
 		{
 			objList.emplace_back((GameObject*)(*reinterpret_cast<DWORD*>(pArray + i)));
@@ -41,3 +45,6 @@ public:
 		return objList;
 	}
 };
+
+// linker error fix
+std::vector<GameObject*> ObjectManager::tempHeroList;

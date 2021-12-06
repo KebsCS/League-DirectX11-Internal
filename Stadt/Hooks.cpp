@@ -318,8 +318,8 @@ bool Hooks::Init()
 
 	// Get VMT addresses
 	void** pSwapchainVMT = *(void***)pSwapchain;
-	void** pDeviceVMT = *(void***)pDevice;
-	void** pDeviceContextVMT = *(void***)pContext;
+	//void** pDeviceVMT = *(void***)pDevice;
+	//void** pDeviceContextVMT = *(void***)pContext;
 
 	// Free our pointers, as we will be using the taget's now
 	if (pSwapchain) { pSwapchain->Release(); pSwapchain = nullptr; }

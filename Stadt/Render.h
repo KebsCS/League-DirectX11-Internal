@@ -15,7 +15,7 @@ private:
 	// todo, maybe few draw lists with mutexes https://github.com/spirthack/CSGOSimple/blob/df4bb4ef20aef408b54b8eb2f99fb1637a5d97e8/CSGOSimple/render.hpp
 	ImDrawList* drawList;
 
-	unsigned circlePoints = 32;
+	size_t circlePoints = 32;
 	std::vector<float>vSinTable;
 	std::vector<float>vCosTable;
 
@@ -27,8 +27,8 @@ private:
 
 		for (auto i = oldSize; i < circlePoints; i++)
 		{
-			vCosTable[i] = cosf(static_cast<float>(i) * (std::numbers::pi * 2.f) / static_cast<float>(circlePoints - 1));
-			vSinTable[i] = sinf(static_cast<float>(i) * (std::numbers::pi * 2.f) / static_cast<float>(circlePoints - 1));
+			vCosTable[i] = cosf(static_cast<float>(i) * (std::numbers::pi_v<float> *2.f) / static_cast<float>(circlePoints - 1));
+			vSinTable[i] = sinf(static_cast<float>(i) * (std::numbers::pi_v<float> *2.f) / static_cast<float>(circlePoints - 1));
 		}
 	}
 
@@ -211,8 +211,8 @@ public:
 				brushes = false;
 		}
 
-		float flPoint = (static_cast<float>(std::numbers::pi) * 2.f) / pointCount;
-		for (float theta = 0; theta < (static_cast<float>(std::numbers::pi) * 2.f); theta += flPoint)
+		float flPoint = (std::numbers::pi_v<float> *2.f) / pointCount;
+		for (float theta = 0; theta < (std::numbers::pi_v<float> *2.f); theta += flPoint)
 		{
 			Vector3 p = Vector3(0.f, 0.f, 0.f);
 

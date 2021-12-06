@@ -26,14 +26,14 @@ public:
 	bool operator!=(const Vector3& other) const;
 	bool IsZero(float tolerance = 0.01f) const;
 
-	float DistanceLine(Vector3 segmentStart, Vector3 segmentEnd, bool onlyIfOnSegment, bool squared);
+	[[nodiscard]] float DistanceLine(Vector3 segmentStart, Vector3 segmentEnd, bool onlyIfOnSegment, bool squared);
 
-	float Distance(const Vector3& v) const;
+	[[nodiscard]] float Distance(const Vector3& v) const;
 
-	float distanceTo(const Vector3& v) const;
-	float LengthSquared() const;
-	float Distance(Vector3 const& segment_start, Vector3 const& segment_end, bool only_if_on_segment = false, bool squared = false) const;
-	float DistanceSquared(Vector3 const& to) const;
+	[[nodiscard]] float distanceTo(const Vector3& v) const;
+	[[nodiscard]] float LengthSquared() const;
+	[[nodiscard]] float Distance(Vector3 const& segment_start, Vector3 const& segment_end, bool only_if_on_segment = false, bool squared = false) const;
+	[[nodiscard]] float DistanceSquared(Vector3 const& to) const;
 
 	Vector3& operator*=(const Vector3& v);
 	Vector3& operator*=(float s);
@@ -62,26 +62,26 @@ public:
 	Vector3& SwitchYZ();
 	Vector3& Negate();
 
-	float Length() const;
-	Vector3 Rotate_x(float angle) const;
-	Vector3 Rotate_y(float angle) const;
-	Vector3 Normalized() const;
-	float NormalizeInPlace() const;
+	[[nodiscard]] float Length() const;
+	[[nodiscard]] Vector3 Rotate_x(float angle) const;
+	[[nodiscard]] Vector3 Rotate_y(float angle) const;
+	[[nodiscard]] Vector3 Normalized() const;
+	[[nodiscard]] float NormalizeInPlace() const;
 
-	float DotProduct(Vector3 const& other) const;
-	float CrossProduct(Vector3 const& other) const;
-	Vector3 Center(Vector3 const& other) const;
-	float Polar() const;
-	float AngleBetween(Vector3 const& other) const;
+	[[nodiscard]] float DotProduct(Vector3 const& other) const;
+	[[nodiscard]] float CrossProduct(Vector3 const& other) const;
+	[[nodiscard]] Vector3 Center(Vector3 const& other) const;
+	[[nodiscard]] float Polar() const;
+	[[nodiscard]] float AngleBetween(Vector3 const& other) const;
 
 	bool Close(float a, float b, float eps) const;
 
-	Vector3 Rotated(float angle) const;
-	Vector3 Perpendicular() const;
-	Vector3 Perpendicular2() const;
-	Vector3 Extend(Vector3 const& to, float distance) const;
+	[[nodiscard]] Vector3 Rotated(float angle) const;
+	[[nodiscard]] Vector3 Perpendicular() const;
+	[[nodiscard]] Vector3 Perpendicular2() const;
+	[[nodiscard]] Vector3 Extend(Vector3 const& to, float distance) const;
 
-	Vector3 Append(Vector3 pos1, Vector3 pos2, float dist) const;
+	[[nodiscard]] Vector3 Append(Vector3 pos1, Vector3 pos2, float dist) const;
 
 	ProjectionInfo ProjectOn(Vector3 const& segment_start, Vector3 const& segment_end) const;
 	IntersectionResult Intersection(Vector3 const& line_segment_end, Vector3 const& line_segment2_start, Vector3 const& line_segment2_end) const;
