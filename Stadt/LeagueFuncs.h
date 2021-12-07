@@ -103,4 +103,10 @@ namespace LeagueFuncs
 
 		return *reinterpret_cast<Vector3*>(HudInstance + 0x11C);
 	}
+
+	//todo implement this to spell classes
+	static bool IsBasicAttackSlot(int slotId)
+	{
+		return (unsigned int)(slotId - 64) <= 17;
+	}
 }

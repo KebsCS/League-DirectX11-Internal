@@ -97,6 +97,7 @@ static std::vector<Geometry::Polygon>testpoly;
 
 // todo move this
 uintptr_t pOnProcessSpellCast;
+// AIHeroClient::CACHandleSpellSituations(Audio::SoundEventType,Spell::SpellCastInfo const&,AttackableUnit *)
 DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellCastInfo* spellCastInfo, int a6)
 {
 	static auto fn = reinterpret_cast<DWORD * (__thiscall*)(void*, int, SpellCastInfo*, int)>(pOnProcessSpellCast);
@@ -180,24 +181,24 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			// VISUALS GO HERE
 			// -----
 
-			render.Box(20, 100, 100, 200, ImColor(1.f, 0.f, 0.f));
+			//render.Box(20, 100, 100, 200, ImColor(1.f, 0.f, 0.f));
 
-			ImGuiIO& io = ImGui::GetIO();
-			ImVec2 mpos = io.MousePos;
-			//render.Text("xddd", mpos.x, mpos.y, 20.f, ImColor(1.f, 0.f, 0.f), true, true);
-			//Image aatroxe = imageManager.GetImageInfoByName("aatrox_square");
-			//render.Image(mpos.x, mpos.y, aatroxe.width, aatroxe.height, aatroxe.pShaderResource, true);
+			//ImGuiIO& io = ImGui::GetIO();
+			//ImVec2 mpos = io.MousePos;
+			////render.Text("xddd", mpos.x, mpos.y, 20.f, ImColor(1.f, 0.f, 0.f), true, true);
+			////Image aatroxe = imageManager.GetImageInfoByName("aatrox_square");
+			////render.Image(mpos.x, mpos.y, aatroxe.width, aatroxe.height, aatroxe.pShaderResource, true);
 
-			render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName(XorStr("talon_w")), true);
+			//render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName(XorStr("talon_w")), true);
 
-			render.CornerBox(300, 300, 400, 400, ImColor(0.f, 1.f, 0.f));
+			//render.CornerBox(300, 300, 400, 400, ImColor(0.f, 1.f, 0.f));
 
-			static float cd = 200.f;
-			if (cd < -200.f)
-				cd = 200.f;
+			//static float cd = 200.f;
+			//if (cd < -200.f)
+			//	cd = 200.f;
 
-			render.FancyIcon(150, 150, XorStr("talon"), cd / 200.f, cd / 200.f, cd / 200.f, 1, cd, XorStr("summoner_flash"), cd, XorStr("summoner_heal"), cd);
-			cd -= 1.f;
+			//render.FancyIcon(150, 150, XorStr("talon"), cd / 200.f, cd / 200.f, cd / 200.f, 1, cd, XorStr("summoner_flash"), cd, XorStr("summoner_heal"), cd);
+			//cd -= 1.f;
 
 			for (auto& pos : testpos)
 			{
@@ -247,25 +248,25 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 				}
 			}
 
-			for (auto obj : ObjectManager::ObjectMap())
-			{
-				if (obj.second && obj.first)
+			/*	for (auto obj : ObjectManager::ObjectMap())
 				{
-					Vector2 objPos = LeagueFuncs::WorldToScreen(obj.second->position);
-
-					render.Text(obj.second->name, objPos.x, objPos.y);
-				}
-			}
-
-			/*	for (auto obj : ObjectManager::ObjectList())
-				{
-					if (obj)
+					if (obj.second && obj.first)
 					{
-						Vector2 objPos = LeagueFuncs::WorldToScreen(obj->position);
+						Vector2 objPos = LeagueFuncs::WorldToScreen(obj.second->position);
 
-						render.Text(obj->name, objPos.x, objPos.y);
+						render.Text(obj.second->name, objPos.x, objPos.y);
 					}
 				}*/
+
+			for (auto obj : ObjectManager::ObjectList())
+			{
+				if (obj)
+				{
+					Vector2 objPos = LeagueFuncs::WorldToScreen(obj->position);
+
+					render.Text(obj->name, objPos.x, objPos.y);
+				}
+			}
 
 			render.Circle3D(local->position, local->GetBoundingRadius() - 5.f, ImColor(1.f, 0.f, 0.f));
 

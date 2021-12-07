@@ -21,11 +21,10 @@ private:
 
 	void InitCirclePoints()
 	{
-		const auto oldSize = vSinTable.size();
 		vCosTable.resize(circlePoints);
 		vSinTable.resize(circlePoints);
 
-		for (auto i = oldSize; i < circlePoints; i++)
+		for (auto i = 0; i < circlePoints; i++)
 		{
 			vCosTable[i] = cosf(static_cast<float>(i) * (std::numbers::pi_v<float> *2.f) / static_cast<float>(circlePoints - 1));
 			vSinTable[i] = sinf(static_cast<float>(i) * (std::numbers::pi_v<float> *2.f) / static_cast<float>(circlePoints - 1));

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Includes.h"
+#include "GameObject.h"
+#include "Render.h"
 
 class Menu
 {
@@ -26,6 +28,15 @@ public:
 		{
 			if (ImGui::BeginTabItem(XorStr("A")))
 			{
+				ImGui::Text("AiManager: %#08x", (*reinterpret_cast<GameObject**>(RVA(oLocalPlayer)))->GetAiManager());
+
+				static int fPoints = 16;
+				ImGui::SliderInt("circle points", &fPoints, 1, 100);
+				if (ImGui::Button("apply points"))
+				{
+					render.SetCirclePoints(fPoints);
+				}
+
 				ImGui::EndTabItem();
 			}
 		}

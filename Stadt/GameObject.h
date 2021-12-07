@@ -32,7 +32,7 @@ public:
 	class N0000300B* Funcs; //0x0E6C
 	char pad_0E70[532]; //0x0E70
 
-	AiManager* GetAiManager()
+	AiManager* GetAiManager() // GetPathController
 	{
 		return VFuncCall<AiManager*>(this, oVFunc::AiManager);
 		/*int uVar2;
