@@ -141,9 +141,6 @@
     <ClInclude Include="VMTHook.h">
       <Filter>Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="LeagueFuncs.h">
-      <Filter>Game</Filter>
-    </ClInclude>
     <ClInclude Include="SpellCastInfo.h">
       <Filter>Game\Classes</Filter>
     </ClInclude>
@@ -152,9 +149,6 @@
     </ClInclude>
     <ClInclude Include="SpellData.h">
       <Filter>Game\Classes</Filter>
-    </ClInclude>
-    <ClInclude Include="LeagueClasses.h">
-      <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="ObjectManager.h">
       <Filter>Game</Filter>
@@ -185,6 +179,12 @@
     </ClInclude>
     <ClInclude Include="AiManager.h">
       <Filter>Game\Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="LeagueFuncs.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="LeagueClasses.h">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

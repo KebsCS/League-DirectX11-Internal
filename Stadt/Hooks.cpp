@@ -134,6 +134,8 @@ DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellC
 			//sp.y = 100;
 			Geometry::Polygon poly = Geometry::Rectangle(sp, extended, 70.f).ToPolygon();
 
+			//LeagueFuncs::SendChat(std::string((DWORD)(local->GetAiManager()->navBegin)).c_str());
+
 			testpoly.emplace_back(poly);
 		}
 		LeagueFuncs::SendChat(ss.str().c_str());
@@ -214,7 +216,7 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			for (auto& poly : danger_polygons)
 				render.Polygon(poly, ImColor(0.f, 0.f, 1.f));
 
-			for (auto h : ObjectManager::HeroList())
+			for (auto& h : ObjectManager::HeroList())
 				render.Circle3D(h->GetAiManager()->serverPos, h->GetBoundingRadius(), ImColor(0.f, 1.f, 0.f));
 
 			ImColor mousecol;
@@ -233,13 +235,9 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			//Vector3 points = *reinterpret_cast<Vector3*>(arr);
 			//render.Circle3D(points, 30.f, ImColor(1.f, 1.f, 1.f));
 
-			Vector3 waypoint = local->GetAiManager()->navBegin;
-
-			render.Circle3D(waypoint, local->GetBoundingRadius(), ImColor(1.f, 1.f, 0.f));
-
-			for (auto minion : ObjectManager::MinionList())
+			for (auto& minion : ObjectManager::MinionList())
 			{
-				if (minion->maxhealth == 3.f && minion->health > 0.f)
+				if (minion->maxhealth == 3.f && minion->health > 0.f && minion->mana > 0.f)
 					render.RealWardRange(minion->position, ImColor(1.f, 1.f, 1.f));
 
 				if (minion && minion->health > 0.f && minion->GetBoundingRadius())
@@ -248,17 +246,7 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 				}
 			}
 
-			/*	for (auto obj : ObjectManager::ObjectMap())
-				{
-					if (obj.second && obj.first)
-					{
-						Vector2 objPos = LeagueFuncs::WorldToScreen(obj.second->position);
-
-						render.Text(obj.second->name, objPos.x, objPos.y);
-					}
-				}*/
-
-			for (auto obj : ObjectManager::ObjectList())
+			for (auto& obj : ObjectManager::ObjectList())
 			{
 				if (obj)
 				{
@@ -266,6 +254,29 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 
 					render.Text(obj->name, objPos.x, objPos.y);
 				}
+			}
+
+			for (auto& obj : ObjectManager::ObjectMap())
+			{
+				if (obj.first && obj.second)
+				{
+					Vector2 objPos = LeagueFuncs::WorldToScreen(obj.second->position);
+
+					render.Text(obj.second->name, objPos.x, objPos.y, 13.f, ImColor(0.f, 1.f, 0.f));
+				}
+			}
+
+			{
+				/*std::vector<Vector3>pathList = local->GetAiManager()->GetWaypoints();
+				for (auto& point : pathList)
+				{
+					render.Circle3D(point, 15.f, ImColor(1.f, 1.f, 1.f));
+				}*/
+				AiManager* ai = local->GetAiManager();
+				render.Path3D(ai->GetWaypoints());
+				Vector2 pathEnd = LeagueFuncs::WorldToScreen(ai->destination);
+				render.Text(std::to_string(ai->GetPathLength()), pathEnd.x, pathEnd.y - 25.f);
+				render.Text(std::to_string(ai->GetPathLength() / ai->movementSpeed), pathEnd.x, pathEnd.y - 45.f);
 			}
 
 			render.Circle3D(local->position, local->GetBoundingRadius() - 5.f, ImColor(1.f, 0.f, 0.f));

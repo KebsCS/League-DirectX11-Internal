@@ -254,8 +254,8 @@ namespace ClipperLib {
 		long64 hi;
 
 		Int128(long64 _lo = 0)
+			:lo((ulong64)_lo)
 		{
-			lo = (ulong64)_lo;
 			if (_lo < 0)  hi = -1; else hi = 0;
 		}
 
@@ -556,8 +556,8 @@ namespace ClipperLib {
 	}
 	//------------------------------------------------------------------------------
 
-	bool SlopesEqual(const IntPoint pt1, const IntPoint pt2,
-		const IntPoint pt3, bool UseFullInt64Range)
+	bool SlopesEqual(const IntPoint& pt1, const IntPoint& pt2,
+		const IntPoint& pt3, const bool& UseFullInt64Range)
 	{
 #ifndef use_int32
 		if (UseFullInt64Range)
@@ -568,8 +568,8 @@ namespace ClipperLib {
 	}
 	//------------------------------------------------------------------------------
 
-	bool SlopesEqual(const IntPoint pt1, const IntPoint pt2,
-		const IntPoint pt3, const IntPoint pt4, bool UseFullInt64Range)
+	bool SlopesEqual(const IntPoint& pt1, const IntPoint& pt2,
+		const IntPoint& pt3, const IntPoint& pt4, const bool& UseFullInt64Range)
 	{
 #ifndef use_int32
 		if (UseFullInt64Range)
@@ -586,7 +586,7 @@ namespace ClipperLib {
 	}
 	//------------------------------------------------------------------------------
 
-	inline double GetDx(const IntPoint pt1, const IntPoint pt2)
+	inline double GetDx(const IntPoint& pt1, const IntPoint& pt2)
 	{
 		return (pt1.Y == pt2.Y) ?
 			HORIZONTAL : (double)(pt2.X - pt1.X) / (pt2.Y - pt1.Y);
@@ -865,8 +865,8 @@ namespace ClipperLib {
 	}
 	//------------------------------------------------------------------------------
 
-	bool Pt2IsBetweenPt1AndPt3(const IntPoint pt1,
-		const IntPoint pt2, const IntPoint pt3)
+	bool Pt2IsBetweenPt1AndPt3(const IntPoint& pt1,
+		const IntPoint& pt2, const IntPoint& pt3)
 	{
 		if ((pt1 == pt3) || (pt1 == pt2) || (pt3 == pt2))
 			return false;
@@ -1952,7 +1952,7 @@ namespace ClipperLib {
 	}
 	//------------------------------------------------------------------------------
 
-	void Clipper::AddJoin(OutPt* op1, OutPt* op2, const IntPoint OffPt)
+	void Clipper::AddJoin(OutPt* op1, OutPt* op2, const IntPoint& OffPt)
 	{
 		Join* j = new Join;
 		j->OutPt1 = op1;
@@ -1978,7 +1978,7 @@ namespace ClipperLib {
 	}
 	//------------------------------------------------------------------------------
 
-	void Clipper::AddGhostJoin(OutPt* op, const IntPoint OffPt)
+	void Clipper::AddGhostJoin(OutPt* op, const IntPoint& OffPt)
 	{
 		Join* j = new Join;
 		j->OutPt1 = op;
@@ -3382,7 +3382,7 @@ namespace ClipperLib {
 	//------------------------------------------------------------------------------
 
 	bool JoinHorz(OutPt* op1, OutPt* op1b, OutPt* op2, OutPt* op2b,
-		const IntPoint Pt, bool DiscardLeft)
+		const IntPoint& Pt, bool DiscardLeft)
 	{
 		Direction Dir1 = (op1->Pt.X > op1b->Pt.X ? dRightToLeft : dLeftToRight);
 		Direction Dir2 = (op2->Pt.X > op2b->Pt.X ? dRightToLeft : dLeftToRight);
@@ -4537,7 +4537,7 @@ namespace ClipperLib {
 	}
 	//------------------------------------------------------------------------------
 
-	void TranslatePath(const Path& input, Path& output, const IntPoint delta)
+	void TranslatePath(const Path& input, Path& output, const IntPoint& delta)
 	{
 		//precondition: input != output
 		output.resize(input.size());

@@ -7,47 +7,47 @@
 class ObjectManager
 {
 private:
-	static std::vector<GameObject*>tempHeroList;
+	inline static std::vector<GameObject*>tempHeroList;
 
 	static DWORD GetFirst(DWORD objectManager)
 	{
-		DWORD v1; // eax
-		DWORD v2; // edx
+		//DWORD v1; // eax
+		//DWORD v2; // edx
 
-		v1 = *reinterpret_cast<DWORD*>(objectManager + 0x14);
-		v2 = *reinterpret_cast<DWORD*>(objectManager + 0x18);
+		static DWORD v1 = *reinterpret_cast<DWORD*>(objectManager + 0x14);
+		static DWORD v2 = *reinterpret_cast<DWORD*>(objectManager + 0x18);
 		if (v1 == v2)
 			return 0;
-		while (*(BYTE*)v1 & 1 || !*(DWORD*)v1)
+		while (*reinterpret_cast<BYTE*>(v1) & 1 || !*reinterpret_cast<DWORD*>(v1))
 		{
 			v1 += 4;
 			if (v1 == v2)
 				return 0;
 		}
-		return *(DWORD*)v1;
+		return *reinterpret_cast<DWORD*>(v1);
 	}
 
 	static DWORD GetNext(DWORD objectManager, DWORD obj)
 	{
-		DWORD v2; // eax
+		//DWORD v2; // eax
 		unsigned int v3; // edx
-		unsigned int v4; // esi
+		//unsigned int v4; // esi
 		DWORD v5; // eax
 
-		v2 = *reinterpret_cast<DWORD*>(objectManager + 0x14);
-		v3 = *(unsigned __int16*)(obj + 32) + 1;
-		v4 = (*reinterpret_cast<DWORD*>(objectManager + 0x18) - v2) >> 2;
+		static DWORD v2 = *reinterpret_cast<DWORD*>(objectManager + 0x14);
+		v3 = *reinterpret_cast<unsigned __int16*>(obj + 32) + 1;
+		static unsigned int v4 = (*reinterpret_cast<DWORD*>(objectManager + 0x18) - v2) >> 2;
 		if (v3 >= v4)
 			return 0;
 		v5 = v2 + 4 * v3;
-		while (*(BYTE*)v5 & 1 || !*(DWORD*)v5)
+		while (*reinterpret_cast<BYTE*>(v5) & 1 || !*reinterpret_cast<DWORD*>(v5))
 		{
 			++v3;
 			v5 += 4;
 			if (v3 >= v4)
 				return 0;
 		}
-		return *(DWORD*)v5;
+		return *reinterpret_cast<DWORD*>(v5);
 	}
 
 public:
@@ -56,14 +56,14 @@ public:
 	{
 		if (tempHeroList.empty())
 		{
-			DWORD pList = *reinterpret_cast<DWORD*>(Globals::dwBaseAddress + oHeroList);
+			static DWORD pList = *reinterpret_cast<DWORD*>(Globals::dwBaseAddress + oHeroList);
 			DWORD pArray = *reinterpret_cast<DWORD*>(pList + 0x04);
-			int nArrayLen = *reinterpret_cast<int*>(pList + 0x08);
+			size_t nArrayLen = *reinterpret_cast<size_t*>(pList + 0x08);
 
 			tempHeroList.reserve(nArrayLen);
 			for (auto i = 0; i < nArrayLen * 4; i += 4)
 			{
-				tempHeroList.emplace_back((GameObject*)(*reinterpret_cast<DWORD*>(pArray + i)));
+				tempHeroList.emplace_back(*reinterpret_cast<GameObject**>(pArray + i));
 			}
 		}
 
@@ -74,14 +74,14 @@ public:
 	{
 		std::vector<GameObject*>objList;
 
-		DWORD pList = *reinterpret_cast<DWORD*>(Globals::dwBaseAddress + oMinionList);
+		static DWORD pList = *reinterpret_cast<DWORD*>(Globals::dwBaseAddress + oMinionList);
 		DWORD pArray = *reinterpret_cast<DWORD*>(pList + 0x04);
-		int nArrayLen = *reinterpret_cast<int*>(pList + 0x08);
+		size_t nArrayLen = *reinterpret_cast<size_t*>(pList + 0x08);
 
 		objList.reserve(nArrayLen);
 		for (auto i = 0; i < nArrayLen * 4; i += 4)
 		{
-			objList.emplace_back((GameObject*)(*reinterpret_cast<DWORD*>(pArray + i)));
+			objList.emplace_back(*reinterpret_cast<GameObject**>(pArray + i));
 		}
 		return objList;
 	}
@@ -91,7 +91,8 @@ public:
 		return *reinterpret_cast<std::map<DWORD, GameObject*>*>(*reinterpret_cast<DWORD*>(RVA(oObjectManager)) + 0x28);
 	}
 
-	[[nodiscard]] static std::vector<GameObject*>ObjectList()
+	// todo, check if noexcept improves performance
+	[[nodiscard]] static std::vector<GameObject*>ObjectList() noexcept
 	{
 		static DWORD dwObjectManager = *reinterpret_cast<DWORD*>(RVA(oObjectManager));
 		size_t nObjects = *reinterpret_cast<size_t*>(dwObjectManager + 0x8);
@@ -101,7 +102,7 @@ public:
 		DWORD obj = GetFirst(dwObjectManager);
 		while (obj)
 		{
-			objList.emplace_back((GameObject*)obj);
+			objList.emplace_back(reinterpret_cast<GameObject*>(obj));
 
 			obj = GetNext(dwObjectManager, obj);
 		}
@@ -109,6 +110,3 @@ public:
 		return objList;
 	}
 };
-
-// linker error fix
-std::vector<GameObject*> ObjectManager::tempHeroList;

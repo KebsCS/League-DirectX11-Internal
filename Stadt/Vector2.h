@@ -28,4 +28,10 @@ public:
 	Vector2& operator/=(float s);
 	Vector2 operator/(const Vector2& v) const;
 	Vector2 operator/(float mod) const;
+
+	[[nodiscard]] float Length() const;
+	[[nodiscard]] float LengthSquared() const;
+	float NormalizeInPlace();
+	[[nodiscard]] float Distance(const Vector2& to) const;
+	[[nodiscard]] float DistanceSquared(const Vector2& to) const;
 };

@@ -18,19 +18,16 @@ public:
 
 	Vector3(float xx, float yy, float zz) : x(xx), y(yy), z(zz) {}
 	Vector3();
-	operator float* ();
+	//operator float* ();
 
 	bool IsValid() const;
-	Vector3 toGround() const;
+	[[nodiscard]] Vector3 ToGround() const;
 	bool operator==(const Vector3& other) const;
 	bool operator!=(const Vector3& other) const;
 	bool IsZero(float tolerance = 0.01f) const;
 
 	[[nodiscard]] float DistanceLine(Vector3 segmentStart, Vector3 segmentEnd, bool onlyIfOnSegment, bool squared);
-
-	[[nodiscard]] float Distance(const Vector3& v) const;
-
-	[[nodiscard]] float distanceTo(const Vector3& v) const;
+	[[nodiscard]] float Distance(const Vector3& to) const;
 	[[nodiscard]] float LengthSquared() const;
 	[[nodiscard]] float Distance(Vector3 const& segment_start, Vector3 const& segment_end, bool only_if_on_segment = false, bool squared = false) const;
 	[[nodiscard]] float DistanceSquared(Vector3 const& to) const;
@@ -64,9 +61,9 @@ public:
 
 	[[nodiscard]] float Length() const;
 	[[nodiscard]] Vector3 Rotate_x(float angle) const;
-	[[nodiscard]] Vector3 Rotate_y(float angle) const;
+	[[nodiscard]] Vector3 Rotate_z(float angle) const;
 	[[nodiscard]] Vector3 Normalized() const;
-	[[nodiscard]] float NormalizeInPlace() const;
+	float NormalizeInPlace();
 
 	[[nodiscard]] float DotProduct(Vector3 const& other) const;
 	[[nodiscard]] float CrossProduct(Vector3 const& other) const;
@@ -81,7 +78,7 @@ public:
 	[[nodiscard]] Vector3 Perpendicular2() const;
 	[[nodiscard]] Vector3 Extend(Vector3 const& to, float distance) const;
 
-	[[nodiscard]] Vector3 Append(Vector3 pos1, Vector3 pos2, float dist) const;
+	[[nodiscard]] Vector3 Append(const Vector3& pos1, const Vector3& pos2, float dist) const;
 
 	ProjectionInfo ProjectOn(Vector3 const& segment_start, Vector3 const& segment_end) const;
 	IntersectionResult Intersection(Vector3 const& line_segment_end, Vector3 const& line_segment2_start, Vector3 const& line_segment2_end) const;

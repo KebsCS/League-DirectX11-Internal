@@ -14,12 +14,12 @@ namespace LeagueFuncs
 	}
 
 	// could be unsafe, haven't checked
-	typedef void(__thiscall* tPrintChat)(DWORD ChatClient, const char* Message, int Color);
-	static void PrintChat(const char* message, int color = 0)
-	{
-		static tPrintChat fnPrintChat = (tPrintChat)(Globals::dwBaseAddress + oPrintChat);
-		fnPrintChat(*(DWORD*)(Globals::dwBaseAddress + oChatClientPtr), message, color);
-	}
+	//typedef void(__thiscall* tPrintChat)(DWORD ChatClient, const char* Message, int Color);
+	//static void PrintChat(const char* message, int color = 0)
+	//{
+	//	static tPrintChat fnPrintChat = (tPrintChat)(Globals::dwBaseAddress + oPrintChat);
+	//	fnPrintChat(*(DWORD*)(Globals::dwBaseAddress + oChatClientPtr), message, color);
+	//}
 
 	typedef bool(__cdecl* tIsNotWall)(Vector3*, unsigned __int16);
 	static bool IsNotWall(Vector3 pos)
@@ -101,7 +101,7 @@ namespace LeagueFuncs
 
 		static DWORD HudInstance = *reinterpret_cast<DWORD*>(RVA(oHudInstance));
 
-		return *reinterpret_cast<Vector3*>(HudInstance + 0x11C);
+		return *reinterpret_cast<Vector3*>(HudInstance + oMousePos);
 	}
 
 	//todo implement this to spell classes

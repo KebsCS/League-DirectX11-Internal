@@ -117,7 +117,7 @@ Result WINAPI ModuleCall(LPCSTR module, LPCSTR procName, Args ... args)
 	typedef Result(WINAPI* FunctionType)(Args ... args);
 
 	void* base = nullptr;
-	if (module == XorStr("kernel32.dll"))
+	if (strcmp(module, XorStr("kernel32.dll")) == 0)
 		base = GetKernel32Handle;
 	else
 		base = GetModuleBase(module);

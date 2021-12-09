@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "Vector2.h"
 
 Vector2::operator float* ()
@@ -107,4 +109,45 @@ Vector2 Vector2::operator/(float mod) const
 {
 	Vector2 result(this->x / mod, this->y / mod);
 	return result;
+}
+
+float Vector2::Length() const
+{
+	return sqrtf(this->x * this->x + this->y * this->y);
+}
+
+float Vector2::LengthSquared() const
+{
+	return this->x * this->x + this->y * this->y;
+}
+
+float Vector2::NormalizeInPlace()
+{
+	float l = this->Length();
+	if (l != 0.0f)
+	{
+		x /= l;
+		y /= l;
+	}
+	else
+	{
+		x = y = 0.0f;
+	}
+	return l;
+}
+
+float Vector2::Distance(const Vector2& to) const
+{
+	Vector2 delta;
+	delta.x = x - to.x;
+	delta.y = y - to.y;
+	return delta.Length();
+}
+
+float Vector2::DistanceSquared(const Vector2& to) const
+{
+	Vector2 delta;
+	delta.x = x - to.x;
+	delta.y = y - to.y;
+	return delta.LengthSquared();
 }

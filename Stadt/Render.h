@@ -166,6 +166,15 @@ public:
 		drawList->PathStroke(color, ImDrawFlags_None, thickness);
 	}
 
+	inline void Path3D(const std::vector<Vector3>& points, const ImColor& color = ImColor(1.f, 1.f, 1.f), const float& thickness = 1.f)
+	{
+		for (const Vector3& p : points)
+		{
+			drawList->PathLineTo(LeagueFuncs::WorldToScreen(p));
+		}
+		drawList->PathStroke(color, ImDrawFlags_None, thickness);
+	}
+
 	template <class T>
 	inline void Box(T x1, T y1, T x2, T y2, ImColor color, float thickness = 1.f, float rounding = 0.f)
 	{

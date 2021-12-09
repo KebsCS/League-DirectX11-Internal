@@ -83,7 +83,7 @@ void FuncHook::ReHook32(intptr_t offset)
 				*((int32_t*)&p[6]) = (int32_t)offset;
 			}
 		}
-		else if (type != HOOKTYPE_FORWARD_OVERWRITE)
+		else
 		{
 			type = HOOKTYPE_FORWARD_OVERWRITE;
 		}

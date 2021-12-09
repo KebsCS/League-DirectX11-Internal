@@ -4,7 +4,13 @@
 #include <Windows.h>
 
 #define M_PI	3.14159265358979323846264338327950288419716939937510
-#define RAD2DEG( x )  ( (float)(x) * (float)(180.f / M_PI) )
+#ifndef RAD2DEG
+#define RAD2DEG(x)  ((float)(x) * (float)(180.f / M_PI_F))
+#endif
+
+#ifndef DEG2RAD
+#define DEG2RAD(x)  ((float)(x) * (float)(M_PI_F / 180.f))
+#endif
 
 // Relative Virtual Address
 #define RVA(address) (Globals::dwBaseAddress + address)

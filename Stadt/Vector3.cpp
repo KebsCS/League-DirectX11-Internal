@@ -22,7 +22,7 @@ bool Vector3::IsValid() const
 	return this->x != 0/* && this->y != 0*/ && this->z != 0;
 }
 
-Vector3 Vector3::toGround() const
+Vector3 Vector3::ToGround() const
 {
 	Vector3 result(this->x, 0, this->z);
 	return result;
@@ -31,6 +31,7 @@ Vector3 Vector3::toGround() const
 bool Vector3::IsZero(float tolerance) const
 {
 	return this->x > -tolerance && this->x < tolerance&&
+		// this->y > -tolerance && this->y < tolerance&&
 		this->z > -tolerance && this->z < tolerance;
 }
 
@@ -39,24 +40,19 @@ float Vector3::DistanceLine(Vector3 segmentStart, Vector3 segmentEnd, bool onlyI
 	auto objects = this->ProjectOn(segmentStart, segmentEnd);
 	if (objects.IsOnSegment || onlyIfOnSegment == false)
 	{
-		return squared ? objects.SegmentPoint.DistanceSquared(Vector3(this->x, this->y, this->z)) : objects.SegmentPoint.distanceTo(Vector3(this->x, this->y, this->z));
+		return squared ? objects.SegmentPoint.DistanceSquared(Vector3(this->x, this->y, this->z)) : objects.SegmentPoint.Distance(Vector3(this->x, this->y, this->z));
 	}
 	return FLT_MAX;
 }
 
-Vector3::operator float* ()
-{
-	return &x;
-}
+//Vector3::operator float* ()
+//{
+//	return &x;
+//}
 
-float Vector3::Distance(const Vector3& v) const
+float Vector3::Distance(const Vector3& to) const
 {
-	return (float)sqrt(pow(v.x - x, 2) + pow(v.z - z, 2) + pow(v.y - y, 2));
-}
-
-float Vector3::distanceTo(const Vector3& v) const
-{
-	return (float)sqrt(pow(v.x - x, 2) + pow(v.z - z, 2) + pow(v.y - y, 2));
+	return (float)sqrt(pow(to.x - x, 2) + pow(to.z - z, 2) + pow(to.y - y, 2));
 }
 
 float Vector3::LengthSquared() const
@@ -73,7 +69,7 @@ float Vector3::Distance(Vector3 const& segment_start, Vector3 const& segment_end
 	{
 		return squared
 			? this->DistanceSquared(projection_info.SegmentPoint)
-			: this->distanceTo(projection_info.SegmentPoint);
+			: this->Distance(projection_info.SegmentPoint);
 	}
 	return FLT_MAX;
 }
@@ -84,7 +80,7 @@ float Vector3::DistanceSquared(Vector3 const& to) const
 
 	delta.x = x - to.x;
 	delta.y = y - to.y;
-	delta.y = z - to.z;
+	delta.z = z - to.z;
 
 	return delta.LengthSquared();
 }
@@ -234,7 +230,7 @@ Vector3 Vector3::Rotate_x(float angle) const {
 	);
 }
 
-Vector3 Vector3::Rotate_y(float angle) const
+Vector3 Vector3::Rotate_z(float angle) const
 {
 	Vector3 result(this->x * cos(angle) - this->z * sin(angle), this->y, this->x * sin(angle) + this->z * cos(angle));
 	return result;
@@ -251,9 +247,20 @@ Vector3 Vector3::Normalized() const
 
 	return *this;
 }
-float Vector3::NormalizeInPlace() const
+
+float Vector3::NormalizeInPlace()
 {
-	auto v = *this;
+	float radius = this->Length();
+
+	float iradius = 1.f / (radius + FLT_EPSILON);
+
+	x *= iradius;
+	y *= iradius;
+	z *= iradius;
+
+	return radius;
+
+	/*auto v = *this;
 	auto const l = this->Length();
 
 	if (l != 0.0f)
@@ -264,7 +271,7 @@ float Vector3::NormalizeInPlace() const
 	{
 		v.x = v.z = 0.0f; v.y = 1.0f;
 	}
-	return l;
+	return l;*/
 }
 
 float Vector3::DotProduct(Vector3 const& other) const
@@ -356,7 +363,7 @@ Vector3 Vector3::Extend(Vector3 const& to, float distance) const
 	return result;
 }
 
-Vector3 Vector3::Append(Vector3 pos1, Vector3 pos2, float dist) const
+Vector3 Vector3::Append(const Vector3 & pos1, const Vector3 & pos2, float dist) const
 {
 	return pos2 + (pos2 - pos1).Normalized() * dist;
 }
