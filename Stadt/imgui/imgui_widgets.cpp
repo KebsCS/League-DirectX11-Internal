@@ -1,6 +1,8 @@
 // dear imgui, v1.85
 // (widgets code)
 
+#include "XorString.h"
+
 /*
 
 Index of this file:
@@ -1581,7 +1583,8 @@ bool ImGui::BeginCombo(const char* label, const char* preview_value, ImGuiComboF
 	// Open on click
 	bool hovered, held;
 	bool pressed = ButtonBehavior(bb, id, &hovered, &held);
-	const ImGuiID popup_id = ImHashStr("##ComboPopup", 0, id);
+	std::string szComboPopup = XorStr("##ComboPopup");
+	const ImGuiID popup_id = ImHashStr(szComboPopup.c_str(), 0, id);
 	bool popup_open = IsPopupOpen(popup_id, ImGuiPopupFlags_None);
 	if (pressed && !popup_open)
 	{
@@ -1659,7 +1662,8 @@ bool ImGui::BeginComboPopup(ImGuiID popup_id, const ImRect& bb, ImGuiComboFlags 
 
 	// This is essentially a specialized version of BeginPopupEx()
 	char name[16];
-	ImFormatString(name, IM_ARRAYSIZE(name), "##Combo_%02d", g.BeginPopupStack.Size); // Recycle windows based on depth
+	std::string szCombo = XorStr("##Combo_%02d");
+	ImFormatString(name, IM_ARRAYSIZE(name), szCombo.c_str(), g.BeginPopupStack.Size); // Recycle windows based on depth
 
 	// Set position given a custom constraint (peak into expected window size so we can position it)
 	// FIXME: This might be easier to express with an hypothetical SetNextWindowPosConstraints() function?

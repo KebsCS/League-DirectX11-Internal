@@ -15,12 +15,12 @@ private:
 
 public:
 
-	VFuncHook(void** VMT = nullptr)
+	VFuncHook(void* VMT = nullptr)
 	{
 		if (VMT)
 			Init(VMT);
 	}
-	bool Init(void** VMT)
+	bool Init(void* VMT)
 	{
 		if (VMT)
 		{
@@ -54,7 +54,7 @@ public:
 		return 0;
 	}
 
-	uintptr_t Hook(void** original, size_t index, void* function)
+	uintptr_t Hook(void* original, size_t index, void* function)
 	{
 		if (!Init(original))
 			return false;

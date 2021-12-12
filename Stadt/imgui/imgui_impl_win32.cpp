@@ -198,32 +198,32 @@ static bool ImGui_ImplWin32_UpdateMouseCursor()
 	if (io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)
 		return false;
 
-	ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
-	if (imgui_cursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
-	{
-		// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
-		LI_FN(SetCursor).get()(NULL);
-		//::SetCursor(NULL);
-	}
-	else
-	{
-		// Show OS mouse cursor
-		LPTSTR win32_cursor = IDC_ARROW;
-		switch (imgui_cursor)
-		{
-		case ImGuiMouseCursor_Arrow:        win32_cursor = IDC_ARROW; break;
-		case ImGuiMouseCursor_TextInput:    win32_cursor = IDC_IBEAM; break;
-		case ImGuiMouseCursor_ResizeAll:    win32_cursor = IDC_SIZEALL; break;
-		case ImGuiMouseCursor_ResizeEW:     win32_cursor = IDC_SIZEWE; break;
-		case ImGuiMouseCursor_ResizeNS:     win32_cursor = IDC_SIZENS; break;
-		case ImGuiMouseCursor_ResizeNESW:   win32_cursor = IDC_SIZENESW; break;
-		case ImGuiMouseCursor_ResizeNWSE:   win32_cursor = IDC_SIZENWSE; break;
-		case ImGuiMouseCursor_Hand:         win32_cursor = IDC_HAND; break;
-		case ImGuiMouseCursor_NotAllowed:   win32_cursor = IDC_NO; break;
-		}
-		LI_FN(SetCursor).get()(LI_FN(LoadCursorW).get()(NULL, win32_cursor));
-		//::SetCursor(LI_FN(LoadCursorW).get()(NULL, win32_cursor));
-	}
+	//ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
+	//if (imgui_cursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
+	//{
+	//	// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
+	//	LI_FN(SetCursor).get()(NULL);
+	//	//::SetCursor(NULL);
+	//}
+	//else
+	//{
+	//	// Show OS mouse cursor
+	//	LPTSTR win32_cursor = IDC_ARROW;
+	//	switch (imgui_cursor)
+	//	{
+	//	case ImGuiMouseCursor_Arrow:        win32_cursor = IDC_ARROW; break;
+	//	case ImGuiMouseCursor_TextInput:    win32_cursor = IDC_IBEAM; break;
+	//	case ImGuiMouseCursor_ResizeAll:    win32_cursor = IDC_SIZEALL; break;
+	//	case ImGuiMouseCursor_ResizeEW:     win32_cursor = IDC_SIZEWE; break;
+	//	case ImGuiMouseCursor_ResizeNS:     win32_cursor = IDC_SIZENS; break;
+	//	case ImGuiMouseCursor_ResizeNESW:   win32_cursor = IDC_SIZENESW; break;
+	//	case ImGuiMouseCursor_ResizeNWSE:   win32_cursor = IDC_SIZENWSE; break;
+	//	case ImGuiMouseCursor_Hand:         win32_cursor = IDC_HAND; break;
+	//	case ImGuiMouseCursor_NotAllowed:   win32_cursor = IDC_NO; break;
+	//	}
+	//	LI_FN(SetCursor).get()(LI_FN(LoadCursorW).get()(NULL, win32_cursor));
+	//	//::SetCursor(LI_FN(LoadCursorW).get()(NULL, win32_cursor));
+	//}
 	return true;
 }
 
@@ -332,12 +332,12 @@ void    ImGui_ImplWin32_NewFrame()
 	ImGui_ImplWin32_UpdateMousePos();
 
 	// Update OS mouse cursor with the cursor requested by imgui
-	ImGuiMouseCursor mouse_cursor = io.MouseDrawCursor ? ImGuiMouseCursor_None : ImGui::GetMouseCursor();
+	/*ImGuiMouseCursor mouse_cursor = io.MouseDrawCursor ? ImGuiMouseCursor_None : ImGui::GetMouseCursor();
 	if (bd->LastMouseCursor != mouse_cursor)
 	{
 		bd->LastMouseCursor = mouse_cursor;
 		ImGui_ImplWin32_UpdateMouseCursor();
-	}
+	}*/
 
 	// Update game controllers (if enabled and available)
 	ImGui_ImplWin32_UpdateGamepads();
@@ -503,101 +503,101 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARA
 //#define _IsWindows8OrGreater()       _IsWindowsVersionOrGreater(HIBYTE(0x0602), LOBYTE(0x0602), 0) // _WIN32_WINNT_WIN8
 //#define _IsWindows8Point1OrGreater() _IsWindowsVersionOrGreater(HIBYTE(0x0603), LOBYTE(0x0603), 0) // _WIN32_WINNT_WINBLUE
 //#define _IsWindows10OrGreater()      _IsWindowsVersionOrGreater(HIBYTE(0x0A00), LOBYTE(0x0A00), 0) // _WIN32_WINNT_WINTHRESHOLD / _WIN32_WINNT_WIN10
-
-#ifndef DPI_ENUMS_DECLARED
-typedef enum { PROCESS_DPI_UNAWARE = 0, PROCESS_SYSTEM_DPI_AWARE = 1, PROCESS_PER_MONITOR_DPI_AWARE = 2 } PROCESS_DPI_AWARENESS;
-typedef enum { MDT_EFFECTIVE_DPI = 0, MDT_ANGULAR_DPI = 1, MDT_RAW_DPI = 2, MDT_DEFAULT = MDT_EFFECTIVE_DPI } MONITOR_DPI_TYPE;
-#endif
-#ifndef _DPI_AWARENESS_CONTEXTS_
-DECLARE_HANDLE(DPI_AWARENESS_CONTEXT);
-#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE    (DPI_AWARENESS_CONTEXT)-3
-#endif
-#ifndef DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
-#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 (DPI_AWARENESS_CONTEXT)-4
-#endif
-typedef HRESULT(WINAPI* PFN_SetProcessDpiAwareness)(PROCESS_DPI_AWARENESS);                     // Shcore.lib + dll, Windows 8.1+
-typedef HRESULT(WINAPI* PFN_GetDpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);        // Shcore.lib + dll, Windows 8.1+
-typedef DPI_AWARENESS_CONTEXT(WINAPI* PFN_SetThreadDpiAwarenessContext)(DPI_AWARENESS_CONTEXT); // User32.lib + dll, Windows 10 v1607+ (Creators Update)
-
-// Helper function to enable DPI awareness without setting up a manifest
-void ImGui_ImplWin32_EnableDpiAwareness()
-{
-	//if (_IsWindows10OrGreater())
-	{ //todo test if this is working
-		std::string szUser32 = XorStr("user32.dll");
-		static HINSTANCE user32_dll = reinterpret_cast<HINSTANCE>(GetModuleBase(szUser32.c_str()));		//LI_FN(LoadLibraryA)("user32.dll"); // Reference counted per-process
-		std::string szSetThreadDpiAwarenessContext = XorStr("SetThreadDpiAwarenessContext");
-		if (PFN_SetThreadDpiAwarenessContext SetThreadDpiAwarenessContextFn = (PFN_SetThreadDpiAwarenessContext)GetProcedureAddress(user32_dll, szSetThreadDpiAwarenessContext.c_str()))
-		{
-			SetThreadDpiAwarenessContextFn(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-			return;
-		}
-	}
-	//if (_IsWindows8Point1OrGreater())
-	{
-		std::string szShcore = XorStr("shcore.dll");
-		static HINSTANCE shcore_dll = reinterpret_cast<HINSTANCE>(GetModuleBase(szShcore.c_str()));		//LI_FN(LoadLibraryA)("shcore.dll"); // Reference counted per-process
-		std::string szSetProcessDpiAwareness = XorStr("SetProcessDpiAwareness");
-		if (PFN_SetProcessDpiAwareness SetProcessDpiAwarenessFn = (PFN_SetProcessDpiAwareness)GetProcedureAddress(shcore_dll, szSetProcessDpiAwareness.c_str()))
-		{
-			SetProcessDpiAwarenessFn(PROCESS_PER_MONITOR_DPI_AWARE);
-			return;
-		}
-	}
-#if _WIN32_WINNT >= 0x0600
-	LI_FN(SetProcessDPIAware)();
-#endif
-}
-
-#if defined(_MSC_VER) && !defined(NOGDI)
-#pragma comment(lib, "gdi32")   // Link with gdi32.lib for GetDeviceCaps(). MinGW will require linking with '-lgdi32'
-#endif
-
-float ImGui_ImplWin32_GetDpiScaleForMonitor(void* monitor)
-{
-	UINT xdpi = 96, ydpi = 96;
-	//if (_IsWindows8Point1OrGreater())
-	{
-		std::string szShcore = XorStr("shcore.dll");
-		static HINSTANCE shcore_dll = reinterpret_cast<HINSTANCE>(GetModuleBase(szShcore.c_str()));		//LI_FN(LoadLibraryA)("shcore.dll"); // Reference counted per-process
-
-		//static HINSTANCE shcore_dll = ::LoadLibraryA("shcore.dll"); // Reference counted per-process
-		static PFN_GetDpiForMonitor GetDpiForMonitorFn = NULL;
-		if (GetDpiForMonitorFn == NULL && shcore_dll != NULL)
-		{
-			std::string szGetDpiForMonitor = XorStr("GetDpiForMonitor");
-			GetDpiForMonitorFn = (PFN_GetDpiForMonitor)GetProcedureAddress(shcore_dll, szGetDpiForMonitor.c_str());
-		}
-		if (GetDpiForMonitorFn != NULL)
-		{
-			GetDpiForMonitorFn((HMONITOR)monitor, MDT_EFFECTIVE_DPI, &xdpi, &ydpi);
-			IM_ASSERT(xdpi == ydpi); // Please contact me if you hit this assert!
-			return xdpi / 96.0f;
-		}
-	}
-#ifndef NOGDI
-	const HDC dc = ::GetDC(NULL);
-	xdpi = LI_FN(GetDeviceCaps)(dc, LOGPIXELSX);
-	ydpi = LI_FN(GetDeviceCaps)(dc, LOGPIXELSY);
-	IM_ASSERT(xdpi == ydpi); // Please contact me if you hit this assert!
-	::ReleaseDC(NULL, dc);
-#endif
-	return xdpi / 96.0f;
-}
-
-float ImGui_ImplWin32_GetDpiScaleForHwnd(void* hwnd)
-{
-	HMONITOR monitor = LI_FN(MonitorFromWindow)((HWND)hwnd, MONITOR_DEFAULTTONEAREST);
-	return ImGui_ImplWin32_GetDpiScaleForMonitor(monitor);
-}
+//
+//#ifndef DPI_ENUMS_DECLARED
+//typedef enum { PROCESS_DPI_UNAWARE = 0, PROCESS_SYSTEM_DPI_AWARE = 1, PROCESS_PER_MONITOR_DPI_AWARE = 2 } PROCESS_DPI_AWARENESS;
+//typedef enum { MDT_EFFECTIVE_DPI = 0, MDT_ANGULAR_DPI = 1, MDT_RAW_DPI = 2, MDT_DEFAULT = MDT_EFFECTIVE_DPI } MONITOR_DPI_TYPE;
+//#endif
+//#ifndef _DPI_AWARENESS_CONTEXTS_
+//DECLARE_HANDLE(DPI_AWARENESS_CONTEXT);
+//#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE    (DPI_AWARENESS_CONTEXT)-3
+//#endif
+//#ifndef DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
+//#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 (DPI_AWARENESS_CONTEXT)-4
+//#endif
+//typedef HRESULT(WINAPI* PFN_SetProcessDpiAwareness)(PROCESS_DPI_AWARENESS);                     // Shcore.lib + dll, Windows 8.1+
+//typedef HRESULT(WINAPI* PFN_GetDpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);        // Shcore.lib + dll, Windows 8.1+
+//typedef DPI_AWARENESS_CONTEXT(WINAPI* PFN_SetThreadDpiAwarenessContext)(DPI_AWARENESS_CONTEXT); // User32.lib + dll, Windows 10 v1607+ (Creators Update)
+//
+//// Helper function to enable DPI awareness without setting up a manifest
+//void ImGui_ImplWin32_EnableDpiAwareness()
+//{
+//	//if (_IsWindows10OrGreater())
+//	{ //todo test if this is working
+//		std::string szUser32 = XorStr("user32.dll");
+//		static HINSTANCE user32_dll = reinterpret_cast<HINSTANCE>(GetModuleBase(szUser32.c_str()));		//LI_FN(LoadLibraryA)("user32.dll"); // Reference counted per-process
+//		std::string szSetThreadDpiAwarenessContext = XorStr("SetThreadDpiAwarenessContext");
+//		if (PFN_SetThreadDpiAwarenessContext SetThreadDpiAwarenessContextFn = (PFN_SetThreadDpiAwarenessContext)GetProcedureAddress(user32_dll, szSetThreadDpiAwarenessContext.c_str()))
+//		{
+//			SetThreadDpiAwarenessContextFn(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+//			return;
+//		}
+//	}
+//	//if (_IsWindows8Point1OrGreater())
+//	{
+//		std::string szShcore = XorStr("shcore.dll");
+//		static HINSTANCE shcore_dll = reinterpret_cast<HINSTANCE>(GetModuleBase(szShcore.c_str()));		//LI_FN(LoadLibraryA)("shcore.dll"); // Reference counted per-process
+//		std::string szSetProcessDpiAwareness = XorStr("SetProcessDpiAwareness");
+//		if (PFN_SetProcessDpiAwareness SetProcessDpiAwarenessFn = (PFN_SetProcessDpiAwareness)GetProcedureAddress(shcore_dll, szSetProcessDpiAwareness.c_str()))
+//		{
+//			SetProcessDpiAwarenessFn(PROCESS_PER_MONITOR_DPI_AWARE);
+//			return;
+//		}
+//	}
+//#if _WIN32_WINNT >= 0x0600
+//	LI_FN(SetProcessDPIAware)();
+//#endif
+//}
+//
+////#if defined(_MSC_VER) && !defined(NOGDI)
+////#pragma comment(lib, "gdi32")   // Link with gdi32.lib for GetDeviceCaps(). MinGW will require linking with '-lgdi32'
+////#endif
+//
+//float ImGui_ImplWin32_GetDpiScaleForMonitor(void* monitor)
+//{
+//	UINT xdpi = 96, ydpi = 96;
+//	//if (_IsWindows8Point1OrGreater())
+//	{
+//		std::string szShcore = XorStr("shcore.dll");
+//		static HINSTANCE shcore_dll = reinterpret_cast<HINSTANCE>(GetModuleBase(szShcore.c_str()));		//LI_FN(LoadLibraryA)("shcore.dll"); // Reference counted per-process
+//
+//		//static HINSTANCE shcore_dll = ::LoadLibraryA("shcore.dll"); // Reference counted per-process
+//		static PFN_GetDpiForMonitor GetDpiForMonitorFn = NULL;
+//		if (GetDpiForMonitorFn == NULL && shcore_dll != NULL)
+//		{
+//			std::string szGetDpiForMonitor = XorStr("GetDpiForMonitor");
+//			GetDpiForMonitorFn = (PFN_GetDpiForMonitor)GetProcedureAddress(shcore_dll, szGetDpiForMonitor.c_str());
+//		}
+//		if (GetDpiForMonitorFn != NULL)
+//		{
+//			GetDpiForMonitorFn((HMONITOR)monitor, MDT_EFFECTIVE_DPI, &xdpi, &ydpi);
+//			IM_ASSERT(xdpi == ydpi); // Please contact me if you hit this assert!
+//			return xdpi / 96.0f;
+//		}
+//	}
+//#ifndef NOGDI
+//	const HDC dc = ::GetDC(NULL);
+//	xdpi = LI_FN(GetDeviceCaps)(dc, LOGPIXELSX);
+//	ydpi = LI_FN(GetDeviceCaps)(dc, LOGPIXELSY);
+//	IM_ASSERT(xdpi == ydpi); // Please contact me if you hit this assert!
+//	::ReleaseDC(NULL, dc);
+//#endif
+//	return xdpi / 96.0f;
+//}
+//
+//float ImGui_ImplWin32_GetDpiScaleForHwnd(void* hwnd)
+//{
+//	HMONITOR monitor = LI_FN(MonitorFromWindow)((HWND)hwnd, MONITOR_DEFAULTTONEAREST);
+//	return ImGui_ImplWin32_GetDpiScaleForMonitor(monitor);
+//}
 
 //---------------------------------------------------------------------------------------------------------
 // Transparency related helpers (optional)
 //--------------------------------------------------------------------------------------------------------
 
-#if defined(_MSC_VER)
-#pragma comment(lib, "dwmapi")  // Link with dwmapi.lib. MinGW will require linking with '-ldwmapi'
-#endif
+//#if defined(_MSC_VER)
+//#pragma comment(lib, "dwmapi")  // Link with dwmapi.lib. MinGW will require linking with '-ldwmapi'
+//#endif
 
 // [experimental]
 // Borrowed from GLFW's function updateFramebufferTransparency() in src/win32_window.c

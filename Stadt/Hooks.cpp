@@ -12,6 +12,7 @@
 
 #include "FuncHook.h"
 #include "VMTHook.h"
+#include "VFuncHook.h"
 
 typedef HRESULT(WINAPI* D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 D3D11PresentHook				phookD3D11Present = nullptr;
@@ -40,6 +41,7 @@ IDirectInput8A* pDirectInput = nullptr;
 FuncHook FHPresent;
 FuncHook FHGetDeviceData;
 VMTHook VMTHOnProcessSpellCast[10]; // todo, maybe a vector or list
+VFuncHook VFHGetDeviceDataHook;
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -68,7 +70,7 @@ static HRESULT WINAPI Hooks::GetDeviceDataHook(IDirectInputDevice8A* pThis, DWOR
 #else
 	// fix hooking method
 	//HRESULT ret = FHGetDeviceData.Call<HRESULT>(pThis, cbObjectData, rgdod, pdwInOut, dwFlags);
-	HRESULT ret = 0;//phookGetDeviceData(pThis, cbObjectData, rgdod, pdwInOut, dwFlags);
+	HRESULT ret = phookGetDeviceData(pThis, cbObjectData, rgdod, pdwInOut, dwFlags);
 
 #endif
 
@@ -138,11 +140,26 @@ DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellC
 
 			testpoly.emplace_back(poly);
 		}
-		LeagueFuncs::SendChat(ss.str().c_str());
+		//LeagueFuncs::SendChat(ss.str().c_str());
+		LOG(ss.str().c_str());
 	}
 
 	return fn(thisptr, state, spellCastInfo, a6);
 }
+
+//uintptr_t pTestFunc;
+//// AIHeroClient::CACHandleSpellSituations(Audio::SoundEventType,Spell::SpellCastInfo const&,AttackableUnit *)
+//DWORD* __fastcall TestFunc(void* thisptr, void* edx, int a2)
+//{
+//	std::stringstream ss;
+//
+//	ss << thisptr << "    " << edx << "    " << a2;
+//	//LeagueFuncs::SendChat(ss.str().c_str());
+//	MessageBoxA(0, ss.str().c_str(), "", 0);
+//
+//	static auto fn = reinterpret_cast<DWORD * (__thiscall*)(void*, int)>(pTestFunc);
+//	return fn(thisptr, a2);
+//}
 
 static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
 {
@@ -162,6 +179,10 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 				pOnProcessSpellCast = VMTHOnProcessSpellCast[i].Hook((void*)dwOnProcessSpell, 29, (uintptr_t)&OnProcessSpellCast);
 				i++;
 			}
+
+			/*	DWORD func = RVA(0x27CED0);
+				if (MH_CreateHook((DWORD_PTR*)func, TestFunc, reinterpret_cast<void**>(&pTestFunc)) != MH_OK) { return false; }
+				if (MH_EnableHook((DWORD_PTR*)func) != MH_OK) { return false; }*/
 		});
 
 	// todo sometimes on unloading pContext was nullptr, maybe make a mutex of some sort
@@ -499,14 +520,16 @@ bool Hooks::InitDInput()
 		return false;
 	}
 
-	void** lpdiKeyboardVMT = *(void***)lpdiKeyboard;
+	void* lpdiKeyboardVMT = *(void**)&lpdiKeyboard;
 
-	if (lpdiKeyboard)
-	{
-		lpdiKeyboard->Unacquire();
-		lpdiKeyboard->Release();
-		lpdiKeyboard = nullptr;
-	}
+	LOG("DINPUT: %#04x", lpdiKeyboardVMT);
+
+	//if (lpdiKeyboard)
+	//{
+	//	lpdiKeyboard->Unacquire();
+	//	lpdiKeyboard->Release();
+	//	lpdiKeyboard = nullptr;
+	//}
 
 #ifdef USEMINHOOK
 
@@ -517,8 +540,7 @@ bool Hooks::InitDInput()
 	//// shadow vmt hook wont work, because by calling DirectInput8Create we are getting
 	//// a temporary device that points to the original and swapping its vmt wont swap the
 	//// original game vmt
-	//void* pVMT = lpdiKeyboard;
-	//phookGetDeviceData = reinterpret_cast<IDirectInputDeviceGetDeviceDataHook>(VMTHGetDeviceData.Hook(pVMT, 10, (uintptr_t)&GetDeviceDataHook));
+	//phookGetDeviceData = reinterpret_cast<IDirectInputDeviceGetDeviceDataHook>(VFHGetDeviceDataHook.Hook(lpdiKeyboardVMT, 10, &GetDeviceDataHook));
 #endif
 
 	return true;

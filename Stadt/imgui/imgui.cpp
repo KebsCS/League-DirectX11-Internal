@@ -8205,7 +8205,8 @@ void ImGui::BeginTooltipEx(ImGuiWindowFlags extra_flags, ImGuiTooltipFlags toolt
 	}
 
 	char window_name[16];
-	ImFormatString(window_name, IM_ARRAYSIZE(window_name), "##Tooltip_%02d", g.TooltipOverrideCount);
+	std::string szTooltip = XorStr("##Tooltip_%02d");
+	ImFormatString(window_name, IM_ARRAYSIZE(window_name), szTooltip.c_str(), g.TooltipOverrideCount);
 	if (tooltip_flags & ImGuiTooltipFlags_OverridePreviousTooltip)
 		if (ImGuiWindow* window = FindWindowByName(window_name))
 			if (window->Active)
@@ -8213,7 +8214,7 @@ void ImGui::BeginTooltipEx(ImGuiWindowFlags extra_flags, ImGuiTooltipFlags toolt
 				// Hide previous tooltip from being displayed. We can't easily "reset" the content of a window so we create a new one.
 				window->Hidden = true;
 				window->HiddenFramesCanSkipItems = 1; // FIXME: This may not be necessary?
-				ImFormatString(window_name, IM_ARRAYSIZE(window_name), "##Tooltip_%02d", ++g.TooltipOverrideCount);
+				ImFormatString(window_name, IM_ARRAYSIZE(window_name), szTooltip.c_str(), ++g.TooltipOverrideCount);
 			}
 	ImGuiWindowFlags flags = ImGuiWindowFlags_Tooltip | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize;
 	Begin(window_name, NULL, flags | extra_flags);
@@ -10061,32 +10062,34 @@ static const char* GetFallbackWindowNameForWindowingList(ImGuiWindow* window)
 // Overlay displayed when using CTRL+TAB. Called by EndFrame().
 void ImGui::NavUpdateWindowingOverlay()
 {
-	ImGuiContext& g = *GImGui;
-	IM_ASSERT(g.NavWindowingTarget != NULL);
+	// idk if i need it
 
-	if (g.NavWindowingTimer < NAV_WINDOWING_LIST_APPEAR_DELAY)
-		return;
+	//ImGuiContext& g = *GImGui;
+	//IM_ASSERT(g.NavWindowingTarget != NULL);
 
-	if (g.NavWindowingListWindow == NULL)
-		g.NavWindowingListWindow = FindWindowByName("###NavWindowingList");
-	const ImGuiViewport* viewport = GetMainViewport();
-	SetNextWindowSizeConstraints(ImVec2(viewport->Size.x * 0.20f, viewport->Size.y * 0.20f), ImVec2(FLT_MAX, FLT_MAX));
-	SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-	PushStyleVar(ImGuiStyleVar_WindowPadding, g.Style.WindowPadding * 2.0f);
-	Begin("###NavWindowingList", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings);
-	for (int n = g.WindowsFocusOrder.Size - 1; n >= 0; n--)
-	{
-		ImGuiWindow* window = g.WindowsFocusOrder[n];
-		IM_ASSERT(window != NULL); // Fix static analyzers
-		if (!IsWindowNavFocusable(window))
-			continue;
-		const char* label = window->Name;
-		if (label == FindRenderedTextEnd(label))
-			label = GetFallbackWindowNameForWindowingList(window);
-		Selectable(label, g.NavWindowingTarget == window);
-	}
-	End();
-	PopStyleVar();
+	//if (g.NavWindowingTimer < NAV_WINDOWING_LIST_APPEAR_DELAY)
+	//	return;
+
+	//if (g.NavWindowingListWindow == NULL)
+	//	g.NavWindowingListWindow = FindWindowByName("###NavWindowingList");
+	//const ImGuiViewport* viewport = GetMainViewport();
+	//SetNextWindowSizeConstraints(ImVec2(viewport->Size.x * 0.20f, viewport->Size.y * 0.20f), ImVec2(FLT_MAX, FLT_MAX));
+	//SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+	//PushStyleVar(ImGuiStyleVar_WindowPadding, g.Style.WindowPadding * 2.0f);
+	//Begin("###NavWindowingList", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings);
+	//for (int n = g.WindowsFocusOrder.Size - 1; n >= 0; n--)
+	//{
+	//	ImGuiWindow* window = g.WindowsFocusOrder[n];
+	//	IM_ASSERT(window != NULL); // Fix static analyzers
+	//	if (!IsWindowNavFocusable(window))
+	//		continue;
+	//	const char* label = window->Name;
+	//	if (label == FindRenderedTextEnd(label))
+	//		label = GetFallbackWindowNameForWindowingList(window);
+	//	Selectable(label, g.NavWindowingTarget == window);
+	//}
+	//End();
+	//PopStyleVar();
 }
 
 //-----------------------------------------------------------------------------

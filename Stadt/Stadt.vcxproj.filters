@@ -186,6 +186,12 @@
     <ClInclude Include="LeagueClasses.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="BuffManager.h">
+      <Filter>Game\Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Console.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

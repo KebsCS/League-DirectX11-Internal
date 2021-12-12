@@ -4,6 +4,7 @@
 
 #include "Offsets.h"
 #include "AiManager.h"
+#include "BuffManager.h"
 #include "Ntdefs.h"
 
 class GameObject
@@ -46,6 +47,12 @@ public:
 		dwAiManager = *reinterpret_cast<DWORD*>(uStack4 + 8);
 
 		return (AiManager*)(dwAiManager);*/
+	}
+
+	// todo
+	BuffManager* GetBuffManager()
+	{
+		return *reinterpret_cast<BuffManager**>((DWORD)this + 0x21B8);
 	}
 
 	bool IsAlive()

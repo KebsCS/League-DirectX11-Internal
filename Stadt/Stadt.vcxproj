@@ -38,6 +38,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x86</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -121,6 +122,11 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FloatingPointExceptions>false</FloatingPointExceptions>
       <ControlFlowGuard>false</ControlFlowGuard>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <StringPooling>true</StringPooling>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <MinimalRebuild>false</MinimalRebuild>
+      <CreateHotpatchableImage>false</CreateHotpatchableImage>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -170,6 +176,7 @@
   <ItemGroup>
     <ClInclude Include="AiManager.h" />
     <ClInclude Include="clipper.h" />
+    <ClInclude Include="Console.h" />
     <ClInclude Include="Definitions.h" />
     <ClInclude Include="Fonts\CascadiaMono.h" />
     <ClInclude Include="Fonts\Tahoma.h" />
@@ -177,6 +184,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="BuffManager.h" />
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Images\Images.h">

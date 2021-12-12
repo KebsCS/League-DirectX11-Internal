@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LolImagesToByteArrayParser"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpellDBGenerator", "SpellDBGenerator\SpellDBGenerator.vcxproj", "{6CB899B3-EC12-46B5-A46A-C3F12B581BCD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NamedPipe", "NamedPipe\NamedPipe.vcxproj", "{23637EEF-03A3-46B2-960A-7187461CCF06}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{6CB899B3-EC12-46B5-A46A-C3F12B581BCD}.Release|x64.Build.0 = Release|x64
 		{6CB899B3-EC12-46B5-A46A-C3F12B581BCD}.Release|x86.ActiveCfg = Release|Win32
 		{6CB899B3-EC12-46B5-A46A-C3F12B581BCD}.Release|x86.Build.0 = Release|Win32
+		{23637EEF-03A3-46B2-960A-7187461CCF06}.Debug|x64.ActiveCfg = Debug|x64
+		{23637EEF-03A3-46B2-960A-7187461CCF06}.Debug|x64.Build.0 = Debug|x64
+		{23637EEF-03A3-46B2-960A-7187461CCF06}.Debug|x86.ActiveCfg = Debug|Win32
+		{23637EEF-03A3-46B2-960A-7187461CCF06}.Debug|x86.Build.0 = Debug|Win32
+		{23637EEF-03A3-46B2-960A-7187461CCF06}.Release|x64.ActiveCfg = Release|x64
+		{23637EEF-03A3-46B2-960A-7187461CCF06}.Release|x64.Build.0 = Release|x64
+		{23637EEF-03A3-46B2-960A-7187461CCF06}.Release|x86.ActiveCfg = Release|Win32
+		{23637EEF-03A3-46B2-960A-7187461CCF06}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

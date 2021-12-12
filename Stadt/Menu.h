@@ -28,7 +28,8 @@ public:
 		{
 			if (ImGui::BeginTabItem(XorStr("A")))
 			{
-				ImGui::Text("AiManager: %#08x", (*reinterpret_cast<GameObject**>(RVA(oLocalPlayer)))->GetAiManager());
+				GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
+				ImGui::Text(XorStr("AiManager: %#08x"), local->GetAiManager());
 
 				static int fPoints = 16;
 				ImGui::SliderInt("circle points", &fPoints, 1, 100);
@@ -36,6 +37,11 @@ public:
 				{
 					render.SetCirclePoints(fPoints);
 				}
+
+				/*for (std::string b : local->GetBuffManager()->GetBuffList())
+				{
+					ImGui::Text("%s", b.c_str());
+				}*/
 
 				ImGui::EndTabItem();
 			}

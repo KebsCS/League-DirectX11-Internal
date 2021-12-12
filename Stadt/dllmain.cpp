@@ -41,6 +41,8 @@ void OnExit() noexcept
 
 	// delete hooks and d3d
 	Hooks::Release();
+
+	Console::Exit();
 }
 
 __declspec(safebuffers)void WINAPI InitThread(HMODULE hModule) noexcept
@@ -56,10 +58,14 @@ __declspec(safebuffers)void WINAPI InitThread(HMODULE hModule) noexcept
 		MessageBoxA(0, "Outdated offsets", "Error", 0);
 	}*/
 
+	Console::Init();
+
 	if (Hooks::Init())
 	{
 		while (!LI_FN(GetAsyncKeyState).get()(VK_END))
+		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		}
 	}
 
 	OnExit();

@@ -5,6 +5,7 @@
 #include "stb_image.h"
 
 #include "XorString.h"
+#include "Console.h"
 
 #include "Definitions.h"
 
