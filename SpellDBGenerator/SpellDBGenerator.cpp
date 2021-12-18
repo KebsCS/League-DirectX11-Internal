@@ -1,13 +1,9 @@
-
-
-
 #include <iostream>
 #include <string>
 #include <regex>
 
 #include "HTTP.h"
 #include "json.h"
-
 
 using namespace nlohmann;
 
@@ -17,7 +13,6 @@ std::string ToLower(std::string str)
 	return str;
 }
 
-
 int main()
 {
 	// get current patch
@@ -26,7 +21,7 @@ int main()
 
 	std::cout << "// " + version << std::endl;
 
-	 // get list of champions
+	// get list of champions
 	std::vector<std::string>champions;
 	std::string getChampions = http->Request("GET", "http://ddragon.leagueoflegends.com/cdn/" + version + "/data/en_US/champion.json");
 	json j = json::parse(getChampions)["data"];
@@ -83,13 +78,8 @@ int main()
 				float missileSpeed = root["missileSpeed"];
 				std::cout << "missileSpeed " << missileSpeed << std::endl;
 			}
-
-		
 		}
-
 	}
-
-
 
 	return 0;
 }

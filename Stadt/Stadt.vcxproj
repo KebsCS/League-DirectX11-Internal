@@ -213,11 +213,13 @@
     <ClInclude Include="Ntfuncs.h" />
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="Offsets.h" />
+    <ClInclude Include="OnProcessSpellCast.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="SpellCastInfo.h" />
     <ClInclude Include="SpellData.h" />
     <ClInclude Include="SpellInfo.h" />
+    <ClInclude Include="stb_decompress.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Syscall.h" />
     <ClInclude Include="Vector2.h" />

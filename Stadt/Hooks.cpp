@@ -14,6 +14,8 @@
 #include "VMTHook.h"
 #include "VFuncHook.h"
 
+#include "OnProcessSpellCast.h"
+
 typedef HRESULT(WINAPI* D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 D3D11PresentHook				phookD3D11Present = nullptr;
 /*
@@ -40,8 +42,9 @@ IDirectInput8A* pDirectInput = nullptr;
 // move this?
 FuncHook FHPresent;
 FuncHook FHGetDeviceData;
-VMTHook VMTHOnProcessSpellCast[10]; // todo, maybe a vector or list
-VFuncHook VFHGetDeviceDataHook;
+//VFuncHook VFHGetDeviceDataHook;
+
+FuncHook FHTestFunc;
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -71,7 +74,7 @@ static HRESULT WINAPI Hooks::GetDeviceDataHook(IDirectInputDevice8A* pThis, DWOR
 	// fix hooking method
 	//HRESULT ret = FHGetDeviceData.Call<HRESULT>(pThis, cbObjectData, rgdod, pdwInOut, dwFlags);
 	HRESULT ret = phookGetDeviceData(pThis, cbObjectData, rgdod, pdwInOut, dwFlags);
-
+	LOG("asd");
 #endif
 
 	if (ret == DI_OK)
@@ -95,70 +98,28 @@ static HRESULT WINAPI Hooks::GetDeviceDataHook(IDirectInputDevice8A* pThis, DWOR
 }
 
 static std::vector<Vector3>testpos;
-static std::vector<Geometry::Polygon>testpoly;
 
-// todo move this
-uintptr_t pOnProcessSpellCast;
-// AIHeroClient::CACHandleSpellSituations(Audio::SoundEventType,Spell::SpellCastInfo const&,AttackableUnit *)
-DWORD* __fastcall OnProcessSpellCast(void* thisptr, void* edx, int state, SpellCastInfo* spellCastInfo, int a6)
-{
-	static auto fn = reinterpret_cast<DWORD * (__thiscall*)(void*, int, SpellCastInfo*, int)>(pOnProcessSpellCast);
-
-	if (spellCastInfo != nullptr)
-	{
-		// todo an event manager
-		std::string name = spellCastInfo->spellInfo->name;
-		//ImVec2 startpos = LeagueFuncs::WorldToScreen(spellCastInfo->startPos);
-		//ImVec2 endpos = LeagueFuncs::WorldToScreen(spellCastInfo->endPos);
-		//Vector3 startpos = spellCastInfo->StartPos;
-		std::stringstream ss;
-		ss << std::hex << name << "  " << (DWORD)spellCastInfo << " ";
-		/*<< startpos.x << " , " << startpos.y << " endpos: " << endpos.x << " , " << endpos.y;*/
-
-		//testpos.emplace_back(spellCastInfo->endPos);
-
-		GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
-		ss << "  id: " << std::dec << spellCastInfo->slotId;
-
-		/*if (Globals::bMenuOpen)
-		{
-			std::stringstream ssAddy;
-			ssAddy << name << "  " << std::hex << (DWORD)(spellCastInfo);
-			MessageBoxA(0, ssAddy.str().c_str(), "", 0);
-		}*/
-
-		//ss << "  " << local->name << "  " << &local->networkId;
-		if (name == "ThreshQ")
-		{
-			Vector3 extended = spellCastInfo->startPos.Extend(spellCastInfo->endPos, spellCastInfo->spellInfo->spellData->castRangeDisplayOverride);
-			Vector3 sp = spellCastInfo->startPos;
-			//extended.y = 100;
-			//sp.y = 100;
-			Geometry::Polygon poly = Geometry::Rectangle(sp, extended, 70.f).ToPolygon();
-
-			//LeagueFuncs::SendChat(std::string((DWORD)(local->GetAiManager()->navBegin)).c_str());
-
-			testpoly.emplace_back(poly);
-		}
-		//LeagueFuncs::SendChat(ss.str().c_str());
-		LOG(ss.str().c_str());
-	}
-
-	return fn(thisptr, state, spellCastInfo, a6);
-}
-
-//uintptr_t pTestFunc;
-//// AIHeroClient::CACHandleSpellSituations(Audio::SoundEventType,Spell::SpellCastInfo const&,AttackableUnit *)
-//DWORD* __fastcall TestFunc(void* thisptr, void* edx, int a2)
+uintptr_t pTestFunc;
+//void __cdecl TestFunc(unsigned int a1, int a2, unsigned int a3, unsigned int a4, unsigned int a5, unsigned int a6, unsigned int a7, float a8, unsigned int a9)
+////DWORD* __fastcall TestFunc(void* thisptr, void* edx, int a2)
 //{
-//	std::stringstream ss;
+//	//std::stringstream ss;
 //
-//	ss << thisptr << "    " << edx << "    " << a2;
-//	//LeagueFuncs::SendChat(ss.str().c_str());
-//	MessageBoxA(0, ss.str().c_str(), "", 0);
+//	LOG("%#04x", a1);
 //
-//	static auto fn = reinterpret_cast<DWORD * (__thiscall*)(void*, int)>(pTestFunc);
-//	return fn(thisptr, a2);
+//	static auto fn = reinterpret_cast<void (__cdecl*)(unsigned,int,unsigned,unsigned,unsigned,unsigned,unsigned,float,unsigned)>(pTestFunc);
+//	return fn(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+//}
+
+//char __cdecl TestFunc(float* a1)
+//{
+//	static auto fn = reinterpret_cast<char(__cdecl*)(float*)>(pTestFunc);
+//
+//	LOG("%f %f %f", a1[0], a1[1], a1[2]);
+//
+//	//return FHTestFunc.Call<char>(a1);
+//
+//	return fn(a1);
 //}
 
 static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
@@ -172,17 +133,15 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 
 			InitDInput();
 
-			for (int i = 0; auto hero : ObjectManager::HeroList())
-			{
-				DWORD dwOnProcessSpell = (DWORD)hero + 0xE6C;
-				//SendChat(std::to_string(dwOnProcessSpell).c_str());
-				pOnProcessSpellCast = VMTHOnProcessSpellCast[i].Hook((void*)dwOnProcessSpell, 29, (uintptr_t)&OnProcessSpellCast);
-				i++;
-			}
+			HookOnProcessSpellCast();
 
-			/*	DWORD func = RVA(0x27CED0);
-				if (MH_CreateHook((DWORD_PTR*)func, TestFunc, reinterpret_cast<void**>(&pTestFunc)) != MH_OK) { return false; }
-				if (MH_EnableHook((DWORD_PTR*)func) != MH_OK) { return false; }*/
+			/*		DWORD func = RVA(0x9ABBB0);
+						LOG("%#04x", func);
+						FHTestFunc = FuncHook((uintptr_t)func, (uintptr_t)TestFunc);
+						FHTestFunc.Hook();*/
+						/*DWORD func = *reinterpret_cast<DWORD*>(RVA(0x9ABBB0));
+						if (MH_CreateHook((DWORD_PTR*)func, TestFunc, reinterpret_cast<void**>(&pTestFunc)) != MH_OK) { return false; }
+						if (MH_EnableHook((DWORD_PTR*)func) != MH_OK) { return false; }*/
 		});
 
 	// todo sometimes on unloading pContext was nullptr, maybe make a mutex of some sort
@@ -204,24 +163,24 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			// VISUALS GO HERE
 			// -----
 
-			//render.Box(20, 100, 100, 200, ImColor(1.f, 0.f, 0.f));
+			render.Box(20, 100, 100, 200, ImColor(1.f, 0.f, 0.f));
 
-			//ImGuiIO& io = ImGui::GetIO();
-			//ImVec2 mpos = io.MousePos;
-			////render.Text("xddd", mpos.x, mpos.y, 20.f, ImColor(1.f, 0.f, 0.f), true, true);
-			////Image aatroxe = imageManager.GetImageInfoByName("aatrox_square");
-			////render.Image(mpos.x, mpos.y, aatroxe.width, aatroxe.height, aatroxe.pShaderResource, true);
+			ImGuiIO& io = ImGui::GetIO();
+			ImVec2 mpos = io.MousePos;
+			//render.Text("xddd", mpos.x, mpos.y, 20.f, ImColor(1.f, 0.f, 0.f), true, true);
+			//Image aatroxe = imageManager.GetImageInfoByName("aatrox_square");
+			//render.Image(mpos.x, mpos.y, aatroxe.width, aatroxe.height, aatroxe.pShaderResource, true);
 
-			//render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName(XorStr("talon_w")), true);
+			render.ImageBordered(10, 10, 64, 64, imageManager.GetImageByName(XorStr("talon_w")), true);
 
-			//render.CornerBox(300, 300, 400, 400, ImColor(0.f, 1.f, 0.f));
+			render.CornerBox(300, 300, 400, 400, ImColor(0.f, 1.f, 0.f));
 
-			//static float cd = 200.f;
-			//if (cd < -200.f)
-			//	cd = 200.f;
+			static float cd = 200.f;
+			if (cd < -200.f)
+				cd = 200.f;
 
-			//render.FancyIcon(150, 150, XorStr("talon"), cd / 200.f, cd / 200.f, cd / 200.f, 1, cd, XorStr("summoner_flash"), cd, XorStr("summoner_heal"), cd);
-			//cd -= 1.f;
+			render.FancyIcon(150, 150, XorStr("talon"), cd / 200.f, cd / 200.f, cd / 200.f, 1, cd, XorStr("summoner_flash"), cd, XorStr("summoner_heal"), cd);
+			cd -= 1.f;
 
 			for (auto& pos : testpos)
 			{
@@ -232,10 +191,10 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			/*for (auto& poly : testpoly)
 				render.Polygon(poly, ImColor(0.f, 0.f, 1.f));*/
 
-			auto danger_polygons = Geometry::Geometry::ToPolygons(Geometry::Geometry::ClipPolygons(testpoly));
+				/*auto danger_polygons = Geometry::Geometry::ToPolygons(Geometry::Geometry::ClipPolygons(testpoly));
 
-			for (auto& poly : danger_polygons)
-				render.Polygon(poly, ImColor(0.f, 0.f, 1.f));
+				for (auto& poly : danger_polygons)
+					render.Polygon(poly, ImColor(0.f, 0.f, 1.f));*/
 
 			for (auto& h : ObjectManager::HeroList())
 				render.Circle3D(h->GetAiManager()->serverPos, h->GetBoundingRadius(), ImColor(0.f, 1.f, 0.f));
@@ -307,7 +266,7 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 		else
 		{
 			testpos.clear();
-			testpoly.clear();
+			//testpoly.clear();
 		}
 		// -----
 
@@ -390,6 +349,8 @@ bool Hooks::Init()
 
 #endif
 
+	LOG("Swapchain hooked");
+
 	// List of VMTs https://github.com/guided-hacking/GH_D3D11_Hook/blob/master/GH_D3D11_Hook/D3D_VMT_Indices.h
 
 	//if (MH_CreateHook((DWORD_PTR*)pDeviceContextVMT[12], DrawIndexedHook, reinterpret_cast<void**>(&phookD3D11DrawIndexed)) != MH_OK) { return 1; }
@@ -418,10 +379,13 @@ void Hooks::Release()
 #else
 
 	FHPresent.UnHook();
+	FHTestFunc.UnHook();
+	//VFHGetDeviceDataHook.UnHook();
 #endif
 
-	for (VMTHook& vmt : VMTHOnProcessSpellCast)
-		vmt.UnHook();
+	UnHookOnProcessSpellCast();
+
+	LOG("Hooks unhooked");
 
 	// wait for last hooks to finish
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -435,6 +399,8 @@ void Hooks::Release()
 	if (pBackbuffer) { pBackbuffer->Release(); pBackbuffer = nullptr; }
 
 	if (pDirectInput) { pDirectInput->Release(); pDirectInput = nullptr; }
+
+	LOG("Pointers released");
 }
 
 bool Hooks::InitD3D(IDXGISwapChain* pSwapchain)
@@ -458,6 +424,8 @@ bool Hooks::InitD3D(IDXGISwapChain* pSwapchain)
 	}
 
 	InitImages(pDevice);
+
+	LOG("Success");
 
 	return true;
 }
@@ -491,6 +459,8 @@ bool Hooks::InitImgui(IDXGISwapChain* pSwapchain)
 	::ImGui_ImplDX11_Init(pDevice, pContext);
 	::ImGui_ImplDX11_CreateDeviceObjects();
 
+	LOG("Success");
+
 	return true;
 }
 
@@ -520,9 +490,10 @@ bool Hooks::InitDInput()
 		return false;
 	}
 
-	void* lpdiKeyboardVMT = *(void**)&lpdiKeyboard;
+	void** lpdiKeyboardVMT = *(void***)lpdiKeyboard;
 
-	LOG("DINPUT: %#04x", lpdiKeyboardVMT);
+	LOG("lpdiKeyboard: %#04x", lpdiKeyboard);
+	LOG("lpdiKeyboardVMT: %#04x", lpdiKeyboardVMT);
 
 	//if (lpdiKeyboard)
 	//{
@@ -540,8 +511,10 @@ bool Hooks::InitDInput()
 	//// shadow vmt hook wont work, because by calling DirectInput8Create we are getting
 	//// a temporary device that points to the original and swapping its vmt wont swap the
 	//// original game vmt
-	//phookGetDeviceData = reinterpret_cast<IDirectInputDeviceGetDeviceDataHook>(VFHGetDeviceDataHook.Hook(lpdiKeyboardVMT, 10, &GetDeviceDataHook));
+	//phookGetDeviceData = reinterpret_cast<IDirectInputDeviceGetDeviceDataHook>(VFHGetDeviceDataHook.HookIndex(lpdiKeyboardVMT, 10, &GetDeviceDataHook));
 #endif
+
+	LOG("Success");
 
 	return true;
 }
@@ -550,24 +523,26 @@ bool Hooks::InitImages(ID3D11Device* pDevice)
 {
 	imageManager.SetDevice(pDevice);
 
-	imageManager.AddImage(XorStr("aatrox_square"), (char*)&Images::aatrox_square, sizeof(Images::aatrox_square));
+	imageManager.AddImage(XorStr("aatrox_square"), Images::aatrox_square, sizeof(Images::aatrox_square));
 
-	imageManager.AddImage(XorStr("talon_square"), (char*)&Images::talon_square_0, sizeof(Images::talon_square_0));
-	imageManager.AddImage(XorStr("talon_w"), (char*)&Images::talonw, sizeof(Images::talonw));
-	imageManager.AddImage(XorStr("talon_e"), (char*)&Images::talone, sizeof(Images::talone));
-	imageManager.AddImage(XorStr("talon_r"), (char*)&Images::talonr, sizeof(Images::talonr));
+	imageManager.AddImage(XorStr("talon_square"), Images::talon_square_0, sizeof(Images::talon_square_0));
+	imageManager.AddImage(XorStr("talon_w"), Images::talonw, sizeof(Images::talonw));
+	imageManager.AddImage(XorStr("talon_e"), Images::talone, sizeof(Images::talone));
+	imageManager.AddImage(XorStr("talon_r"), Images::talonr, sizeof(Images::talonr));
 
-	imageManager.AddImage(XorStr("xpbar"), (char*)&Images::xpbar, sizeof(Images::xpbar));
-	imageManager.AddImage(XorStr("xpbarblack"), (char*)&Images::xpbarblack, sizeof(Images::xpbarblack));
-	imageManager.AddImage(XorStr("hudicon"), (char*)&Images::hudicon, sizeof(Images::hudicon));
-	imageManager.AddImage(XorStr("hudcircle"), (char*)&Images::hudcircle, sizeof(Images::hudcircle));
-	imageManager.AddImage(XorStr("hudleft"), (char*)&Images::hudleft, sizeof(Images::hudleft));
-	imageManager.AddImage(XorStr("manabar"), (char*)&Images::manabar, sizeof(Images::manabar));
-	imageManager.AddImage(XorStr("hpbar"), (char*)&Images::hpbar, sizeof(Images::hpbar));
-	imageManager.AddImage(XorStr("hpbarblack"), (char*)&Images::hpbarblack, sizeof(Images::hpbarblack));
+	imageManager.AddImage(XorStr("xpbar"), Images::xpbar, sizeof(Images::xpbar));
+	imageManager.AddImage(XorStr("xpbarblack"), Images::xpbarblack, sizeof(Images::xpbarblack));
+	imageManager.AddImage(XorStr("hudicon"), Images::hudicon, sizeof(Images::hudicon));
+	imageManager.AddImage(XorStr("hudcircle"), Images::hudcircle, sizeof(Images::hudcircle));
+	imageManager.AddImage(XorStr("hudleft"), Images::hudleft, sizeof(Images::hudleft));
+	imageManager.AddImage(XorStr("manabar"), Images::manabar, sizeof(Images::manabar));
+	imageManager.AddImage(XorStr("hpbar"), Images::hpbar, sizeof(Images::hpbar));
+	imageManager.AddImage(XorStr("hpbarblack"), Images::hpbarblack, sizeof(Images::hpbarblack));
 
-	imageManager.AddImage(XorStr("summoner_flash"), (char*)&Images::summoner_flash, sizeof(Images::summoner_flash));
-	imageManager.AddImage(XorStr("summoner_heal"), (char*)&Images::summoner_heal, sizeof(Images::summoner_heal));
+	imageManager.AddImage(XorStr("summoner_flash"), Images::summoner_flash, sizeof(Images::summoner_flash));
+	imageManager.AddImage(XorStr("summoner_heal"), Images::summoner_heal, sizeof(Images::summoner_heal));
+
+	LOG("Success");
 
 	return true;
 }

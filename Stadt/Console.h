@@ -9,18 +9,27 @@
 #include "XorString.h"
 #include "lazy_importer.h"
 
-#define LOG(...) Console::Log(__FUNCTION__, __VA_ARGS__)
+#ifdef DEVELOPER
+#define LOG(...) Console::Log(XorStr(__FUNCTION__), __LINE__, __VA_ARGS__)
+#else
+#define LOG(...) Console::Log("",0,"")
+#endif
 
 class Console
 {
 private:
+#ifdef DEVELOPER
+
 	inline static HANDLE hPipe;
 	inline static DWORD dwWritten;
 	inline static bool bInitialized = false;
-
 	inline static const std::string sPipeName = XorStr("\\\\.\\pipe\\Pipe12");
 
+#endif
+
 public:
+
+	inline static bool bStopLog = true;
 
 	static void Init()
 	{
@@ -63,7 +72,7 @@ public:
 #endif
 	}
 
-	static void Log(const std::string& function, const char* format, ...)
+	static void Log(const std::string& function, const int& line, const char* format, ...)
 	{
 #ifdef DEVELOPER
 
@@ -71,7 +80,7 @@ public:
 		va_list args;
 		va_start(args, format);
 		vsprintf(buffer, format, args);
-		const std::string t = "[" + function + "] " + buffer + "\n";
+		const std::string t = "[" + function + "|" + std::to_string(line) + "] " + buffer + "\n";
 		va_end(args);
 
 		Print(t);
@@ -85,7 +94,7 @@ private:
 	{
 #ifdef DEVELOPER
 
-		if (!bInitialized)
+		if (!bInitialized || !bStopLog)
 			return;
 
 		LI_FN(WriteFile).get()(hPipe,

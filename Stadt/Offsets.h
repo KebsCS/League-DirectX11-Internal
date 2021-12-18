@@ -23,6 +23,8 @@ static constexpr auto oRendererHeight = oRendererWidth + 0x4;
 
 static constexpr auto oHudInstance = 0x186CD9C;// 0x186cd58L;
 static constexpr auto oMousePos = 0x110;
+
+static constexpr auto oBuffManager = 0x21B8;
 //
 //// 148/149th index in object vtable
 //// push ecx

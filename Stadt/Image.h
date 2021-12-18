@@ -1,10 +1,13 @@
 #pragma once
 
+#include "stb_image.h"
+
 #include "Includes.h"
 #include "Ntdefs.h"
 #include "Ntfuncs.h"
 
 #include "Images/Images.h"
+#include "stb_decompress.h"
 
 /*
 typedef HRESULT(WINAPI* tD3DX11CreateShaderResourceViewFromMemory)(
@@ -28,14 +31,17 @@ public:
 	int width = 0;
 	int height = 0;
 
-	Image(const std::string& name, const char* imageBytes, const int& size, ID3D11Device* pDevice)
+	Image(const std::string& name, const void* imageBytes, const int& size, ID3D11Device* pDevice)
 	{
-		this->name = name;
+		// Decompress byte array
+		const unsigned int buf_decompressed_size = stb_decompress_length((unsigned char*)imageBytes);
+		unsigned char* buf_decompressed_data = (unsigned char*)malloc(buf_decompressed_size);
+		stb_decompress(buf_decompressed_data, (unsigned char*)imageBytes, size);
 
 		// Load from byte array into a raw RGBA buffer
 		int image_width = 0;
 		int image_height = 0;
-		unsigned char* image_data = stbi_load_from_memory((unsigned char*)imageBytes, size, &image_width, &image_height, NULL, 4);
+		unsigned char* image_data = stbi_load_from_memory(buf_decompressed_data, buf_decompressed_size, &image_width, &image_height, NULL, 4);
 
 		// Create texture
 		D3D11_TEXTURE2D_DESC desc;
@@ -67,8 +73,9 @@ public:
 		pDevice->CreateShaderResourceView(pTexture, &srvDesc, &pShaderResource);
 		pTexture->Release();
 
-		width = image_width;
-		height = image_height;
+		this->name = name;
+		this->width = image_width;
+		this->height = image_height;
 
 		stbi_image_free(image_data);
 
@@ -134,7 +141,7 @@ public:
 		return this->vImages.size();
 	}
 
-	void AddImage(const std::string& name, const char* bytes, const int& size)
+	void AddImage(const std::string& name, const unsigned int* bytes, const int& size)
 	{
 		this->vImages.push_back(Image(name, bytes, size, this->pDevice));
 	}

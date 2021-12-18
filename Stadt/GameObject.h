@@ -33,6 +33,7 @@ public:
 	class N0000300B* Funcs; //0x0E6C
 	char pad_0E70[532]; //0x0E70
 
+	// todo, rewrite to not use a call
 	AiManager* GetAiManager() // GetPathController
 	{
 		return VFuncCall<AiManager*>(this, oVFunc::AiManager);
@@ -49,10 +50,9 @@ public:
 		return (AiManager*)(dwAiManager);*/
 	}
 
-	// todo
 	BuffManager* GetBuffManager()
 	{
-		return *reinterpret_cast<BuffManager**>((DWORD)this + 0x21B8);
+		return reinterpret_cast<BuffManager*>((DWORD)this + oBuffManager);
 	}
 
 	bool IsAlive()

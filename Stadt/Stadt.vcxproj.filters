@@ -192,6 +192,12 @@
     <ClInclude Include="Console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OnProcessSpellCast.h">
+      <Filter>Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_decompress.h">
+      <Filter>Libs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

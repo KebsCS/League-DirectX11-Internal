@@ -28,6 +28,9 @@ public:
 		{
 			if (ImGui::BeginTabItem(XorStr("A")))
 			{
+				float fGameTime = *reinterpret_cast<float*>(RVA(oGameTime));
+				ImGui::Text("%f", fGameTime);
+
 				GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
 				ImGui::Text(XorStr("AiManager: %#08x"), local->GetAiManager());
 
@@ -38,10 +41,13 @@ public:
 					render.SetCirclePoints(fPoints);
 				}
 
-				/*for (std::string b : local->GetBuffManager()->GetBuffList())
+				for (auto b : local->GetBuffManager()->GetBuffList())
 				{
-					ImGui::Text("%s", b.c_str());
-				}*/
+					ImGui::Text("%#04x %s : %0.1f", (DWORD)b, b->scriptBaseBuff->name, fabs(fGameTime - b->endTime));
+					//	ImGui::Text("%#04x", (DWORD)b);
+				}
+
+				ImGui::Checkbox("Stop console log", &Console::bStopLog);
 
 				ImGui::EndTabItem();
 			}
