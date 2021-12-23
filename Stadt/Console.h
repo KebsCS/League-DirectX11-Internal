@@ -2,8 +2,6 @@
 
 #pragma warning (disable:4996)
 
-#define DEVELOPER
-
 #include <Windows.h>
 #include <string>
 #include "XorString.h"

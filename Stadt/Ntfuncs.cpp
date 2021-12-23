@@ -98,11 +98,11 @@ SIZE_T FVirtualQueryEx(HANDLE hProcess, LPCVOID lpAddress, PMEMORY_BASIC_INFORMA
 }
 
 // todo, handle the args, but works fine anyway
-BOOL FVirtualProtectEx(HANDLE hProcess, PVOID lpBaseAddress, PSIZE_T dwSize, ULONG flNewProtect, PULONG lpflOldPRotect)
+NTSTATUS FVirtualProtectEx(HANDLE hProcess, PVOID lpBaseAddress, PSIZE_T dwSize, ULONG flNewProtect, PULONG lpflOldPRotect)
 {
 	NTSTATUS ntStatus = Syscall<NTSTATUS>({ 0x50 }, RtlInterlockedCompareExchange64, 0x170, { 0x14 })
 		(hProcess, &lpBaseAddress, dwSize, flNewProtect, lpflOldPRotect);
-	return 1;
+	return ntStatus;
 }
 
 tCreateToolhelp32Snapshot pCreateToolhelp32Snapshot = NULL;

@@ -29,7 +29,10 @@ public:
 			if (ImGui::BeginTabItem(XorStr("A")))
 			{
 				float fGameTime = *reinterpret_cast<float*>(RVA(oGameTime));
-				ImGui::Text("%f", fGameTime);
+				ImGui::Text("GameTime: %f", fGameTime);
+
+				Vector3 mousePos = LeagueFuncs::GetMouseWorldPos();
+				ImGui::Text("MousePos: %f  %f   %f", mousePos.x, mousePos.y, mousePos.z);
 
 				GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
 				ImGui::Text(XorStr("AiManager: %#08x"), local->GetAiManager());
@@ -48,6 +51,15 @@ public:
 				}
 
 				ImGui::Checkbox("Stop console log", &Console::bStopLog);
+
+				static std::vector<Vector3>futurePath;
+
+				if (ImGui::Button("test"))
+				{
+					futurePath = local->GetAiManager()->BuildNavigationPath(mousePos, true);
+				}
+
+				render.Path3D(futurePath, ImColor(0.f, 1.f, 1.f));
 
 				ImGui::EndTabItem();
 			}

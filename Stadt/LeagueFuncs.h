@@ -99,9 +99,17 @@ namespace LeagueFuncs
 		//float Z = *reinterpret_cast<float*>(aux2 + 0x8);
 		//return Vector3{ X, Y, Z };
 
-		static DWORD HudInstance = *reinterpret_cast<DWORD*>(RVA(oHudInstance));
+		static DWORD dwHudInstance = *reinterpret_cast<DWORD*>(RVA(oHudInstance));
 
-		return *reinterpret_cast<Vector3*>(HudInstance + oMousePos);
+		return *reinterpret_cast<Vector3*>(dwHudInstance + oMousePos);
+	}
+
+	[[nodiscard]] static int GetPing()
+	{
+		static DWORD dwPingInstance = *reinterpret_cast<DWORD*>(RVA(oForGetPing));
+		static DWORD dwPingPointer = *reinterpret_cast<DWORD*>(dwPingInstance + 0x3C);
+
+		return *reinterpret_cast<int*>(dwPingPointer + 0x28);
 	}
 
 	//todo implement this to spell classes
