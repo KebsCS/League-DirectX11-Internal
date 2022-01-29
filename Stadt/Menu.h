@@ -44,11 +44,11 @@ public:
 					render.SetCirclePoints(fPoints);
 				}
 
-				for (auto b : local->GetBuffManager()->GetBuffList())
-				{
-					ImGui::Text("%#04x %s : %0.1f", (DWORD)b, b->scriptBaseBuff->name, fabs(fGameTime - b->endTime));
-					//	ImGui::Text("%#04x", (DWORD)b);
-				}
+				//for (auto b : local->GetBuffManager()->GetBuffList())
+				//{
+				//	ImGui::Text("%#04x %d %s : %0.1f", (DWORD)b, b->StackCount(), b->scriptBaseBuff->name, fabs(fGameTime - b->endTime));
+				//	//	ImGui::Text("%#04x", (DWORD)b);
+				//}
 
 				ImGui::Checkbox("Stop console log", &Console::bStopLog);
 
@@ -58,6 +58,9 @@ public:
 				{
 					futurePath = local->GetAiManager()->BuildNavigationPath(mousePos, true);
 				}
+
+				static char buff[100];
+				ImGui::InputText("xd", buff, 100);
 
 				render.Path3D(futurePath, ImColor(0.f, 1.f, 1.f));
 

@@ -18,6 +18,9 @@ LPVOID FVirtualAllocEx(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD  
 
 SIZE_T FVirtualQueryEx(HANDLE hProcess, LPCVOID lpAddress, PMEMORY_BASIC_INFORMATION lpBuffer, SIZE_T dwLength);
 
+SIZE_T FNtQueryVirtualMemory(HANDLE hProcess, PVOID BaseAddress, MEMORY_INFORMATION_CLASS  MemoryInformationClass,
+	PVOID MemoryInformation, SIZE_T MemoryInformationLength, PSIZE_T ReturnLength);
+
 NTSTATUS FVirtualProtectEx(HANDLE hProcess, PVOID lpBaseAddress, PSIZE_T dwSize, ULONG flNewProtect, PULONG lpflOldPRotect);
 
 typedef HANDLE(WINAPI* tCreateToolhelp32Snapshot)

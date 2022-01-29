@@ -198,6 +198,12 @@
     <ClInclude Include="stb_decompress.h">
       <Filter>Libs</Filter>
     </ClInclude>
+    <ClInclude Include="LowLevelHooks.h">
+      <Filter>Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="SelfProtection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

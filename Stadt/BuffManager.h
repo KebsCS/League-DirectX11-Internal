@@ -19,7 +19,15 @@ public:
 	float startTime; //0x000C
 	float endTime; //0x0010
 	float duration; //0x0014
-	char pad_0018[40]; //0x0018
+	char pad_0018[8]; //0x0018
+	uint32_t stacksAlt; //0x0020
+	uint32_t stacksAlt2; //0x0024
+	char pad_0028[268]; //0x0028
+
+	int StackCount()
+	{
+		return (stacksAlt2 - stacksAlt) >> 3;
+	}
 };
 
 class BuffManager
@@ -42,10 +50,16 @@ public:
 				if ((DWORD)buff < 0x1000)
 					continue;
 
+				if ((DWORD)buff->scriptBaseBuff < 0x1000)
+					continue;
+
+				if (buff->StackCount() <= 0)
+					continue;
+
 				if (*reinterpret_cast<float*>(RVA(oGameTime)) > buff->endTime)
 					continue;
 
-				if ((DWORD)buff->scriptBaseBuff < 0x1000)
+				if (*reinterpret_cast<float*>(RVA(oGameTime)) < buff->startTime)
 					continue;
 
 				buffs.emplace_back(buff);

@@ -4,6 +4,8 @@
 
 #include "XorString.h"
 
+#define NtCurrentProcess (HANDLE)0xFFFFFFFF
+
 #if !defined(NTSTATUS)
 typedef LONG NTSTATUS;
 typedef NTSTATUS* PNTSTATUS;
@@ -84,10 +86,35 @@ typedef struct _CLIENT_ID
     (p)->SecurityQualityOfService = NULL;               \
     }
 
-typedef enum _MEMORY_INFORMATION_CLASS {
+typedef enum _MEMORY_INFORMATION_CLASS
+{
 	MemoryBasicInformation,
-	MemoryMappedFilenameInformation
+	MemoryWorkingSetInformation,
+	MemoryMappedFilenameInformation,
+	MemoryRegionInformation,
+	MemoryWorkingSetExInformation,
+	MemorySharedCommitInformation
 } MEMORY_INFORMATION_CLASS;
+
+typedef union _PSAPI_WORKING_SET_EX_BLOCK {
+	ULONG_PTR   Flags;
+	struct {
+		ULONG_PTR   Valid : 1;
+		ULONG_PTR   ShareCount : 3;
+		ULONG_PTR   Win32Protection : 11;
+		ULONG_PTR   Shared : 1;
+		ULONG_PTR   Node : 6;
+		ULONG_PTR   Locked : 1;
+		ULONG_PTR   LargePage : 1;
+	};
+} PSAPI_WORKING_SET_EX_BLOCK;
+typedef PSAPI_WORKING_SET_EX_BLOCK* PPSAPI_WORKING_SET_EX_BLOCK;
+
+typedef struct _PSAPI_WORKING_SET_EX_INFORMATION {
+	PVOID                       VirtualAddress;
+	PSAPI_WORKING_SET_EX_BLOCK  VirtualAttributes;
+} PSAPI_WORKING_SET_EX_INFORMATION;
+typedef PSAPI_WORKING_SET_EX_INFORMATION* PPSAPI_WORKING_SET_EX_INFORMATION;
 
 // https://github.com/Visgean/Zeus/blob/translation/source/client/core.cpp#L175
 HMODULE GetKernel32Handle(void);

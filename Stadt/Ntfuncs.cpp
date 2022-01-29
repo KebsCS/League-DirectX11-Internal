@@ -97,6 +97,14 @@ SIZE_T FVirtualQueryEx(HANDLE hProcess, LPCVOID lpAddress, PMEMORY_BASIC_INFORMA
 	return ReturnLength;
 }
 
+SIZE_T FNtQueryVirtualMemory(HANDLE hProcess, PVOID BaseAddress, MEMORY_INFORMATION_CLASS  MemoryInformationClass,
+	PVOID MemoryInformation, SIZE_T MemoryInformationLength, PSIZE_T ReturnLength)
+{
+	NTSTATUS ntStatus = Syscall<NTSTATUS>({ 0x50 }, RtlInterlockedCompareExchange64, 0x170, { 0x14 })
+		(hProcess, BaseAddress, MemoryInformationClass, MemoryInformation, MemoryInformationLength, ReturnLength);
+	return ntStatus;
+}
+
 // todo, handle the args, but works fine anyway
 NTSTATUS FVirtualProtectEx(HANDLE hProcess, PVOID lpBaseAddress, PSIZE_T dwSize, ULONG flNewProtect, PULONG lpflOldPRotect)
 {

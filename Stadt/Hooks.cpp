@@ -15,6 +15,7 @@
 #include "VFuncHook.h"
 
 #include "OnProcessSpellCast.h"
+#include "LowLevelHooks.h"
 
 typedef HRESULT(WINAPI* D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 D3D11PresentHook				phookD3D11Present = nullptr;
@@ -28,7 +29,7 @@ D3D11PSSetShaderResourcesHook	phookD3D11PSSetShaderResources = nullptr;
 typedef void(__stdcall* D3D11ClearRenderTargetViewHook) (ID3D11DeviceContext* pContext, ID3D11RenderTargetView* pRenderTargetView, const FLOAT ColorRGBA[4]);
 D3D11ClearRenderTargetViewHook  phookD3D11ClearRenderTargetViewHook = nullptr;
 */
-typedef HRESULT(WINAPI* IDirectInputDeviceGetDeviceDataHook)(IDirectInputDevice8A* pThis, DWORD cbObjectData, LPDIDEVICEOBJECTDATA rgdod, LPDWORD pdwInOut, DWORD dwFlags);
+typedef HRESULT(WINAPI* IDirectInputDeviceGetDeviceDataHook)(IDirectInputDevice8W* pThis, DWORD cbObjectData, LPDIDEVICEOBJECTDATA rgdod, LPDWORD pdwInOut, DWORD dwFlags);
 IDirectInputDeviceGetDeviceDataHook phookGetDeviceData = nullptr;
 
 ID3D11Device* pDevice = nullptr;
@@ -37,7 +38,9 @@ ID3D11DeviceContext* pContext = nullptr;
 ID3D11RenderTargetView* pRenderTargetView = nullptr;
 ID3D11Texture2D* pBackbuffer = nullptr;
 
-IDirectInput8A* pDirectInput = nullptr;
+IDirectInput8W* pDirectInput = nullptr;
+
+LowLevelHooks lowLevelHooks;
 
 // move this?
 FuncHook FHPresent;
@@ -65,16 +68,16 @@ LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return LI_FN(CallWindowProcW).get()(Globals::WndProc, hwnd, uMsg, wParam, lParam);
 }
 
-static HRESULT WINAPI Hooks::GetDeviceDataHook(IDirectInputDevice8A* pThis, DWORD cbObjectData, LPDIDEVICEOBJECTDATA rgdod, LPDWORD pdwInOut, DWORD dwFlags)
+static HRESULT WINAPI Hooks::GetDeviceDataHook(IDirectInputDevice8W* pThis, DWORD cbObjectData, LPDIDEVICEOBJECTDATA rgdod, LPDWORD pdwInOut, DWORD dwFlags)
 {
 	// Call original function to get actual keypresses
 #ifdef USEMINHOOK
 	HRESULT ret = phookGetDeviceData(pThis, cbObjectData, rgdod, pdwInOut, dwFlags);
 #else
 	// fix hooking method
-	//HRESULT ret = FHGetDeviceData.Call<HRESULT>(pThis, cbObjectData, rgdod, pdwInOut, dwFlags);
-	HRESULT ret = phookGetDeviceData(pThis, cbObjectData, rgdod, pdwInOut, dwFlags);
-	LOG("asd");
+	HRESULT ret = FHGetDeviceData.Call<HRESULT>(pThis, cbObjectData, rgdod, pdwInOut, dwFlags);
+	//HRESULT ret = phookGetDeviceData(pThis, cbObjectData, rgdod, pdwInOut, dwFlags);
+
 #endif
 
 	if (ret == DI_OK)
@@ -83,12 +86,20 @@ static HRESULT WINAPI Hooks::GetDeviceDataHook(IDirectInputDevice8A* pThis, DWOR
 		{
 			if (LOBYTE(rgdod[i].dwData) > 0)
 			{
-				switch (rgdod[i].dwOfs)
+				//LOG("%d %d %d %d %d", rgdod[i].dwOfs, rgdod[i].dwData, rgdod[i].dwTimeStamp, rgdod[i].dwSequence, rgdod[i].uAppData);
+				// block input when menu is open
+				if (Globals::bMenuOpen)
+				{
+					rgdod[i].dwData = 0;
+					rgdod[i].dwOfs = 0;
+				}
+
+				//switch (rgdod[i].dwOfs)
 				{
 					// blocks W key by changing key code to 0
-				case DIK_W:
+				/*case DIK_W:
 					rgdod[i].dwOfs = 0;
-					break;
+					break;*/
 				}
 			}
 		}
@@ -142,9 +153,12 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			InitD3D(pSwapChain);
 			InitImgui(pSwapChain);
 
+			lowLevelHooks.Init();
+
 			InitDInput();
 
 			HookOnProcessSpellCast();
+
 #ifdef  DEVELOPER
 
 			TestFuncs();
@@ -169,7 +183,7 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 		::ImGui_ImplWin32_NewFrame();
 		::ImGui::NewFrame();
 
-		if (Globals::bMenuOpen)
+		//if (Globals::bMenuOpen)
 		{
 			::ImGui::ShowDemoWindow();
 			::ImGui::ShowMetricsWindow();
@@ -233,16 +247,16 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 
 			for (auto& minion : ObjectManager::MinionList())
 			{
-				if (minion->maxhealth == 3.f && minion->health > 0.f && minion->mana > 0.f)
-					render.RealWardRange(minion->position, ImColor(1.f, 1.f, 1.f));
+				//if (minion->maxhealth == 3.f && minion->health > 0.f && minion->mana > 0.f)
+				//	render.RealWardRange(minion->position, ImColor(1.f, 1.f, 1.f));
 
 				if (minion && minion->health > 0.f && minion->GetBoundingRadius())
 				{
-					render.Circle3D(minion->position, minion->GetBoundingRadius(), ImColor(1.f, 0.f, 0.f));
+					//	render.Circle3D(minion->position, minion->GetBoundingRadius(), ImColor(1.f, 0.f, 0.f));
 				}
 			}
 
-			for (auto& obj : ObjectManager::ObjectList())
+			/*for (auto& obj : ObjectManager::ObjectList())
 			{
 				if (obj)
 				{
@@ -260,7 +274,18 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 
 					render.Text(obj.second->name, objPos.x, objPos.y, 13.f, ImColor(0.f, 1.f, 0.f));
 				}
-			}
+			}*/
+
+			//for (auto& obj : ObjectManager::SomeList3())
+			//{
+			//	if (obj.first && obj.second)
+			//	{
+			//		Vector2 objPos = LeagueFuncs::WorldToScreen(obj.second->position);
+
+			//		LOG("%s", obj.second->name);
+			//		//render.Text(obj.second->name, objPos.x, objPos.y, 13.f, ImColor(0.f, 1.f, 0.f));
+			//	}
+			//}
 
 			{
 				/*std::vector<Vector3>pathList = local->GetAiManager()->GetWaypoints();
@@ -277,13 +302,16 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 
 			render.Circle3D(local->position, local->GetBoundingRadius() - 5.f, ImColor(1.f, 0.f, 0.f));
 
-			Menu::Render();
+			if (Globals::bMenuOpen)
+			{
+				Menu::Render();
+			}
 		}
-		else
-		{
-			testpos.clear();
-			//testpoly.clear();
-		}
+		//else
+		//{
+		//	testpos.clear();
+		//	//testpoly.clear();
+		//}
 		// -----
 
 		::ImGui::EndFrame();
@@ -396,8 +424,10 @@ void Hooks::Release()
 
 	FHPresent.UnHook();
 	FHTestFunc.UnHook();
-	//VFHGetDeviceDataHook.UnHook();
+	FHGetDeviceData.UnHook();
 #endif
+
+	lowLevelHooks.Release();
 
 	UnHookOnProcessSpellCast();
 
@@ -494,32 +524,37 @@ bool Hooks::InitDInput()
 	IID IID_IDirectInput8A = { 0xBF798030, 0x483A, 0x4DA2, 0xAA, 0x99, 0x5D, 0x64, 0xED, 0x36, 0x97, 0x00 };
 	IID IID_IDirectInput8W = { 0xBF798031, 0x483A, 0x4DA2, 0xAA, 0x99, 0x5D, 0x64, 0xED, 0x36, 0x97, 0x00 };
 
-	HRESULT hr = LI_FN(DirectInput8Create).in(LI_MODULE("DINPUT8.dll").cached())((HINSTANCE)Globals::hModule, DIRECTINPUT_VERSION, IID_IDirectInput8A, (LPVOID*)&pDirectInput, NULL);
+	HRESULT hr = LI_FN(DirectInput8Create).in(LI_MODULE("DINPUT8.dll").cached())((HINSTANCE)Globals::hModule, DIRECTINPUT_VERSION, IID_IDirectInput8W, (LPVOID*)&pDirectInput, NULL);
 
 	if (FAILED(hr))
 		return false;
 
-	LPDIRECTINPUTDEVICE8A  lpdiKeyboard;
-	if (pDirectInput->CreateDevice(GUID_SysKeyboard, &lpdiKeyboard, NULL) != DI_OK)
+	LPDIRECTINPUTDEVICE8  lpDirectInputDevice;
+	if (pDirectInput->CreateDevice(GUID_SysKeyboard, &lpDirectInputDevice, NULL) != DI_OK)
 	{
 		pDirectInput->Release();
 		return false;
 	}
 
-	void** lpdiKeyboardVMT = *(void***)lpdiKeyboard;
+	if (pDirectInput->CreateDevice(GUID_SysMouse, &lpDirectInputDevice, NULL) != DI_OK)
+	{
+		pDirectInput->Release();
+		return false;
+	}
 
-	LOG("lpdiKeyboard: %#04x", lpdiKeyboard);
-	LOG("lpdiKeyboardVMT: %#04x", lpdiKeyboardVMT);
+	void** lpDirectInputDeviceVMT = *(void***)lpDirectInputDevice;
+	//LOG("lpdiKeyboard: %#04x", lpdiKeyboard);
+	//LOG("lpdiKeyboardVMT: %#04x", lpdiKeyboardVMT);
+	//LOG("lpdiKeyboardVMT[10]: %#04x", lpdiKeyboardVMT[10]);
 
-	//if (lpdiKeyboard)
-	//{
-	//	lpdiKeyboard->Unacquire();
-	//	lpdiKeyboard->Release();
-	//	lpdiKeyboard = nullptr;
-	//}
+	if (lpDirectInputDevice)
+	{
+		lpDirectInputDevice->Unacquire();
+		lpDirectInputDevice->Release();
+		lpDirectInputDevice = nullptr;
+	}
 
 #ifdef USEMINHOOK
-
 	if (MH_CreateHook((DWORD_PTR*)lpdiKeyboardVMT[10], GetDeviceDataHook, reinterpret_cast<void**>(&phookGetDeviceData)) != MH_OK) { return false; }
 	if (MH_EnableHook((DWORD_PTR*)lpdiKeyboardVMT[10]) != MH_OK) { return false; }
 #else
@@ -527,7 +562,11 @@ bool Hooks::InitDInput()
 	//// shadow vmt hook wont work, because by calling DirectInput8Create we are getting
 	//// a temporary device that points to the original and swapping its vmt wont swap the
 	//// original game vmt
-	//phookGetDeviceData = reinterpret_cast<IDirectInputDeviceGetDeviceDataHook>(VFHGetDeviceDataHook.HookIndex(lpdiKeyboardVMT, 10, &GetDeviceDataHook));
+	//void** lpdiKeyboardVMT = *(void***)lpdiKeyboard;
+	///phookGetDeviceData = reinterpret_cast<IDirectInputDeviceGetDeviceDataHook>(VFHGetDeviceDataHook.Hook2(lpdiKeyboard, 10, &GetDeviceDataHook));
+
+	FHGetDeviceData = FuncHook((uintptr_t)lpDirectInputDeviceVMT[10], (uintptr_t)GetDeviceDataHook);
+	FHGetDeviceData.Hook();
 #endif
 
 	LOG("Success");

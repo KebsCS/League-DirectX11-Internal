@@ -8,7 +8,7 @@ namespace Hooks
 {
 	bool Init();
 	void Release();
-	static HRESULT WINAPI GetDeviceDataHook(IDirectInputDevice8A* pThis, DWORD cbObjectData, LPDIDEVICEOBJECTDATA rgdod, LPDWORD pdwInOut, DWORD dwFlags);
+	static HRESULT WINAPI GetDeviceDataHook(IDirectInputDevice8W* pThis, DWORD cbObjectData, LPDIDEVICEOBJECTDATA rgdod, LPDWORD pdwInOut, DWORD dwFlags);
 	static HRESULT WINAPI PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 	bool InitD3D(IDXGISwapChain* pSwapchain);
 	bool InitImgui(IDXGISwapChain* pSwapchain);

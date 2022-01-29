@@ -127,6 +127,8 @@
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <MinimalRebuild>false</MinimalRebuild>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
+      <ExceptionHandling>false</ExceptionHandling>
+      <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -206,6 +208,7 @@
     <ClInclude Include="lazy_importer.h" />
     <ClInclude Include="LeagueClasses.h" />
     <ClInclude Include="LeagueFuncs.h" />
+    <ClInclude Include="LowLevelHooks.h" />
     <ClInclude Include="Matrix4x4.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="MinHook.h" />
@@ -216,6 +219,7 @@
     <ClInclude Include="OnProcessSpellCast.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Render.h" />
+    <ClInclude Include="SelfProtection.h" />
     <ClInclude Include="SpellCastInfo.h" />
     <ClInclude Include="SpellData.h" />
     <ClInclude Include="SpellInfo.h" />

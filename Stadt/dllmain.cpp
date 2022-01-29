@@ -5,6 +5,7 @@
 #include "Hooks.h"
 #include "Ntdefs.h"
 #include "Ntfuncs.h"
+#include "SelfProtection.h"
 
 struct HandleData
 {
@@ -53,14 +54,35 @@ __declspec(safebuffers)void WINAPI InitThread(HMODULE hModule) noexcept
 	Globals::Hwnd = FindMainWindow(Globals::dwPid);
 	Globals::WndProc = reinterpret_cast<WNDPROC>(LI_FN(SetWindowLongW)(Globals::Hwnd, GWLP_WNDPROC, (LONG_PTR)WndProc));
 
-	/*if (!*(DWORD*)RVA(oLocalPlayer) && *(float*)RVA(oGameTime) < 1.f)
+	LI_FN(srand)((unsigned int)time(NULL));
+
+	SelfProtection protection;
+	bool bFailed = false;
+#ifndef DEVELOPER
+	if (protection.InitializeAntiDump(hModule) == false)
 	{
-		MessageBoxA(0, "Outdated offsets", "Error", 0);
-	}*/
+		LOG("Anti dump failed");
+		bFailed = true;
+	}
+	protection.HideModuleLinks(hModule);
+	protection.ProtectSelfPE(hModule);
+#endif
+	/*if (protection.InitializeAntiDump(hModule) == false)
+	{
+		LOG("Anti dump failed");
+	}
+	protection.HideModuleLinks(hModule);
+	protection.ProtectSelfPE(hModule);*/
+
+	if (!*(DWORD*)RVA(oLocalPlayer) && *(float*)RVA(oGameTime) < 1.f)
+	{
+		LOG("Outdated offsets");
+		bFailed = true;
+	}
 
 	Console::Init();
 
-	if (Hooks::Init())
+	if (Hooks::Init() && !bFailed)
 	{
 		while (!LI_FN(GetAsyncKeyState).get()(VK_END))
 		{

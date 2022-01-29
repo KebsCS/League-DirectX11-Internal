@@ -109,4 +109,50 @@ public:
 
 		return objList;
 	}
+
+	// minions, players and structures?
+	[[nodiscard]] static std::vector<GameObject*>SomeList() noexcept
+	{
+		/*static DWORD dwObjectManager = *reinterpret_cast<DWORD*>(RVA(oObjectManager));
+		size_t nObjects = *reinterpret_cast<size_t*>(dwObjectManager + 0x8);*/
+
+		static DWORD pList = *reinterpret_cast<DWORD*>(RVA(oObjectManager) + 0x78);
+
+		DWORD pArray = *reinterpret_cast<DWORD*>(pList + 0x04);
+		size_t nArrayLen = *reinterpret_cast<size_t*>(pList + 0x08);
+
+		std::vector<GameObject*>objList;
+		objList.reserve(nArrayLen);
+		for (auto i = 0; i < nArrayLen * 4; i += 4)
+		{
+			objList.emplace_back(*reinterpret_cast<GameObject**>(pArray + i));
+		}
+		return objList;
+	}
+
+	// minions only?
+	[[nodiscard]] static std::vector<GameObject*>SomeList2() noexcept
+	{
+		/*static DWORD dwObjectManager = *reinterpret_cast<DWORD*>(RVA(oObjectManager));
+		size_t nObjects = *reinterpret_cast<size_t*>(dwObjectManager + 0x8);*/
+
+		static DWORD pList = *reinterpret_cast<DWORD*>(RVA(oObjectManager) + 0x98);
+
+		DWORD pArray = *reinterpret_cast<DWORD*>(pList + 0x04);
+		size_t nArrayLen = *reinterpret_cast<size_t*>(pList + 0x08);
+
+		std::vector<GameObject*>objList;
+		objList.reserve(nArrayLen);
+		for (auto i = 0; i < nArrayLen * 4; i += 4)
+		{
+			objList.emplace_back(*reinterpret_cast<GameObject**>(pArray + i));
+		}
+		return objList;
+	}
+
+	// some map but it seems empty?
+	[[nodiscard]] static std::map<DWORD, GameObject*>SomeList3()
+	{
+		return *reinterpret_cast<std::map<DWORD, GameObject*>*>(*reinterpret_cast<DWORD*>(RVA(oObjectManager) + 0xA0));
+	}
 };
