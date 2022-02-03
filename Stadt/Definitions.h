@@ -68,6 +68,7 @@ enum class ObjectType : int
 	Unknown1 = (1 << 16), //0x10000
 	Building = (1 << 17), //0x20000
 	Unknown2 = (1 << 18), //0x40000
+	Unknown3 = (1 << 19), //0x80000
 };
 
 enum SpellSlotID : int

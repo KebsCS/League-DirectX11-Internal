@@ -16,11 +16,11 @@ public:
 	inline protect_guard(uintptr_t address, SIZE_T size)
 		: addr(LPVOID(address)), size(size)
 	{
-		FVirtualProtectEx((HANDLE)0xFFFFFFFF, addr, &size, PAGE_EXECUTE_READWRITE, &protect_val);
+		FVirtualProtectEx(NtCurrentProcess, addr, &size, PAGE_EXECUTE_READWRITE, &protect_val);
 	}
 	inline ~protect_guard()
 	{
-		FVirtualProtectEx((HANDLE)0xFFFFFFFF, addr, &size, protect_val, &protect_val);
+		FVirtualProtectEx(NtCurrentProcess, addr, &size, protect_val, &protect_val);
 	}
 };
 

@@ -44,12 +44,13 @@ public:
 					render.SetCirclePoints(fPoints);
 				}
 
-				//for (auto b : local->GetBuffManager()->GetBuffList())
-				//{
-				//	ImGui::Text("%#04x %d %s : %0.1f", (DWORD)b, b->StackCount(), b->scriptBaseBuff->name, fabs(fGameTime - b->endTime));
-				//	//	ImGui::Text("%#04x", (DWORD)b);
-				//}
+				for (auto b : local->GetBuffManager()->GetBuffList())
+				{
+					ImGui::Text("%#04x %d %s : %0.1f", (DWORD)b, b->AltStackCount(), b->scriptBaseBuff->name, fabs(fGameTime - b->endTime));
+					//	ImGui::Text("%#04x", (DWORD)b);
+				}
 
+				ImGui::Text("%lf", local->GetRespawnTimeRemaining());
 				ImGui::Checkbox("Stop console log", &Console::bStopLog);
 
 				static std::vector<Vector3>futurePath;
@@ -57,10 +58,29 @@ public:
 				if (ImGui::Button("test"))
 				{
 					futurePath = local->GetAiManager()->BuildNavigationPath(mousePos, true);
+
+					//					POINT curMouse;
+					//					bool getMouse = GetCursorPos(&curMouse);
+					//					//if (!getMouse)
+					//						//return false;
+					//
+					//#define SENDINPUTX(x) (x * 65536 / (::GetSystemMetrics(SM_CXSCREEN))+1)
+					//#define SENDINPUTY(y) (y * 65536 / (::GetSystemMetrics(SM_CYSCREEN))+1)
+					//					INPUT Input = { 0 };
+					//					::ZeroMemory(&Input, sizeof(INPUT));
+					//					Input.type = INPUT_MOUSE;
+					//					Input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK;
+					//					Input.mi.dx = SENDINPUTX(20);
+					//					Input.mi.dy = SENDINPUTY(20);
+					//					::SendInput(1, &Input, sizeof(INPUT));
 				}
+
+				ImGui::Text("%x", HashFunctions::HashStringELF("Aatrox"));
 
 				static char buff[100];
 				ImGui::InputText("xd", buff, 100);
+				std::string tmp = buff;
+				ImGui::Text("%x", HashFunctions::HashStringCaseInsensitiveFNV1a(tmp.c_str()));
 
 				render.Path3D(futurePath, ImColor(0.f, 1.f, 1.f));
 

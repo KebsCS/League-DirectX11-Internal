@@ -18,14 +18,8 @@
     <Filter Include="Vector">
       <UniqueIdentifier>{c6f9000e-ac24-4454-8e42-f769c41d7684}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Render">
-      <UniqueIdentifier>{a6f25365-9d6a-4844-ac87-60179507de8d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Syscalls">
       <UniqueIdentifier>{76f0b9c6-3501-4200-b12d-d88e3e03ee19}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Render\Images">
-      <UniqueIdentifier>{2a253eb3-e397-4fd1-b7ad-be35375b9e99}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
@@ -48,6 +42,12 @@
     </Filter>
     <Filter Include="Libs\Geometry">
       <UniqueIdentifier>{3261d105-cbfb-47c7-aa7d-a28f877a1289}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render">
+      <UniqueIdentifier>{a6f25365-9d6a-4844-ac87-60179507de8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\Images">
+      <UniqueIdentifier>{2a253eb3-e397-4fd1-b7ad-be35375b9e99}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -203,6 +203,15 @@
     </ClInclude>
     <ClInclude Include="SelfProtection.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AntiInputHooks.h">
+      <Filter>Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="IssueOrder.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="HashFunctions.h">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

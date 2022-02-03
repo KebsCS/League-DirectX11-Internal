@@ -1,17 +1,17 @@
 #pragma once
 
 #include "Includes.h"
-
 #include "Globals.h"
+#include "HashFunctions.h"
 
 namespace LeagueFuncs
 {
-	typedef void(__thiscall* tSendChat)(DWORD ChatClient, const char* Message, int Color);
+	/*typedef void(__thiscall* tSendChat)(DWORD ChatClient, const char* Message, int Color);
 	static void SendChat(const char* message, int color = 0)
 	{
 		static tSendChat fnSendChat = (tSendChat)(Globals::dwBaseAddress + oSendChat);
 		fnSendChat(*(DWORD*)(Globals::dwBaseAddress + oChatClientPtr), message, color);
-	}
+	}*/
 
 	// could be unsafe, haven't checked
 	//typedef void(__thiscall* tPrintChat)(DWORD ChatClient, const char* Message, int Color);
@@ -88,6 +88,13 @@ namespace LeagueFuncs
 		return returnVec;
 	}
 
+	typedef bool(__cdecl* tWorldToScreen)(Vector3* in, Vector2* out);
+	static bool WorldToScreenGame(Vector3& in, Vector2& out)
+	{
+		static tWorldToScreen fWorldToScreen = (tWorldToScreen)(Globals::dwBaseAddress + 0xA1AAF0);
+		return fWorldToScreen(&in, &out);
+	}
+
 	[[nodiscard]] static Vector3 GetMouseWorldPos()
 	{
 		//auto aux1 = *reinterpret_cast<DWORD*>(RVA(oHudInstance));
@@ -116,5 +123,24 @@ namespace LeagueFuncs
 	static bool IsBasicAttackSlot(int slotId)
 	{
 		return (unsigned int)(slotId - 64) <= 17;
+	}
+
+	static size_t FindVFunc(DWORD object, DWORD address)
+	{
+#ifdef DEVELOPER
+		DWORD* base = *reinterpret_cast<DWORD**>(object);
+		size_t i = 0;
+		while (base[i])
+		{
+			if ((base[i] - Globals::dwBaseAddress) == address)
+			{
+				LOG("Found function at %d", i);
+				return i;
+			}
+			i++;
+		}
+		//LOG("Function not found");
+		return -1;
+#endif
 	}
 }

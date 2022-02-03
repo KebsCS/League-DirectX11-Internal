@@ -92,6 +92,7 @@ public:
 	}
 
 	// todo, check if noexcept improves performance
+	// Contains every object in the game
 	[[nodiscard]] static std::vector<GameObject*>ObjectList() noexcept
 	{
 		static DWORD dwObjectManager = *reinterpret_cast<DWORD*>(RVA(oObjectManager));

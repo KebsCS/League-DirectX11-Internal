@@ -10,11 +10,12 @@
 class GameObject
 {
 public:
-	char pad_0000[4]; //0x0000
+	char pad_0000[4]; //0x0000 // dont remove this
+
 	char pad_0004[28]; //0x0004
 	uint32_t index; //0x0020
 	char pad_0024[40]; //0x0024
-	uint16_t N00000068; //0x004C
+	uint16_t teamId; //0x004C
 	char pad_004E[30]; //0x004E
 	LolString name; //0x006C
 	char pad_0084[72]; //0x0084
@@ -31,7 +32,14 @@ public:
 	float maxhealth; //0x0DC4
 	char pad_0DC8[164]; //0x0DC8
 	class N0000300B* Funcs; //0x0E6C
-	char pad_0E70[532]; //0x0E70
+	char pad_0E70[7540]; //0x0E70
+	char* skinName; //0x2BE4
+	char pad_2BFC[1180]; //0x2BFC
+
+	std::string AddressHex()
+	{
+		return std::format("{:#x}", (DWORD)this);
+	}
 
 	// todo, rewrite to not use a call
 	AiManager* GetAiManager() // GetPathController
@@ -52,12 +60,44 @@ public:
 
 	BuffManager* GetBuffManager()
 	{
+		//return VFuncCall<BuffManager*>(this, oVFunc::GetSpellBuffs);
 		return reinterpret_cast<BuffManager*>((DWORD)this + oBuffManager);
+	}
+
+	bool IsLaneMinion()
+	{
+		if (!IsFunc(ObjectType::Minion))
+			return false;
+		return VFuncCall<bool>(this, oVFunc::IsLaneMinion);
+	}
+
+	bool IsClone()
+	{
+		if (!IsFunc(ObjectType::Minion))
+			return false;
+		return VFuncCall<bool>(this, oVFunc::IsClone);
 	}
 
 	bool IsAlive()
 	{
-		return VFuncCall<bool>(this, oVFunc::IsAlive);
+		if (IsFunc(ObjectType::Minion) || IsFunc(ObjectType::Hero) ||
+			IsFunc(ObjectType::Turret) || IsFunc(ObjectType::AttackableUnit) ||
+			IsFunc(ObjectType::Building))
+		{
+			if (IsFunc(ObjectType::Hero))
+			{
+				return this->GetRespawnTimeRemaining() == 0.f;
+			}
+			return VFuncCall<bool>(this, oVFunc::ShouldDrawHealthBar);
+		}
+		return false;
+	}
+
+	bool IsTestFunc()
+	{
+		if (!IsFunc(ObjectType::Minion) && !IsFunc(ObjectType::Hero))
+			return false;
+		return VFuncCall<bool>(this, 58);
 	}
 
 	float GetBoundingRadius()
@@ -80,5 +120,38 @@ public:
 		uStack4 ^= ~uVar2;
 
 		return  (((int)type & uStack4) != 0);
+	}
+
+	bool IsJungleMonster()
+	{
+		//if (this->teamId != 100 && this->teamId != 200) return true;
+		return VFuncCall<bool>(this, oVFunc::IsJungleMonster);
+	}
+
+	double GetRespawnTimeRemaining()
+	{
+		return VFuncCall<double>(this, oVFunc::GetRespawnTimeRemaining);
+	}
+
+	bool IsWard()
+	{
+		if (this->teamId != 100 && this->teamId != 200)
+			return false;
+		return VFuncCall<bool>(this, oVFunc::IsWard);
+	}
+	//288 for IsWard and 289 for IsPet
+
+	bool IsBaron()
+	{
+		if (!IsFunc(ObjectType::Minion))
+			return false;
+		return !strcmp(this->skinName, XorStr("Worm")) || !strcmp(this->skinName, XorStr("SRU_Baron"));
+	}
+
+	bool IsDragon()
+	{
+		if (!IsFunc(ObjectType::Minion))
+			return false;
+		return !strcmp(this->skinName, XorStr("Dragon")) || !strncmp(this->skinName, XorStr("SRU_Dragon"), 10);
 	}
 };

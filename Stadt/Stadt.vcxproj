@@ -177,6 +177,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AiManager.h" />
+    <ClInclude Include="AntiInputHooks.h" />
     <ClInclude Include="clipper.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="Definitions.h" />
@@ -187,6 +188,7 @@
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="BuffManager.h" />
+    <ClInclude Include="HashFunctions.h" />
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Images\Images.h">
@@ -204,6 +206,7 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Includes.h" />
+    <ClInclude Include="IssueOrder.h" />
     <ClInclude Include="json.h" />
     <ClInclude Include="lazy_importer.h" />
     <ClInclude Include="LeagueClasses.h" />

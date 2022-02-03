@@ -16,6 +16,9 @@
 
 #include "OnProcessSpellCast.h"
 #include "LowLevelHooks.h"
+#include "AntiInputHooks.h"
+
+#include "IssueOrder.h"
 
 typedef HRESULT(WINAPI* D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 D3D11PresentHook				phookD3D11Present = nullptr;
@@ -41,6 +44,7 @@ ID3D11Texture2D* pBackbuffer = nullptr;
 IDirectInput8W* pDirectInput = nullptr;
 
 LowLevelHooks lowLevelHooks;
+AntiInputHooks antiInputHooks;
 
 // move this?
 FuncHook FHPresent;
@@ -48,6 +52,21 @@ FuncHook FHGetDeviceData;
 //VFuncHook VFHGetDeviceDataHook;
 
 FuncHook FHTestFunc;
+
+void mouse_movement_detection(HRAWINPUT raw_input)
+{
+	UINT buffer_size = 48;
+	LPBYTE buffer[48];
+	GetRawInputData((HRAWINPUT)raw_input, RID_INPUT, buffer, &buffer_size, sizeof(RAWINPUTHEADER));
+	RAWINPUT* raw = (RAWINPUT*)buffer;
+	if (raw->header.dwType != RIM_TYPEMOUSE) {
+		return;
+	}
+	const RAWMOUSE& mouse = raw->data.mouse;
+	if ((mouse.usFlags & MOUSE_MOVE_ABSOLUTE) == MOUSE_MOVE_ABSOLUTE) {
+		LOG("detected");
+	}
+}
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -57,6 +76,21 @@ LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		if (wParam == VK_INSERT)
 			Globals::bMenuOpen = !Globals::bMenuOpen;
+
+#ifdef DEVELOPER
+		//mouse_movement_detection((HRAWINPUT)lParam);
+
+		if (wParam == VK_F5)
+		{
+			LI_FN(MessageBoxA).get()(0, "", "", 0);
+			/*POINT curMouse;
+			bool getMouse = GetCursorPos(&curMouse);
+			if (getMouse)
+			{
+				IssueOrder::Move(curMouse);
+			}*/
+		}
+#endif
 	}
 
 	if (Globals::bMenuOpen)
@@ -153,7 +187,8 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			InitD3D(pSwapChain);
 			InitImgui(pSwapChain);
 
-			lowLevelHooks.Init();
+			//lowLevelHooks.Init(); todo, they need thread with GetMessage and dont seem to work with internal
+			antiInputHooks.Init();
 
 			InitDInput();
 
@@ -245,28 +280,44 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			//Vector3 points = *reinterpret_cast<Vector3*>(arr);
 			//render.Circle3D(points, 30.f, ImColor(1.f, 1.f, 1.f));
 
-			for (auto& minion : ObjectManager::MinionList())
-			{
-				//if (minion->maxhealth == 3.f && minion->health > 0.f && minion->mana > 0.f)
-				//	render.RealWardRange(minion->position, ImColor(1.f, 1.f, 1.f));
+			//for (auto& minion : ObjectManager::MinionList())
+			//{
+			//	//if (minion->maxhealth == 3.f && minion->health > 0.f && minion->mana > 0.f)
+			//	//	render.RealWardRange(minion->position, ImColor(1.f, 1.f, 1.f));
 
-				if (minion && minion->health > 0.f && minion->GetBoundingRadius())
-				{
-					//	render.Circle3D(minion->position, minion->GetBoundingRadius(), ImColor(1.f, 0.f, 0.f));
-				}
-			}
+			//	if (minion && minion->health > 0.f && minion->GetBoundingRadius())
+			//	{
+			//		render.Circle3D(minion->position, minion->GetBoundingRadius(), ImColor(1.f, 0.f, 0.f));
+			//		Vector2 objPos = LeagueFuncs::WorldToScreen(minion->position);
+			//		render.Text(minion->AddressHex(), objPos.x, objPos.y);
 
-			/*for (auto& obj : ObjectManager::ObjectList())
+			//		if (minion->IsWard())
+			//		{
+			//			render.Text("WARD", objPos.x, objPos.y);
+
+			//		}
+			//	}
+
+			//
+			//}
+
+			for (auto& obj : ObjectManager::ObjectList())
 			{
 				if (obj)
 				{
-					Vector2 objPos = LeagueFuncs::WorldToScreen(obj->position);
+					if (obj->IsAlive())
+					{
+						//LeagueFuncs::FindVFunc((DWORD)obj, 0x13FA70);
+						Vector2 objPos = LeagueFuncs::WorldToScreen(obj->position);
+						//std::string nn = obj->name.str() + std::to_string((DWORD)obj);
+						render.Text(obj->AddressHex(), objPos.x, objPos.y);
 
-					render.Text(obj->name, objPos.x, objPos.y);
+						//LOG("%s", obj->name);
+					}
 				}
 			}
 
-			for (auto& obj : ObjectManager::ObjectMap())
+			/*for (auto& obj : ObjectManager::ObjectMap())
 			{
 				if (obj.first && obj.second)
 				{
@@ -286,7 +337,6 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			//		//render.Text(obj.second->name, objPos.x, objPos.y, 13.f, ImColor(0.f, 1.f, 0.f));
 			//	}
 			//}
-
 			{
 				/*std::vector<Vector3>pathList = local->GetAiManager()->GetWaypoints();
 				for (auto& point : pathList)
@@ -428,6 +478,7 @@ void Hooks::Release()
 #endif
 
 	lowLevelHooks.Release();
+	antiInputHooks.Release();
 
 	UnHookOnProcessSpellCast();
 

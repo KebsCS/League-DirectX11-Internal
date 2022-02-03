@@ -58,8 +58,7 @@ private:
 
 		__try
 		{
-			pMemBase = FVirtualAllocEx((HANDLE)0xFFFFFFFF, 0, dwRegionSize, MEM_COMMIT | MEM_RESERVE, dwProtection);
-			//pMemBase = g_winapiApiTable->VirtualAlloc(0, dwRegionSize, MEM_COMMIT | MEM_RESERVE, dwProtection);
+			pMemBase = FVirtualAllocEx(NtCurrentProcess, 0, dwRegionSize, MEM_COMMIT | MEM_RESERVE, dwProtection);
 		}
 		__except (EXCEPTION_EXECUTE_HANDLER) {}
 
@@ -100,14 +99,14 @@ public:
 		{
 			auto dwOldProtect = 0UL;
 			SIZE_T size = 1024;
-			FVirtualProtectEx((HANDLE)0xFFFFFFFF, pIDH, &size, PAGE_READWRITE, &dwOldProtect);
+			FVirtualProtectEx(NtCurrentProcess, pIDH, &size, PAGE_READWRITE, &dwOldProtect);
 			{
 				pIDH->e_magic = 0;
 
 				auto pINH = reinterpret_cast<IMAGE_NT_HEADERS*>(pIDH + 1);
 				pINH->Signature = 0;
 
-				FVirtualProtectEx((HANDLE)0xFFFFFFFF, pIDH, &size, dwOldProtect, &dwOldProtect);
+				FVirtualProtectEx(NtCurrentProcess, pIDH, &size, dwOldProtect, &dwOldProtect);
 			}
 		}
 	}
@@ -141,11 +140,11 @@ public:
 
 		auto dwOldProtect = 0UL;
 		SIZE_T size = sizeof(LPVOID);
-		FVirtualProtectEx((HANDLE)0xFFFFFFFF, (LPVOID)pISH, &size, PAGE_READWRITE, &dwOldProtect);
+		FVirtualProtectEx(NtCurrentProcess, (LPVOID)pISH, &size, PAGE_READWRITE, &dwOldProtect);
 
 		pISH[0].VirtualAddress = reinterpret_cast<DWORD_PTR>(s_pGuardMem);
 
-		FVirtualProtectEx((HANDLE)0xFFFFFFFF, (LPVOID)pISH, &size, dwOldProtect, &dwOldProtect);
+		FVirtualProtectEx(NtCurrentProcess, (LPVOID)pISH, &size, dwOldProtect, &dwOldProtect);
 
 		return true;
 	}

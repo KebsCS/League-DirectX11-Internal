@@ -63,12 +63,21 @@ public:
 
 	bool Release()
 	{
-		bool bUnhookKey = LI_FN(UnhookWindowsHookEx)(keyboardHook);
-		bool bUnhookMouse = LI_FN(UnhookWindowsHookEx)(mouseHook);
-		if (!bUnhookKey || !bUnhookMouse)
+		if (keyboardHook != NULL)
 		{
-			LOG("Failed to release low level hooks");
-			return false;
+			if (LI_FN(UnhookWindowsHookEx)(mouseHook) == false)
+			{
+				LOG("Failed to release low level keyboard hook");
+				return false;
+			}
+		}
+		if (mouseHook != NULL)
+		{
+			if (LI_FN(UnhookWindowsHookEx)(mouseHook) == false)
+			{
+				LOG("Failed to release low level mouse hook");
+				return false;
+			}
 		}
 		LOG("Unhooked low level hooks");
 		return true;

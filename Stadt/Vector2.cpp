@@ -1,10 +1,15 @@
 #include <cmath>
-
 #include "Vector2.h"
 
 Vector2::operator float* ()
 {
 	return &x;
+}
+
+bool Vector2::IsZero(float tolerance) const
+{
+	return this->x > -tolerance && this->x < tolerance&&
+		this->y > -tolerance && this->y < tolerance;
 }
 
 Vector2& Vector2::operator+=(const Vector2& v)
