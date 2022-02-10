@@ -215,7 +215,7 @@ HMODULE LoadDll(LPCSTR lpFileName)
 		std::string szNtdll = XorStr("ntdll.dll");
 		hNtdll = reinterpret_cast<HMODULE>(GetModuleBase((szNtdll.c_str())));
 	}
-	if (!_LdrLoadDll)
+	if (!_LdrLoadDll) // can be a syscall, todo
 	{
 		std::string szLdrLoadDll = XorStr("LdrLoadDll");
 		_LdrLoadDll = (fLdrLoadDll)GetProcedureAddress(hNtdll, szLdrLoadDll.c_str());
@@ -231,4 +231,145 @@ HMODULE LoadDll(LPCSTR lpFileName)
 	NTSTATUS result = _LdrLoadDll(NULL, NULL, &usDllFile, &hModule);
 
 	return hModule;
+}
+
+NTSTATUS FNtSetInformationProcess(
+	_In_ HANDLE ProcessHandle,
+	_In_ PROCESSINFOCLASS ProcessInformationClass,
+	_In_ PVOID ProcessInformation,
+	_In_ ULONG ProcessInformationLength
+)
+{
+	NTSTATUS ntStatus = Syscall<NTSTATUS>({ 0x1C }, RtlInterlockedCompareExchange64, 0x170, { 0x10 })
+		(ProcessHandle, ProcessInformationClass, ProcessInformation, ProcessInformationLength);
+	return ntStatus;
+}
+
+bool WINAPI FSetProcessMitigationPolicy(PROCESS_MITIGATION_POLICY MitigationPolicy, PVOID lpBuffer, SIZE_T dwLength)
+{
+	char v3; // dl
+	bool v4; // zf
+	signed int v5; // eax
+	NTSTATUS v6; // eax
+	NTSTATUS v8; // ecx
+	signed int v9; // [esp-4h] [ebp-10h]
+	int v10; // [esp+4h] [ebp-8h]
+	int ProcessInformation; // [esp+8h] [ebp-4h]
+
+	switch (MitigationPolicy)
+	{
+	case 0:
+		if (dwLength != 8 || *(DWORD*)lpBuffer & 0xFFFFFFFC)
+			goto LABEL_21;
+		if (*(BYTE*)lpBuffer & 1)
+		{
+			v3 = *(BYTE*)((DWORD)lpBuffer + 4);
+			if (!v3)
+				goto LABEL_21;
+			v4 = (*(BYTE*)lpBuffer & 2) == 0;
+			v5 = 1;
+			ProcessInformation = 1;
+			if (v4)
+				goto LABEL_7;
+			v9 = 5;
+		}
+		else
+		{
+			if (*(BYTE*)lpBuffer & 2)
+			{
+				v8 = -1073741776;
+				goto LABEL_25;
+			}
+			v3 = *(BYTE*)((DWORD)lpBuffer + 4);
+			v9 = 2;
+		}
+		v5 = v9;
+		ProcessInformation = v9;
+	LABEL_7:
+		if (v3)
+			ProcessInformation = v5 | 8;
+		v6 = FNtSetInformationProcess((HANDLE)0xFFFFFFFF, ProcessExecuteFlags, &ProcessInformation, 4u);
+		goto LABEL_10;
+	case 1:
+		if (dwLength != 4)
+			goto LABEL_21;
+		v10 = 1;
+		goto LABEL_15;
+	case 2:
+		if (dwLength != 4)
+			goto LABEL_21;
+		v10 = 2;
+		goto LABEL_15;
+	case 3:
+		if (dwLength != 4)
+			goto LABEL_21;
+		v10 = 3;
+		goto LABEL_15;
+	case 4:
+		if (dwLength != 4)
+			goto LABEL_21;
+		v10 = 4;
+		goto LABEL_15;
+	case 6:
+		if (dwLength != 4)
+			goto LABEL_21;
+		v10 = 6;
+		goto LABEL_15;
+	case 7:
+		if (dwLength != 4)
+			goto LABEL_21;
+		v10 = 7;
+		goto LABEL_15;
+	case 8:
+		if (dwLength != 4)
+			goto LABEL_21;
+		v10 = 8;
+		goto LABEL_15;
+	case 9:
+		if (dwLength != 4)
+			goto LABEL_21;
+		v10 = 9;
+		goto LABEL_15;
+	case 10:
+		if (dwLength != 4)
+			goto LABEL_21;
+		v10 = 10;
+		goto LABEL_15;
+	case 13:
+		if (dwLength != 4)
+			goto LABEL_21;
+		v10 = 13;
+		goto LABEL_15;
+	case 14:
+		if (dwLength != 4)
+			goto LABEL_21;
+		v10 = 14;
+		goto LABEL_15;
+	case 15:
+		if (dwLength != 4)
+			goto LABEL_21;
+		v10 = 15;
+	LABEL_15:
+		ProcessInformation = *(DWORD*)lpBuffer;
+		v6 = FNtSetInformationProcess((HANDLE)0xFFFFFFFF, (PROCESSINFOCLASS)(ProcessCookie | ProcessUserModeIOPL), &v10, 8u);
+	LABEL_10:
+		if (v6 >= 0)
+			return 1;
+		v8 = v6;
+	LABEL_25:
+		//sub_10111000(v8); // SetLastError
+		return 0;
+	default:
+	LABEL_21:
+		v8 = -1073741811;
+		goto LABEL_25;
+	}
+}
+
+BOOL WINAPI FSetProcessDEPPolicy() // PROCESS_DEP_ENABLE
+{
+	PROCESS_MITIGATION_DEP_POLICY policy = { 0 };
+	policy.Enable = 1;
+	policy.Permanent = TRUE;
+	return FSetProcessMitigationPolicy(ProcessDEPPolicy, &policy, sizeof(policy));
 }

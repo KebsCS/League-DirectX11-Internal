@@ -1,4 +1,3 @@
-// todo move this to images.cpp
 #define STB_IMAGE_IMPLEMENTATION
 
 #include "Includes.h"

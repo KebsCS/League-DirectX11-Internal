@@ -31,8 +31,14 @@ namespace LeagueFuncs
 	typedef bool(__cdecl* tIsBrush)(Vector3*);
 	static bool IsBrush(Vector3 pos)
 	{
-		static tIsBrush fnIsBrush = (tIsBrush)(Globals::dwBaseAddress + oIsBrush);
-		return fnIsBrush(&pos);
+		std::array<std::uint8_t, 2> gadget = *(std::array<std::uint8_t, 2>*)RVA(oSpoofGadget);
+		if (gadget.at(0) != 0xFF || gadget.at(1) != 0x23)
+		{
+			LOG("Wrong spoof gadget");
+			return {};
+		}
+		return x86RetSpoof::invokeCdecl<bool>(RVA(oIsBrush), std::uintptr_t(gadget.data()),
+			&pos);
 	}
 
 	//typedef bool(__cdecl* tTestFunc)(Vector3*);
@@ -88,12 +94,12 @@ namespace LeagueFuncs
 		return returnVec;
 	}
 
-	typedef bool(__cdecl* tWorldToScreen)(Vector3* in, Vector2* out);
-	static bool WorldToScreenGame(Vector3& in, Vector2& out)
-	{
-		static tWorldToScreen fWorldToScreen = (tWorldToScreen)(Globals::dwBaseAddress + 0xA1AAF0);
-		return fWorldToScreen(&in, &out);
-	}
+	//typedef bool(__cdecl* tWorldToScreen)(Vector3* in, Vector2* out);
+	//static bool WorldToScreenGame(Vector3& in, Vector2& out)
+	//{
+	//	static tWorldToScreen fWorldToScreen = (tWorldToScreen)(Globals::dwBaseAddress + 0xA1AAF0);
+	//	return fWorldToScreen(&in, &out);
+	//}
 
 	[[nodiscard]] static Vector3 GetMouseWorldPos()
 	{

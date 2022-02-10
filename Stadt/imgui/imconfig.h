@@ -82,9 +82,13 @@
 
 #include "Vector2.h"
 
+#pragma warning(disable:4010) //warning C4010: single-line comment contains line-continuation character
+
 #define IM_VEC2_CLASS_EXTRA                                                 \
 		ImVec2(const Vector2& f) { x = f.x; y = f.y; }                       \
-		operator Vector2() const { return Vector2(x,y); }
+		operator Vector2() const { return Vector2(x,y); }			//	\
+	ImVec2(const POINT& f) { x = f.x; y = f.y; }                       \
+		operator POINT() const { return POINT(x,y); }
 
 /*
 #define IM_VEC4_CLASS_EXTRA                                                 \

@@ -6,16 +6,19 @@
 
 #include "XorString.h"
 
+#include "json.h"
+
+//#define LAZY_IMPORTER_CASE_INSENSITIVE
+#define LAZY_IMPORTER_NO_CPP_FORWARD
+#include "lazy_importer.h"
+
+#include "x86RetSpoof.h"
+
 #define DEVELOPER
 
 #include "Console.h"
 
 #include "Definitions.h"
-
-#include "json.h"
-
-//#define LAZY_IMPORTER_CASE_INSENSITIVE
-#include "lazy_importer.h"
 
 //#define USEMINHOOK
 

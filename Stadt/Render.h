@@ -319,6 +319,18 @@ public:
 
 		Text(std::to_string(level), x + 141, y + 144 - fontSize / 2, fontSize, ImColor(1.f, 1.f, 1.f), true, true);
 	}
+
+	void HealthCircle(Vector2 position, int health, int maxHealth, float radius)
+	{
+		char text[4];
+		float a_max = ((std::numbers::pi_v<float> *2.0f));
+		float v1 = (float)health / (float)maxHealth;
+		float difference = v1 - 1.0f;
+		drawList->PathArcTo(position, radius, (-(a_max / 4.0f)) + (a_max / maxHealth) * (maxHealth - health), a_max - (a_max / 4.0f), 200 - 1);
+		drawList->PathStroke(ImGui::ColorConvertFloat4ToU32({ fabs(v1 - difference),v1,v1,1.0f }), ImDrawFlags_None, 5.f);
+		sprintf_s(text, 4, "%d", health);
+		drawList->AddText({ (position.x - ImGui::CalcTextSize(text).x / 2.0f) , (position.y - ImGui::CalcTextSize(text).y / 2.0f) }, ImGui::ColorConvertFloat4ToU32({ 1,1,1,1.0f }), text);
+	}
 };
 
 inline Render render;

@@ -178,7 +178,7 @@ public:
 	//			return obj;
 	//		}
 	//	}
-	//	// todo return a value
+	//	return {};
 	//}
 
 	Vector2 GetImageSizeByName(const std::string& name)

@@ -31,6 +31,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x86</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -178,6 +179,7 @@
   <ItemGroup>
     <ClInclude Include="AiManager.h" />
     <ClInclude Include="AntiInputHooks.h" />
+    <ClInclude Include="CastSpell.h" />
     <ClInclude Include="clipper.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="Definitions.h" />
@@ -234,6 +236,7 @@
     <ClInclude Include="Vector4.h" />
     <ClInclude Include="VFuncHook.h" />
     <ClInclude Include="VMTHook.h" />
+    <ClInclude Include="x86RetSpoof.h" />
     <ClInclude Include="XorString.h" />
   </ItemGroup>
   <ItemGroup>

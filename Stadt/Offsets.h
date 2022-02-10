@@ -4,12 +4,13 @@ static constexpr auto oLocalPlayer = 0x30ee58c;// 0x310990C; // A1 ? ? ? ? 8B 54
 static constexpr auto oGameTime = 0x30e585c;// 0x3101384; //  0F 57 C0 F3 0F 5C 0D ? ? ? ? 0F 2F C1
 //static constexpr auto oGameClient = 0x30eb774L;
 //static constexpr auto oGameInfo = 0x30eb774L;
-//static constexpr auto oHudInstance = 0x185c058L;
-//static constexpr auto oRenderer = 0x3121da8L;
 static constexpr auto oHeroList = 0x184ec74;// 0x186abf4;
 static constexpr auto oMinionList = 0x18511fc;// 0x186cdb8;
 
-static constexpr auto oTryRightClick = 0x5E7580;// A1 ?? ?? ?? ?? 6A 00 8B 48 24
+static constexpr auto oTryRightClick = 0x5E7580; // A1 ?? ?? ?? ?? 6A 00 8B 48 24
+static constexpr auto oHandleSpellInput = 0x5CF830; // 53 8B 1D ?? ?? ?? ?? 55 56 57 8B F9 85
+static constexpr auto oSpoofAddress = 0x4386; // any C3 instruction
+static constexpr auto oSpoofGadget = 0xEDA0F3; // ff 23 jmp dwort ptr [ebx]
 
 static constexpr auto oChatClientPtr = 0x30e080c;// 0x3109E28;// 0x30fc790;
 //static constexpr auto oSendChat = 0x5F49B0;// 0x5F42A0; // outdated

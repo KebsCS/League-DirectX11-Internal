@@ -84,3 +84,14 @@ NTSTATUS FNtCreateThreadEx(_Out_ PHANDLE ThreadHandle,
 	_In_opt_ PVOID AttributeList);
 
 HMODULE LoadDll(LPCSTR lpFileName);
+
+NTSTATUS FNtSetInformationProcess(
+	_In_ HANDLE ProcessHandle,
+	_In_ PROCESS_INFORMATION_CLASS ProcessInformationClass,
+	_In_ PVOID ProcessInformation,
+	_In_ ULONG ProcessInformationLength
+);
+
+bool WINAPI FSetProcessMitigationPolicy(PROCESS_MITIGATION_POLICY MitigationPolicy, PVOID lpBuffer, SIZE_T dwLength);
+
+BOOL WINAPI FSetProcessDEPPolicy();

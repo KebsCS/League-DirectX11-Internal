@@ -19,6 +19,7 @@
 #include "AntiInputHooks.h"
 
 #include "IssueOrder.h"
+#include "CastSpell.h"
 
 typedef HRESULT(WINAPI* D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 D3D11PresentHook				phookD3D11Present = nullptr;
@@ -82,13 +83,16 @@ LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == VK_F5)
 		{
-			LI_FN(MessageBoxA).get()(0, "", "", 0);
-			/*POINT curMouse;
-			bool getMouse = GetCursorPos(&curMouse);
-			if (getMouse)
+			// hook GetProcessMitigationPolicy to always return 0 for dep so its ud
+			/*DWORD flags = 0;
+			BOOL pernament = 0;
+			if (GetProcessDEPPolicy(GetCurrentProcess(), &flags, &pernament))
 			{
-				IssueOrder::Move(curMouse);
+				FSetProcessDEPPolicy();
+				LOG("%d %d", flags, pernament);
 			}*/
+			//}
+			//LI_FN(MessageBoxA).get()(0, "", "", 0);
 		}
 #endif
 	}
@@ -178,6 +182,26 @@ void TestFuncs()
 	LOG("IsNotWall expected 0: %d", LeagueFuncs::IsNotWall(Vector3(6691, 49, 3570)));
 }
 
+// todo, IAT/EAT hook(if undetected),
+FuncHook FHGetCursorPos;
+static BOOL WINAPI GetCursorPosHook(LPPOINT lpPoint)
+{
+	auto ret = FHGetCursorPos.Call<BOOL>(lpPoint);
+
+	//POINT& p = *lpPoint;
+	if (HookedMouse.enabled)
+	{
+		LOG("before lock");
+		HookedMouse.mutex.lock();
+		*lpPoint = HookedMouse.pos;
+		HookedMouse.mutex.unlock();
+		HookedMouse.enabled = false;
+		LOG("after lock");
+	}
+
+	return ret;
+}
+
 static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
 {
 	static std::once_flag isInitialized;
@@ -193,6 +217,9 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			InitDInput();
 
 			HookOnProcessSpellCast();
+
+			//FHGetCursorPos = FuncHook((uintptr_t)GetCursorPos, (uintptr_t)GetCursorPosHook);
+			//FHGetCursorPos.Hook();
 
 #ifdef  DEVELOPER
 
@@ -227,6 +254,16 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 
 			// VISUALS GO HERE
 			// -----
+
+			if (GetAsyncKeyState(VK_F5))
+			{
+				POINT curMouse(50, 50);
+				bool getMouse = LI_FN(GetCursorPos).get()(&curMouse);
+				//if (getMouse)
+				{
+					IssueOrder::AttackMove(curMouse);
+				}
+			}
 
 			//render.Box(20, 100, 100, 200, ImColor(1.f, 0.f, 0.f));
 
@@ -475,6 +512,8 @@ void Hooks::Release()
 	FHPresent.UnHook();
 	FHTestFunc.UnHook();
 	FHGetDeviceData.UnHook();
+
+	FHGetCursorPos.UnHook();
 #endif
 
 	lowLevelHooks.Release();
@@ -606,8 +645,8 @@ bool Hooks::InitDInput()
 	}
 
 #ifdef USEMINHOOK
-	if (MH_CreateHook((DWORD_PTR*)lpdiKeyboardVMT[10], GetDeviceDataHook, reinterpret_cast<void**>(&phookGetDeviceData)) != MH_OK) { return false; }
-	if (MH_EnableHook((DWORD_PTR*)lpdiKeyboardVMT[10]) != MH_OK) { return false; }
+	if (MH_CreateHook((DWORD_PTR*)lpDirectInputDeviceVMT[10], GetDeviceDataHook, reinterpret_cast<void**>(&phookGetDeviceData)) != MH_OK) { return false; }
+	if (MH_EnableHook((DWORD_PTR*)lpDirectInputDeviceVMT[10]) != MH_OK) { return false; }
 #else
 	//// todo fix the hooking method, most likely vtable function swap, like minhook
 	//// shadow vmt hook wont work, because by calling DirectInput8Create we are getting

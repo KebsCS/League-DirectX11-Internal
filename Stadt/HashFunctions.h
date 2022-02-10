@@ -28,6 +28,30 @@ namespace HashFunctions
 		return v1;
 	}
 
+	// constexpr dragon names, champion names
+	[[nodiscard]] constexpr static int ConstHashStringSDBM(const char* a1)
+	{
+		int v1; // esi
+		char v2; // ah
+		int i; // ecx
+		char v4; // dl
+
+		v1 = 0;
+		if (a1)
+		{
+			v2 = *a1;
+			for (i = (int)(a1 + 1); v2; v1 = v4 + 65599 * v1)
+			{
+				++i;
+				v4 = v2 + 32;
+				if ((unsigned __int8)(v2 - 65) > 0x19u)
+					v4 = v2;
+				v2 = *(BYTE*)(i - 1);
+			}
+		}
+		return v1;
+	}
+
 	// buff names
 	[[nodiscard]] const static int HashStringCaseInsensitiveFNV1a(const char* a1, int a3 = -2128831035)
 	{

@@ -4,6 +4,8 @@
 #include "GameObject.h"
 #include "Render.h"
 
+#include "CastSpell.h"
+
 class Menu
 {
 public:
@@ -54,10 +56,18 @@ public:
 				ImGui::Checkbox("Stop console log", &Console::bStopLog);
 
 				static std::vector<Vector3>futurePath;
+				static int iTestVal = 1;
 
+				ImGui::InputInt("a", &iTestVal, 1, 2);
+
+				// tf why does this crash all of a sudden
+				//render.HealthCircle(LeagueFuncs::WorldToScreen(local->position), local->health, local->maxhealth, 60);
 				if (ImGui::Button("test"))
 				{
 					futurePath = local->GetAiManager()->BuildNavigationPath(mousePos, true);
+					//Vector3 testCast = local->position;
+					//testCast.z += 500;
+				//	CastSpell::QuickCastSpell(testCast, SpellSlotID::Q);
 
 					//					POINT curMouse;
 					//					bool getMouse = GetCursorPos(&curMouse);

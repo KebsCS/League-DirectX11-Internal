@@ -38,7 +38,7 @@ public:
 
 	std::string AddressHex()
 	{
-		return std::format("{:#x}", (DWORD)this);
+		return std::format(XorStr("{:#x}"), (DWORD)this);
 	}
 
 	// todo, rewrite to not use a call
@@ -139,7 +139,6 @@ public:
 			return false;
 		return VFuncCall<bool>(this, oVFunc::IsWard);
 	}
-	//288 for IsWard and 289 for IsPet
 
 	bool IsBaron()
 	{

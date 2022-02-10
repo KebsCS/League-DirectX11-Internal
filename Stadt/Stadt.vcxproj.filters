@@ -213,6 +213,12 @@
     <ClInclude Include="HashFunctions.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="CastSpell.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="x86RetSpoof.h">
+      <Filter>Libs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
