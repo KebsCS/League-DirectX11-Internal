@@ -55,6 +55,8 @@ __declspec(safebuffers)void WINAPI InitThread(HMODULE hModule) noexcept
 
 	LI_FN(srand)((unsigned int)time(NULL));
 
+	Console::Init();
+
 	SelfProtection protection;
 	bool bFailed = false;
 #ifndef DEVELOPER
@@ -79,7 +81,12 @@ __declspec(safebuffers)void WINAPI InitThread(HMODULE hModule) noexcept
 		bFailed = true;
 	}
 
-	Console::Init();
+	std::array<std::uint8_t, 2> gadget = *(std::array<std::uint8_t, 2>*)RVA(oSpoofGadget);
+	if (gadget.at(0) != 0xFF || gadget.at(1) != 0x23)
+	{
+		LOG("Wrong spoof gadget");
+		bFailed = true;
+	}
 
 	if (Hooks::Init() && !bFailed)
 	{

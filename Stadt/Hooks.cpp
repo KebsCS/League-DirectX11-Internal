@@ -10,6 +10,9 @@
 #include "Menu.h"
 #include "GameObject.h"
 
+#include "Keyboard.h"
+#include "Mouse.h"
+
 #include "FuncHook.h"
 #include "VMTHook.h"
 #include "VFuncHook.h"
@@ -72,6 +75,10 @@ void mouse_movement_detection(HRAWINPUT raw_input)
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	DWORD now = LI_FN(GetTickCount).get()();
+	Keyboard::Update(now);
+	Mouse::Update(now);
+
 	// hotkeys
 	if (uMsg == WM_KEYDOWN)
 	{
@@ -255,13 +262,15 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			// VISUALS GO HERE
 			// -----
 
-			if (GetAsyncKeyState(VK_F5))
+			if (LI_FN(GetAsyncKeyState).get()(VK_F5))
 			{
 				POINT curMouse(50, 50);
 				bool getMouse = LI_FN(GetCursorPos).get()(&curMouse);
 				//if (getMouse)
+				Keyboard::KeyDown(DIK_W);
 				{
 					IssueOrder::AttackMove(curMouse);
+					//Mouse::RightDown();
 				}
 			}
 

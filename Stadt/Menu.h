@@ -60,10 +60,13 @@ public:
 
 				ImGui::InputInt("a", &iTestVal, 1, 2);
 
+				//ImGui::Text("%lf", local->GetStatTotal((StatType)iTestVal));
+
 				// tf why does this crash all of a sudden
 				//render.HealthCircle(LeagueFuncs::WorldToScreen(local->position), local->health, local->maxhealth, 60);
 				if (ImGui::Button("test"))
 				{
+					LeagueFuncs::DoEmote((EmoteType)iTestVal);
 					futurePath = local->GetAiManager()->BuildNavigationPath(mousePos, true);
 					//Vector3 testCast = local->position;
 					//testCast.z += 500;

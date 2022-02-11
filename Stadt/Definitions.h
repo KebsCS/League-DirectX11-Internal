@@ -49,7 +49,7 @@ private:
 	}
 };
 
-enum class ObjectType : int
+enum class ObjectType : unsigned
 {
 	//x << y = x*pow(2,y)
 	//x >> y = x/pow(2,y)
@@ -71,7 +71,15 @@ enum class ObjectType : int
 	Unknown3 = (1 << 19), //0x80000
 };
 
-enum SpellSlotID : int
+enum class ObjectTeam : unsigned
+{
+	Unknown = 0,
+	Order = 100,
+	Chaos = 200,
+	Neutral = 300
+};
+
+enum SpellSlotID : unsigned
 {
 	Q = 0,
 	W = 1,

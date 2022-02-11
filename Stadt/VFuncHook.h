@@ -1,3 +1,5 @@
+// todo, try this: https://github.com/dencelle/Vault21/blob/1e0f23d5ef18a42b0b09bc74a1ca40410c822c49/V21/VirtualTableManager.cpp
+
 //#pragma once
 //
 //#include <Windows.h>

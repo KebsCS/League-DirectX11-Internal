@@ -29,42 +29,12 @@ private:
 			return;
 		lastTick = now;
 
-		/*DWORD spoofAddress = RVA(oSpoofAddress);
-		if (((*reinterpret_cast<DWORD*>(spoofAddress)) & 0xFF) != 0xC3)
-		{
-			LOG("Not C3");
-			return;
-		}*/
-
-		//static tTryRightClick fTryRightClick = (tTryRightClick)(Globals::dwBaseAddress + oTryRightClick);
 		static DWORD fTryRightClick = RVA(oTryRightClick);
 		static DWORD dwHudInstance = *reinterpret_cast<DWORD*>(RVA(oHudInstance));
 		DWORD dwHudInputLoic = *reinterpret_cast<DWORD*>(dwHudInstance + 0x24);
 
-		std::array<std::uint8_t, 2> gadget = *(std::array<std::uint8_t, 2>*)RVA(oSpoofGadget);
-		if (gadget.at(0) != 0xFF || gadget.at(1) != 0x23)
-		{
-			LOG("Wrong spoof gadget");
-			return;
-		}
-		x86RetSpoof::invokeThiscall<void*>(dwHudInputLoic, fTryRightClick, std::uintptr_t(gadget.data()), state, isAttack, isAttackCommand, x, y, attackOnly);
-
-		// set ecx when func is thiscall
-		// and the parameters go backwards
-		/*__asm
-		{
-			push retnHere
-			mov ecx, dwHudInputLoic
-			push attackOnly
-			push y
-			push x
-			push isAttackCommand
-			push isAttack
-			push state
-			push spoofAddress
-			jmp fTryRightClick
-			retnHere :
-		}*/
+		x86RetSpoof::invokeThiscall<bool>(dwHudInputLoic, fTryRightClick, RVA(oSpoofGadget),
+			state, isAttack, isAttackCommand, x, y, attackOnly);
 	}
 
 public:

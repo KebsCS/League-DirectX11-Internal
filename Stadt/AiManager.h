@@ -112,13 +112,7 @@ public:
 		static DWORD fBuildNavigationPath = RVA(oBuildNavigationPath);
 		AiManager* ai = (AiManager*)this;
 
-		std::array<std::uint8_t, 2> gadget = *(std::array<std::uint8_t, 2>*)RVA(oSpoofGadget);
-		if (gadget.at(0) != 0xFF || gadget.at(1) != 0x23)
-		{
-			LOG("Wrong spoof gadget");
-			return {};
-		}
-		x86RetSpoof::invokeThiscall<void*>(std::uintptr_t(navMesh), fBuildNavigationPath, std::uintptr_t(gadget.data()),
+		x86RetSpoof::invokeThiscall<bool>(std::uintptr_t(navMesh), fBuildNavigationPath, RVA(oSpoofGadget),
 			&navPath, &startPos, &endPos, ai, 0, &unk1, &unk2, &unk3, maxNodes, unk4);
 
 		if (smooth)
@@ -126,19 +120,8 @@ public:
 			//reinterpret_cast<int32_t(__thiscall*)(AiManager*, NavigationPath*)>(RVA(oSmoothPath))((AiManager*)this, &navPath);
 			static DWORD fSmoothPath = RVA(oSmoothPath);
 
-			x86RetSpoof::invokeThiscall<void*>(std::uintptr_t(ai), fSmoothPath, std::uintptr_t(gadget.data()),
+			x86RetSpoof::invokeThiscall<int>(std::uintptr_t(ai), fSmoothPath, RVA(oSpoofGadget),
 				&navPath);
-
-			/*__asm
-			{
-				push retnHere2
-				mov ecx, ai
-				lea eax, [navPath]
-				push eax
-				push spoofAddress
-				jmp fSmoothPath
-				retnHere2 :
-			}*/
 		}
 
 		std::vector<Vector3>waypoints;

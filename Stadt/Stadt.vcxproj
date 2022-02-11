@@ -210,6 +210,7 @@
     <ClInclude Include="Includes.h" />
     <ClInclude Include="IssueOrder.h" />
     <ClInclude Include="json.h" />
+    <ClInclude Include="Keyboard.h" />
     <ClInclude Include="lazy_importer.h" />
     <ClInclude Include="LeagueClasses.h" />
     <ClInclude Include="LeagueFuncs.h" />
@@ -217,6 +218,7 @@
     <ClInclude Include="Matrix4x4.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="MinHook.h" />
+    <ClInclude Include="Mouse.h" />
     <ClInclude Include="Ntdefs.h" />
     <ClInclude Include="Ntfuncs.h" />
     <ClInclude Include="ObjectManager.h" />

@@ -7,6 +7,9 @@
 #include "BuffManager.h"
 #include "Ntdefs.h"
 
+enum class StatType : unsigned;
+enum class StatInfo : uint8_t;
+
 class GameObject
 {
 public:
@@ -153,4 +156,50 @@ public:
 			return false;
 		return !strcmp(this->skinName, XorStr("Dragon")) || !strncmp(this->skinName, XorStr("SRU_Dragon"), 10);
 	}
+
+	double GetStatTotal(StatType type, StatInfo outputType = (StatInfo)0)
+	{
+		DWORD statOwner = (DWORD)this + 584;
+		return x86RetSpoof::invokeThiscall<double>(statOwner, RVA(oGetStatTotal), RVA(oSpoofGadget), type, outputType);
+	}
+};
+
+enum class StatType : unsigned
+{
+	AbilityPower = 0,
+	Armor = 1,
+	AttackDamage = 2,
+	AttackSpeed = 3,
+	MagicResist = 5,
+	MoveSpeed = 6,
+	CritChance = 7,
+	CritDamageMultiplier = 8,
+	//PercentCooldownMod,
+	AbilityHaste = 10,
+	Health = 11,
+	HealthPercent = 12,
+	HealthMissingPercent = 13,
+	//SpellVamp,
+	LifeSteal = 15,
+	//MagicPercentPenetration,
+	MagicFlatPenetration = 19,
+	MagicBonusPercentPenetration = 20,
+	//MagicLethality,
+	//ArmorFlatPenetration,
+	//ArmorPercentPenetration,
+	ArmorBonusPercentPenetration = 24,
+	//Unknown1,
+	Lethality = 26,
+	Tenacity = 27,
+	AttackRange = 28,
+	HealthRegen = 29,
+	ManaRegen = 30,
+	//Unknown2,
+};
+
+enum class StatInfo : uint8_t
+{
+	TOTAL = 0,
+	BASE = 1,
+	BONUS = 2,
 };

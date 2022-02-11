@@ -98,13 +98,16 @@ public:
 		if (pIDH->e_magic == IMAGE_DOS_SIGNATURE)
 		{
 			auto dwOldProtect = 0UL;
-			SIZE_T size = 1024;
+			SIZE_T size = sizeof(IMAGE_DOS_HEADER);
 			FVirtualProtectEx(NtCurrentProcess, pIDH, &size, PAGE_READWRITE, &dwOldProtect);
 			{
-				pIDH->e_magic = 0;
+				//pIDH->e_magic = 0;
+				for (SIZE_T i = 0; i < size; i++)
+					*(BYTE*)((BYTE*)pIDH + i) = 0;
 
-				auto pINH = reinterpret_cast<IMAGE_NT_HEADERS*>(pIDH + 1);
-				pINH->Signature = 0;
+				//	auto pINH = reinterpret_cast<IMAGE_NT_HEADERS*>(pIDH + 1);
+				//	LOG("%d", pINH->Signature);
+				//	pINH->Signature = 0;
 
 				FVirtualProtectEx(NtCurrentProcess, pIDH, &size, dwOldProtect, &dwOldProtect);
 			}

@@ -4,6 +4,8 @@
 #include "Globals.h"
 #include "HashFunctions.h"
 
+enum class EmoteType : uint8_t;
+
 namespace LeagueFuncs
 {
 	/*typedef void(__thiscall* tSendChat)(DWORD ChatClient, const char* Message, int Color);
@@ -21,23 +23,17 @@ namespace LeagueFuncs
 	//	fnPrintChat(*(DWORD*)(Globals::dwBaseAddress + oChatClientPtr), message, color);
 	//}
 
-	typedef bool(__cdecl* tIsNotWall)(Vector3*, unsigned __int16);
+	//typedef bool(__cdecl* tIsNotWall)(Vector3*, unsigned __int16);
 	static bool IsNotWall(Vector3 pos)
 	{
-		static tIsNotWall fnIsNotWall = (tIsNotWall)(Globals::dwBaseAddress + oIsNotWall);
-		return fnIsNotWall(&pos, (unsigned __int16)0);
+		return x86RetSpoof::invokeCdecl<bool>(RVA(oIsNotWall), RVA(oSpoofGadget),
+			&pos, (unsigned __int16)0);
 	}
 
-	typedef bool(__cdecl* tIsBrush)(Vector3*);
+	//typedef bool(__cdecl* tIsBrush)(Vector3*);
 	static bool IsBrush(Vector3 pos)
 	{
-		std::array<std::uint8_t, 2> gadget = *(std::array<std::uint8_t, 2>*)RVA(oSpoofGadget);
-		if (gadget.at(0) != 0xFF || gadget.at(1) != 0x23)
-		{
-			LOG("Wrong spoof gadget");
-			return {};
-		}
-		return x86RetSpoof::invokeCdecl<bool>(RVA(oIsBrush), std::uintptr_t(gadget.data()),
+		return x86RetSpoof::invokeCdecl<bool>(RVA(oIsBrush), RVA(oSpoofGadget),
 			&pos);
 	}
 
@@ -117,6 +113,11 @@ namespace LeagueFuncs
 		return *reinterpret_cast<Vector3*>(dwHudInstance + oMousePos);
 	}
 
+	static void DoEmote(EmoteType emote)
+	{
+		x86RetSpoof::invokeStdcall<bool>(RVA(oDoEmote), RVA(oSpoofGadget), emote);
+	}
+
 	//[[nodiscard]] static int GetPing()
 	//{
 	//	static DWORD dwPingInstance = *reinterpret_cast<DWORD*>(RVA(oForGetPing));
@@ -150,3 +151,12 @@ namespace LeagueFuncs
 #endif
 	}
 }
+
+enum class EmoteType : uint8_t
+{
+	Dance = 0,
+	Taunt = 1,
+	Laugh = 2,
+	Joke = 3,
+	Toggle = 4
+};

@@ -24,7 +24,6 @@ namespace Geometry
 			return !IsOutside(point);
 		}
 
-		// todo , i think when clipper lib uses z, then z is the height, double check this
 		bool IsOutside(const Vector3& point)
 		{
 			const auto p = ClipperLib::IntPoint(point.x, point.z, point.y);
