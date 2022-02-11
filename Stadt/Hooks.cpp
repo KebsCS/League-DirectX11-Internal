@@ -24,6 +24,8 @@
 #include "IssueOrder.h"
 #include "CastSpell.h"
 
+#include "Prediction.h"
+
 typedef HRESULT(WINAPI* D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 D3D11PresentHook				phookD3D11Present = nullptr;
 /*
@@ -262,18 +264,6 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			// VISUALS GO HERE
 			// -----
 
-			if (LI_FN(GetAsyncKeyState).get()(VK_F5))
-			{
-				POINT curMouse(50, 50);
-				bool getMouse = LI_FN(GetCursorPos).get()(&curMouse);
-				//if (getMouse)
-				Keyboard::KeyDown(DIK_W);
-				{
-					IssueOrder::AttackMove(curMouse);
-					//Mouse::RightDown();
-				}
-			}
-
 			//render.Box(20, 100, 100, 200, ImColor(1.f, 0.f, 0.f));
 
 			//ImGuiIO& io = ImGui::GetIO();
@@ -319,6 +309,39 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			render.Circle3D(LeagueFuncs::GetMouseWorldPos(), 65.f, mousecol);
 			GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
 
+			static GameObject* enemy;
+
+			DWORD now = LI_FN(GetTickCount).get()();
+			static DWORD lastTick = now + 100000;
+			if ((now - lastTick > 1000) && LI_FN(GetAsyncKeyState).get()(VK_F5))
+			{
+				lastTick = now;
+				POINT curMouse(50, 50);
+				bool getMouse = LI_FN(GetCursorPos).get()(&curMouse);
+
+				for (auto h : ObjectManager::HeroList())
+					if (h != local)
+						enemy = h;
+
+				// xerath w
+				auto p = Prediction::SkillInstant(local, enemy, 1000, 250, 0.75, 0);
+				if (p.hitChance != 0)
+				{
+					Mouse::MouseBack(LeagueFuncs::WorldToScreen(p.pos));
+					Keyboard::KeyDown(DIK_W);
+				}
+
+				{
+					//IssueOrder::AttackMove(curMouse);
+					//Mouse::RightDown();
+				}
+			}
+			if (enemy)
+			{
+				render.Circle3D(Prediction::PosAfterTime(enemy, 0.75), 65.f);
+				render.Circle3D(local->GetAiManager()->serverPos, 1000);
+			}
+
 			//std::vector<Vector3>points = *reinterpret_cast<std::vector<Vector3>*>(local->GetAiManager() + 0x1E4);
 
 			//Vector3 points = **reinterpret_cast<Vector3**>(local->GetAiManager() + 0x1E4);
@@ -363,6 +386,8 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 				}
 			}
 
+			render.Circle3D(Prediction::PosAfterTime(local, 1), 65.f);
+
 			/*for (auto& obj : ObjectManager::ObjectMap())
 			{
 				if (obj.first && obj.second)
@@ -391,12 +416,18 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 				}*/
 				AiManager* ai = local->GetAiManager();
 				render.Path3D(ai->GetWaypoints());
+				render.Path3D(ai->GetFuturePoints(), ImColor(0.f, 0.f, 1.f));
+				for (Vector3 wpoint : ai->GetWaypoints())
+				{
+					render.Circle3D(wpoint, 10);
+				}
 				Vector2 pathEnd = LeagueFuncs::WorldToScreen(ai->destination);
 				render.Text(std::to_string(ai->GetPathLength()), pathEnd.x, pathEnd.y - 25.f);
 				render.Text(std::to_string(ai->GetPathLength() / ai->movementSpeed), pathEnd.x, pathEnd.y - 45.f);
+				render.Text(std::to_string(ai->GetWaypoints().size()), pathEnd.x, pathEnd.y - 65.f);
 			}
 
-			render.Circle3D(local->position, local->GetBoundingRadius() - 5.f, ImColor(1.f, 0.f, 0.f));
+			//render.Circle3D(local->position, local->GetBoundingRadius() - 5.f, ImColor(1.f, 0.f, 0.f));
 
 			if (Globals::bMenuOpen)
 			{

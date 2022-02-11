@@ -108,7 +108,7 @@ public:
 		return VFuncCall<float>(this, oVFunc::BoundingRadius);
 	}
 
-	int IsFunc(ObjectType type)
+	int IsFunc(const ObjectType& type)
 	{
 		if (!this)
 			return 0;

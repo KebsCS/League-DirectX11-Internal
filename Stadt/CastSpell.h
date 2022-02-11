@@ -46,7 +46,7 @@ public:
 		HookedMouse.pos = pos2D;
 		HookedMouse.enabled = true;
 		LOG("pre cast");
-		HandleSpellInput(slot, 2, 0);
+		HandleSpellInput(static_cast<int>(slot), 2, 0);
 		//HookedMouse.enabled = false;
 		LOG("after cast");
 

@@ -60,6 +60,38 @@ public:
 		return waypoints;
 	}
 
+	std::vector<Vector3>GetFuturePoints()
+	{
+		const std::vector<Vector3>waypoints = GetWaypoints();
+		const auto waypointsSize = waypoints.size();
+
+		std::vector<Vector3>futurePoints;
+		futurePoints.emplace_back(serverPos);
+		if (waypointsSize == 0)
+			return futurePoints;
+
+		bool found = false;
+		for (auto i = 1; i < waypointsSize; i++)
+		{
+			if (!found)
+			{
+				// find between which points we are
+				if (std::abs(serverPos.Distance(waypoints[i]) + serverPos.Distance(waypoints[i - 1]) - waypoints[i - 1].Distance(waypoints[i]))
+					<= 20.f) // 20 tolerance, because the position isn't ideal and it can be moved by minions
+				{
+					futurePoints.emplace_back(waypoints[i]);
+					found = true;
+				}
+			}
+			else
+			{
+				futurePoints.emplace_back(waypoints[i]);
+			}
+		}
+
+		return futurePoints;
+	}
+
 	float GetPathLength()
 	{
 		std::vector points = GetWaypoints();
@@ -96,7 +128,7 @@ public:
 	//	return waypoints;
 	//}
 
-	std::vector<Vector3> BuildNavigationPath(Vector3 endPos, const bool smooth = true)
+	std::vector<Vector3> BuildNavigationPath(Vector3 endPos, const bool& smooth = true)
 	{
 		Vector3 startPos = this->serverPos;
 		bool unk1, unk2, unk3;
@@ -134,22 +166,4 @@ public:
 		}
 		return waypoints;
 	}
-
-	// todo
-	/*std::vector<Vector3>GetFuturePoints()
-	{
-		std::vector<Vector3> waypoints;
-		waypoints.reserve((navEnd - navBegin) / 0x0C);
-		if (navBegin != 0 && navEnd != 0)
-		{
-			for (DWORD i = passedWaypoints-1; i < (navEnd - navBegin); i += 0x0C)
-			{
-				const Vector3 point = *reinterpret_cast<Vector3*>(navBegin + i);
-				if (!point.IsZero())
-					waypoints.emplace_back(point);
-			}
-		}
-
-		return waypoints;
-	}*/
 };

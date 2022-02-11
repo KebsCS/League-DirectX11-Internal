@@ -127,12 +127,12 @@ namespace LeagueFuncs
 	//}
 
 	//todo implement this to spell classes
-	static bool IsBasicAttackSlot(int slotId)
+	static bool IsBasicAttackSlot(const int& slotId)
 	{
 		return (unsigned int)(slotId - 64) <= 17;
 	}
 
-	static size_t FindVFunc(DWORD object, DWORD address)
+	static size_t FindVFunc(const DWORD& object, const DWORD& address)
 	{
 #ifdef DEVELOPER
 		DWORD* base = *reinterpret_cast<DWORD**>(object);

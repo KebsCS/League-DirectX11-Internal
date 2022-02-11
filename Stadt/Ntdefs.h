@@ -121,7 +121,7 @@ typedef PSAPI_WORKING_SET_EX_INFORMATION* PPSAPI_WORKING_SET_EX_INFORMATION;
 HMODULE GetKernel32Handle(void);
 
 //https://www.unknowncheats.me/wiki/C%2B%2B:Detecting_and_Removing_API_Hooks_using_C%2B%2B
-FARPROC GetProcedureAddress(HANDLE hModule, LPCSTR pszProcName);
+FARPROC GetProcedureAddress(const HANDLE& hModule, LPCSTR pszProcName);
 
 // https://github.com/apt69/RibeyeSpecial/blob/b56b225e8ae6507d514931f935445bd74b82de77/RibeyeBone/ImportHandler.cpp#L56
 void* GetModuleBase(LPCSTR moduleName);
@@ -162,7 +162,7 @@ Result WINAPI ModuleCall(LPCSTR module, LPCSTR procName, Args ... args)
 uintptr_t GetCurrentPID();
 
 template <typename T, typename ... Args>
-T VFuncCall(void* object, size_t index, Args...args)
+T VFuncCall(void* object, const size_t& index, Args...args)
 {
 	return reinterpret_cast<T(__thiscall*)(void*, Args...args)>((*(void***)object)[index])(object, args...);
 }

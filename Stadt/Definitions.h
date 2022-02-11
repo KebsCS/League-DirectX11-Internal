@@ -79,7 +79,7 @@ enum class ObjectTeam : unsigned
 	Neutral = 300
 };
 
-enum SpellSlotID : unsigned
+enum class SpellSlotID : unsigned
 {
 	Q = 0,
 	W = 1,

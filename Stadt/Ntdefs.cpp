@@ -40,7 +40,7 @@ HMODULE GetKernel32Handle(void)
 #endif
 }
 
-FARPROC GetProcedureAddress(HANDLE hModule, LPCSTR pszProcName)
+FARPROC GetProcedureAddress(const HANDLE& hModule, LPCSTR pszProcName)
 {
 	IMAGE_DOS_HEADER* pdhDosHeader = reinterpret_cast<IMAGE_DOS_HEADER*>(hModule);
 	//Check if valid PE

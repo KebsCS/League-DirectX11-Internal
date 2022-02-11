@@ -225,6 +225,7 @@
     <ClInclude Include="Offsets.h" />
     <ClInclude Include="OnProcessSpellCast.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Prediction.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="SelfProtection.h" />
     <ClInclude Include="SpellCastInfo.h" />

@@ -24,7 +24,7 @@ public:
 	T operator()(Args ... arg);
 
 private:
-	void Create(std::vector<BYTE>index, LPCSTR func, uintptr_t offset, std::vector<BYTE>ret);
+	void Create(std::vector<BYTE>& index, LPCSTR& func, uintptr_t& offset, std::vector<BYTE>& ret);
 };
 
 template <typename T>
@@ -55,7 +55,7 @@ Syscall<T>::Syscall(std::vector<BYTE>index, LPCSTR func, uintptr_t offset, std::
 }
 
 template <typename T>
-void Syscall<T>::Create(std::vector<BYTE>index, LPCSTR func, uintptr_t offset, std::vector<BYTE>ret)
+void Syscall<T>::Create(std::vector<BYTE>& index, LPCSTR& func, uintptr_t& offset, std::vector<BYTE>& ret)
 {
 	if (!hNtdll)
 	{

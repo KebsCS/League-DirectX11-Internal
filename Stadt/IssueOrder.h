@@ -39,12 +39,12 @@ private:
 
 public:
 
-	static void Move(Vector2 pos2D)
+	static void Move(const Vector2& pos2D)
 	{
 		TryRightClick(0, 0, false, pos2D.x, pos2D.y, 0);
 	}
 
-	static void Move(Vector3 pos)
+	static void Move(const Vector3& pos)
 	{
 		Vector2 pos2D = LeagueFuncs::WorldToScreen(pos);
 		if (!pos2D.IsZero())
@@ -53,12 +53,12 @@ public:
 		}
 	}
 
-	static void AttackMove(Vector2 pos2D)
+	static void AttackMove(const Vector2& pos2D)
 	{
 		TryRightClick(0, 1, false, pos2D.x, pos2D.y, 0);
 	}
 
-	static void AttackMove(Vector3 pos)
+	static void AttackMove(const Vector3& pos)
 	{
 		Vector2 pos2D = LeagueFuncs::WorldToScreen(pos);
 		if (!pos2D.IsZero())
@@ -67,7 +67,7 @@ public:
 		}
 	}
 
-	static void Attack(GameObject* target)
+	static void Attack(const GameObject* target)
 	{
 		Vector2 pos2D = LeagueFuncs::WorldToScreen(target->position);
 		if (!pos2D.IsZero())

@@ -9,7 +9,7 @@ class ObjectManager
 private:
 	inline static std::vector<GameObject*>tempHeroList;
 
-	static DWORD GetFirst(DWORD objectManager)
+	static DWORD GetFirst(const DWORD& objectManager)
 	{
 		//DWORD v1; // eax
 		//DWORD v2; // edx
@@ -27,7 +27,7 @@ private:
 		return *reinterpret_cast<DWORD*>(v1);
 	}
 
-	static DWORD GetNext(DWORD objectManager, DWORD obj)
+	static DWORD GetNext(const DWORD& objectManager, const DWORD& obj)
 	{
 		//DWORD v2; // eax
 		unsigned int v3; // edx

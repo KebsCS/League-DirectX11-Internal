@@ -10,6 +10,10 @@ private:
 	static inline DWORD lastRight = 0;
 	static inline const DWORD delay = 30;
 
+	static inline POINT lastPos;
+	static inline DWORD lastMove = 0;
+	static inline const DWORD delayMove = 20;
+
 	static inline INPUT input = { 0 };
 
 	// todo relative mouse movement
@@ -30,6 +34,21 @@ public:
 		::SendInput(1, &input, sizeof(input));
 	}
 
+	static void MouseBack(const Vector2& pos)
+	{
+		if (lastMove)
+			return;
+
+		POINT curMouse;
+		bool getMouse = LI_FN(GetCursorPos).get()(&curMouse);
+		if (!getMouse)
+			return;
+
+		Move(pos);
+		lastPos = curMouse;
+		lastMove = LI_FN(GetTickCount).get()();
+	}
+
 	// call in main loop
 	static void Update(const DWORD& now)
 	{
@@ -40,6 +59,12 @@ public:
 		if ((now - lastRight > delay) && lastRight)
 		{
 			RightUp();
+		}
+
+		if ((now - lastMove > delayMove) && lastMove)
+		{
+			Move(lastPos);
+			lastMove = 0;
 		}
 	}
 
