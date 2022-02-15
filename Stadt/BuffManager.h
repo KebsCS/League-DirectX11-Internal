@@ -2,8 +2,7 @@
 
 #include "Console.h"
 #include "Offsets.h"
-
-enum BuffType : int;
+#include "Definitions.h"
 
 class ScriptBaseBuff
 {
@@ -43,7 +42,7 @@ public:
 class BuffManager
 {
 public:
-	DWORD test;
+	DWORD pad;
 
 	std::vector<BuffInstance*> GetBuffList()
 	{
@@ -88,47 +87,17 @@ public:
 		}
 		return false;
 	}
-};
 
-enum BuffType : int
-{
-	Internal = 0,
-	Aura = 1,
-	CombatEnhancer = 2,
-	CombatDehancer = 3,
-	SpellShield = 4,
-	Stun = 5,
-	Invisibility = 6,
-	Silence = 7,
-	Taunt = 8,
-	Berserk = 9,
-	Polymorph = 10,
-	Slow = 11,
-	Snare = 12,
-	Damage = 13,
-	Heal = 14,
-	Haste = 15,
-	SpellImmunity = 16,
-	PhysicalImmunity = 17,
-	Invulnerability = 18,
-	AttackSpeedSlow = 19,
-	NearSight = 20,
-	Fear = 22,
-	Charm = 23,
-	Poison = 24,
-	Suppression = 25,
-	Blind = 26,
-	Counter = 27,
-	Currency = 21,
-	Shred = 28,
-	Flee = 29,
-	Knockup = 30,
-	Knockback = 31,
-	Disarm = 32,
-	Grounded = 33,
-	Drowsy = 34,
-	Asleep = 35,
-	Obscured = 36,
-	ClickproofToEnemies = 37,
-	UnKillable = 38
+	float StunDuration()
+	{
+		float max = *reinterpret_cast<float*>(RVA(oGameTime));
+		for (auto& buff : this->GetBuffList())
+		{
+			if (buff->type == BuffType::Charm || buff->type == BuffType::Knockup || buff->type == BuffType::Stun
+				|| buff->type == BuffType::Suppression || buff->type == BuffType::Snare)
+				if (max < buff->endTime)
+					max = buff->endTime;
+		}
+		return (max - *reinterpret_cast<float*>(RVA(oGameTime)));
+	}
 };

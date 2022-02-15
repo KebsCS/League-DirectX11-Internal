@@ -24,7 +24,7 @@ private:
 	//typedef bool(__thiscall* tTryRightClick)(DWORD hudInputLogic, int state, int isAttack, bool isAttackCommand, int x, int y, bool attackOnly);
 	static void TryRightClick(int state, int isAttack, bool isAttackCommand, int x, int y, bool attackOnly)
 	{
-		DWORD now = LI_FN(GetTickCount).get()();
+		DWORD now = FGetTickCount();
 		if (now - lastTick < delay)
 			return;
 		lastTick = now;

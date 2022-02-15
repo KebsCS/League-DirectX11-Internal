@@ -13,6 +13,7 @@ static constexpr auto oSpoofAddress = 0x4386; // any C3 instruction
 static constexpr auto oSpoofGadget = 0xEDA0F3; // ff 23 jmp dwort ptr [ebx]
 static constexpr auto oGetStatTotal = 0x1DE360; // CharBasePhysical GetStatTotal((_DWORD *)(a2 + 584), 2, 1);
 static constexpr auto oDoEmote = 0x5C73A0; // "evtEmoteTaunt" sub_11BFB80(&v96, EmoteWrapper); // 8B 0D ?? ?? ?? ?? 83 EC 0C 8B 49 08 53
+static constexpr auto oGetPing = 0x333590;
 
 static constexpr auto oChatClientPtr = 0x30e080c;// 0x3109E28;// 0x30fc790;
 //static constexpr auto oSendChat = 0x5F49B0;// 0x5F42A0; // outdated

@@ -155,3 +155,12 @@ __declspec(naked)uintptr_t GetCurrentPID()
 	};
 #endif
 }
+
+//https://github.com/spender-sandbox/cuckoomon-modified/blob/8977c40859cee718709adda664ce716c7ab65d58/hook_sleep.c
+DWORD WINAPI FGetTickCount(VOID)
+{
+	//if (IsWindowsVistaOrGreater())
+	return (DWORD)((*(ULONGLONG*)0x7ffe0320 * *(DWORD*)0x7ffe0004) >> 24);
+	//else
+	//	return (DWORD)(((ULONGLONG)*(DWORD *)0x7ffe0000 * *(DWORD *)0x7ffe0004) >> 24);
+}

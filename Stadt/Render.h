@@ -38,7 +38,7 @@ public:
 		InitCirclePoints();
 	}
 
-	void SetCirclePoints(const auto& points)
+	void SetCirclePoints(const size_t& points)
 	{
 		if (circlePoints != points)
 		{
@@ -152,7 +152,7 @@ public:
 		this->Image(x, y, width, height, image, false);
 	}
 
-	inline void Circle3D(const Vector3& worldPos, const float& radius, const ImColor& color = ImColor(1.f, 1.f, 1.f), const float& thickness = 1.f) const
+	inline void Circle3D(const Vector3& worldPos, const float& radius, const ImColor& color = ImColor(1.f, 1.f, 1.f), const float& thickness = 2.f) const
 	{
 		Vector3 worldSpace = worldPos;
 
@@ -166,7 +166,7 @@ public:
 		drawList->PathStroke(color, ImDrawFlags_None, thickness);
 	}
 
-	inline void Path3D(const std::vector<Vector3>& points, const ImColor& color = ImColor(1.f, 1.f, 1.f), const float& thickness = 1.f)
+	inline void Path3D(const std::vector<Vector3>& points, const ImColor& color = ImColor(1.f, 1.f, 1.f), const float& thickness = 2.f)
 	{
 		for (const Vector3& p : points)
 		{
@@ -199,7 +199,7 @@ public:
 		drawList->AddLine(pos1, pos2, color, thickness);
 	}
 	template <class T>
-	inline void Circle(T x, T y, float radius, int points, ImColor color, float thickness = 1.f)
+	inline void Circle(T x, T y, float radius, int points, ImColor color, float thickness = 2.f)
 	{
 		drawList->AddCircle(ImVec2(x, y), radius, color, points, thickness);
 	}
@@ -213,7 +213,7 @@ public:
 	{
 		const auto pointCount = 30;
 		static ImVec2 points[pointCount];
-		int i = 0;
+		size_t i = 0;
 
 		// todo, improve this so it doesnt count only own brush
 		if (brushes)
@@ -227,10 +227,10 @@ public:
 		{
 			Vector3 p = Vector3(0.f, 0.f, 0.f);
 
-			for (float i = 20.f; i <= range; i += 20.f)
+			for (float step = 20.f; step <= range; step += 20.f)
 			{
-				Vector3 p2 = Vector3(position.x + (i * cos(theta)), position.y, position.z - (i * sin(theta)));
-				if (!LeagueFuncs::IsNotWall(p2) || i == range || (brushes && LeagueFuncs::IsBrush(p2)))
+				Vector3 p2 = Vector3(position.x + (step * cos(theta)), position.y, position.z - (step * sin(theta)));
+				if (!LeagueFuncs::IsNotWall(p2) || step == range || (brushes && LeagueFuncs::IsBrush(p2)))
 				{
 					p = p2;
 					break;

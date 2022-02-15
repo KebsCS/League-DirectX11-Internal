@@ -71,7 +71,7 @@ public:
 			return futurePoints;
 
 		bool found = false;
-		for (auto i = 1; i < waypointsSize; i++)
+		for (size_t i = 1; i < waypointsSize; i++)
 		{
 			if (!found)
 			{

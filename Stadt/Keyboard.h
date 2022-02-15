@@ -64,6 +64,6 @@ public:
 		input.ki = kb;
 		::SendInput(1, &input, sizeof(input));
 
-		keys[key] = LI_FN(GetTickCount).get()();
+		keys[key] = FGetTickCount();
 	}
 };

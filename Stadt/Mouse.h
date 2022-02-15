@@ -46,7 +46,7 @@ public:
 
 		Move(pos);
 		lastPos = curMouse;
-		lastMove = LI_FN(GetTickCount).get()();
+		lastMove = FGetTickCount();
 	}
 
 	// call in main loop
@@ -78,7 +78,7 @@ public:
 		input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
 		::SendInput(1, &input, sizeof(input));
 
-		lastLeft = LI_FN(GetTickCount).get()();
+		lastLeft = FGetTickCount();
 	}
 
 	static void LeftUp()
@@ -101,7 +101,7 @@ public:
 		input.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
 		::SendInput(1, &input, sizeof(input));
 
-		lastRight = LI_FN(GetTickCount).get()();
+		lastRight = FGetTickCount();
 	}
 
 	static void RightUp()

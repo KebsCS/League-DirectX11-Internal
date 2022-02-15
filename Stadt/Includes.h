@@ -15,6 +15,7 @@
 #include "x86RetSpoof.h"
 
 #define DEVELOPER
+#define DISCORD
 
 #include "Console.h"
 

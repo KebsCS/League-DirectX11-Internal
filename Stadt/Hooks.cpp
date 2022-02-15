@@ -28,6 +28,7 @@
 
 typedef HRESULT(WINAPI* D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 D3D11PresentHook				phookD3D11Present = nullptr;
+uintptr_t DiscordPresent = 0;
 /*
 typedef void(__stdcall* D3D11DrawIndexedHook) (ID3D11DeviceContext* pContext, UINT IndexCount, UINT StartIndexLocation, INT BaseVertexLocation);
 D3D11DrawIndexedHook            phookD3D11DrawIndexed = nullptr;
@@ -77,7 +78,7 @@ void mouse_movement_detection(HRAWINPUT raw_input)
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	DWORD now = LI_FN(GetTickCount).get()();
+	DWORD now = FGetTickCount();
 	Keyboard::Update(now);
 	Mouse::Update(now);
 
@@ -192,24 +193,24 @@ void TestFuncs()
 }
 
 // todo, IAT/EAT hook(if undetected),
-FuncHook FHGetCursorPos;
-static BOOL WINAPI GetCursorPosHook(LPPOINT lpPoint)
-{
-	auto ret = FHGetCursorPos.Call<BOOL>(lpPoint);
-
-	//POINT& p = *lpPoint;
-	if (HookedMouse.enabled)
-	{
-		LOG("before lock");
-		HookedMouse.mutex.lock();
-		*lpPoint = HookedMouse.pos;
-		HookedMouse.mutex.unlock();
-		HookedMouse.enabled = false;
-		LOG("after lock");
-	}
-
-	return ret;
-}
+//FuncHook FHGetCursorPos;
+//static BOOL WINAPI GetCursorPosHook(LPPOINT lpPoint)
+//{
+//	auto ret = FHGetCursorPos.Call<BOOL>(lpPoint);
+//
+//	//POINT& p = *lpPoint;
+//	if (HookedMouse.enabled)
+//	{
+//		LOG("before lock");
+//		HookedMouse.mutex.lock();
+//		*lpPoint = HookedMouse.pos;
+//		HookedMouse.mutex.unlock();
+//		HookedMouse.enabled = false;
+//		LOG("after lock");
+//	}
+//
+//	return ret;
+//}
 
 static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
 {
@@ -297,6 +298,21 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 				for (auto& poly : danger_polygons)
 					render.Polygon(poly, ImColor(0.f, 0.f, 1.f));*/
 
+			GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
+
+			/*{
+				auto fwaypoint = local->GetAiManager()->GetFuturePoints();
+				if (fwaypoint.size() >= 2)
+				{
+					Vector3 disp = fwaypoint[1] - fwaypoint[0];
+					float distance = disp.Length();
+					Vector3 velocity = disp * (local->GetStatTotal(StatType::MoveSpeed) / distance);
+					Vector3 realvel = local->GetAiManager()->velocity;
+					LOG("my %f %f %f", velocity.x, velocity.y, velocity.z);
+					LOG("re %f %f %f", realvel.x, realvel.y, realvel.z);
+				}
+			}*/
+
 			for (auto& h : ObjectManager::HeroList())
 				render.Circle3D(h->GetAiManager()->serverPos, h->GetBoundingRadius(), ImColor(0.f, 1.f, 0.f));
 
@@ -307,13 +323,12 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 				mousecol = ImColor(0.f, 1.f, 0.f);
 
 			render.Circle3D(LeagueFuncs::GetMouseWorldPos(), 65.f, mousecol);
-			GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
 
 			static GameObject* enemy;
 
-			DWORD now = LI_FN(GetTickCount).get()();
+			DWORD now = FGetTickCount();
 			static DWORD lastTick = now + 100000;
-			if ((now - lastTick > 1000) && LI_FN(GetAsyncKeyState).get()(VK_F5))
+			//if ((now - lastTick > 1000) && LI_FN(GetAsyncKeyState).get()(VK_F5))
 			{
 				lastTick = now;
 				POINT curMouse(50, 50);
@@ -324,12 +339,22 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 						enemy = h;
 
 				// xerath w
-				auto p = Prediction::SkillInstant(local, enemy, 1000, 250, 0.75, 0);
-				if (p.hitChance != 0)
+				auto p = Prediction::Preidct33(local, enemy, 1500, 60, 0.75, 99999, 0);
+				render.Circle3D(p, 65, ImColor(0.f, 0.f, 1.f));
+				if (LI_FN(GetAsyncKeyState).get()(VK_F5))
 				{
-					Mouse::MouseBack(LeagueFuncs::WorldToScreen(p.pos));
+					Mouse::MouseBack(LeagueFuncs::WorldToScreen(p));
 					Keyboard::KeyDown(DIK_W);
+					//IssueOrder::AttackMove(curMouse);
 				}
+
+				/*	Vector3 predict = Prediction::Preidct33(local, enemy, 1500, 60, 0.6, 3300, 0);
+					render.Circle3D(predict, 65,ImColor(0.f,0.f,1.f));
+					if (LI_FN(GetAsyncKeyState).get()(VK_F5))
+					{
+						Mouse::MouseBack(LeagueFuncs::WorldToScreen(predict));
+						Keyboard::KeyDown(DIK_W);
+					}*/
 
 				{
 					//IssueOrder::AttackMove(curMouse);
@@ -338,7 +363,7 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			}
 			if (enemy)
 			{
-				render.Circle3D(Prediction::PosAfterTime(enemy, 0.75), 65.f);
+				//render.Circle3D(Prediction::PosAfterTime(enemy, 0.75), 65.f);
 				render.Circle3D(local->GetAiManager()->serverPos, 1000);
 			}
 
@@ -446,16 +471,70 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 
 		::ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	}
-
 #ifdef USEMINHOOK
 	return phookD3D11Present(pSwapChain, SyncInterval, Flags);
 #else
-	return FHPresent.Call<HRESULT>(pSwapChain, SyncInterval, Flags);
+	return phookD3D11Present(pSwapChain, SyncInterval, Flags);
+
+	//return FHPresent.Call<HRESULT>(pSwapChain, SyncInterval, Flags);
 #endif
+}
+
+inline uintptr_t FindPattern(void* module, const char* szSignature) {
+	static auto patternToByte = [](const char* pattern) {
+		auto bytes = std::vector<int>{};
+		auto start = const_cast<char*>(pattern);
+		auto end = const_cast<char*>(pattern) + strlen(pattern);
+
+		for (auto current = start; current < end; ++current) {
+			if (*current == '?') {
+				++current;
+				if (*current == '?')
+					++current;
+				bytes.push_back(-1);
+			}
+			else {
+				bytes.push_back(strtoul(current, &current, 16));
+			}
+		}
+		return bytes;
+	};
+
+	const auto dosHeader = (PIMAGE_DOS_HEADER)module;
+	const auto ntHeaders = (PIMAGE_NT_HEADERS)((std::uint8_t*)module + dosHeader->e_lfanew);
+
+	const auto sizeOfImage = ntHeaders->OptionalHeader.SizeOfImage;
+	auto       patternBytes = patternToByte(szSignature);
+	const auto scanBytes = reinterpret_cast<std::uint8_t*>(module);
+
+	const auto s = patternBytes.size();
+	const auto d = patternBytes.data();
+
+	for (auto i = 0ul; i < sizeOfImage - s; ++i)
+	{
+		bool found = true;
+		for (auto j = 0ul; j < s; ++j)
+		{
+			if (scanBytes[i + j] != d[j] && d[j] != -1)
+			{
+				found = false;
+				break;
+			}
+		}
+		if (found) { return reinterpret_cast<uintptr_t>(&scanBytes[i]); }
+	}
+	return 0;
 }
 
 bool Hooks::Init()
 {
+#ifdef DISCORD
+	DiscordPresent = FindPattern(GetModuleBase(XorStr("DiscordHook.dll")),
+		XorStr("FF 15 ? ? ? ? 89 C6 8D 4D EC E8 ? ? ? ? 8B 4D F0 31 E9 E8 ? ? ? ? 89 F0 83 C4 08 5E 5F 5B 5D C2 0C 00")) + 0x2;
+	phookD3D11Present = **reinterpret_cast<D3D11PresentHook**>(DiscordPresent); // PresentSceneOriginal
+	**reinterpret_cast<D3D11PresentHook**>(DiscordPresent) = reinterpret_cast<D3D11PresentHook>(PresentHook);
+
+#else
 	D3D_FEATURE_LEVEL FeatureLevelsRequested[] = { D3D_FEATURE_LEVEL_11_0/*, D3D_FEATURE_LEVEL_10_1 */ };
 	D3D_FEATURE_LEVEL FeatureLevelsSupported;
 
@@ -519,6 +598,7 @@ bool Hooks::Init()
 	FHPresent.Hook();
 
 #endif
+#endif
 
 	LOG("Swapchain hooked");
 
@@ -549,11 +629,16 @@ void Hooks::Release()
 	MH_Uninitialize();
 #else
 
+#ifdef DISCORD
+	** reinterpret_cast<D3D11PresentHook**>(DiscordPresent) = reinterpret_cast<D3D11PresentHook>(phookD3D11Present);
+#else
 	FHPresent.UnHook();
+#endif
+
 	FHTestFunc.UnHook();
 	FHGetDeviceData.UnHook();
 
-	FHGetCursorPos.UnHook();
+	//FHGetCursorPos.UnHook();
 #endif
 
 	lowLevelHooks.Release();

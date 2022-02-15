@@ -132,7 +132,16 @@ namespace LeagueFuncs
 		return (unsigned int)(slotId - 64) <= 17;
 	}
 
-	static size_t FindVFunc(const DWORD& object, const DWORD& address)
+	static int GetPing()
+	{
+		//3CD5F30
+		//double v2 = x86RetSpoof::invokeThiscall<double>(*(DWORD*)(RVA(0x184E578) + 40), RVA(0x968CB0), RVA(oSpoofGadget));
+		//LOG("%lf", v2);
+		//v2 = 0.000835
+		return x86RetSpoof::invokeStdcall<signed int>(RVA(oGetPing), RVA(oSpoofGadget), RVA(0x30F5F30), 0.f);
+	}
+
+	static int FindVFunc(const DWORD& object, const DWORD& address)
 	{
 #ifdef DEVELOPER
 		DWORD* base = *reinterpret_cast<DWORD**>(object);
