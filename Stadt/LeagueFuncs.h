@@ -23,20 +23,6 @@ namespace LeagueFuncs
 	//	fnPrintChat(*(DWORD*)(Globals::dwBaseAddress + oChatClientPtr), message, color);
 	//}
 
-	//typedef bool(__cdecl* tIsNotWall)(Vector3*, unsigned __int16);
-	static bool IsNotWall(Vector3 pos)
-	{
-		return x86RetSpoof::invokeCdecl<bool>(RVA(oIsNotWall), RVA(oSpoofGadget),
-			&pos, (unsigned __int16)0);
-	}
-
-	//typedef bool(__cdecl* tIsBrush)(Vector3*);
-	static bool IsBrush(Vector3 pos)
-	{
-		return x86RetSpoof::invokeCdecl<bool>(RVA(oIsBrush), RVA(oSpoofGadget),
-			&pos);
-	}
-
 	//typedef bool(__cdecl* tTestFunc)(Vector3*);
 	//static bool TestFunc(Vector3 pos)
 	//{
@@ -132,13 +118,76 @@ namespace LeagueFuncs
 		return (unsigned int)(slotId - 64) <= 17;
 	}
 
-	static int GetPing()
+	//static int GetPing()
+	//{
+	//	//3CD5F30
+	//	//double v2 = x86RetSpoof::invokeThiscall<double>(*(DWORD*)(RVA(0x184E578) + 40), RVA(0x968CB0), RVA(oSpoofGadget));
+	//	//LOG("%lf", v2);
+	//	//v2 = 0.000835
+	//	return x86RetSpoof::invokeStdcall<signed int>(RVA(oGetPing), RVA(oSpoofGadget), RVA(0x30F5F30), 0.f);
+	//}
+
+	static unsigned GetCollisionFlags(float* a1)
 	{
-		//3CD5F30
-		//double v2 = x86RetSpoof::invokeThiscall<double>(*(DWORD*)(RVA(0x184E578) + 40), RVA(0x968CB0), RVA(oSpoofGadget));
-		//LOG("%lf", v2);
-		//v2 = 0.000835
-		return x86RetSpoof::invokeStdcall<signed int>(RVA(oGetPing), RVA(oSpoofGadget), RVA(0x30F5F30), 0.f);
+		// inside IsNotWall, or IsGrass etc
+		DWORD dword_42AFB10 = *reinterpret_cast<DWORD*>(RVA(0x311E394));
+
+		float v2; // xmm1_4
+		int v3; // ecx
+		int v4; // edx
+		signed int v5; // edi
+		float v6; // xmm0_4
+		int v7; // eax
+		int v8; // edx
+		int v9; // eax
+		__int16 v10; // cx
+		int v11; // ecx
+		__int16 v13; // ax
+
+		v2 = *(float*)(dword_42AFB10 + 1452);
+		v3 = *(DWORD*)(dword_42AFB10 + 1440);
+		v4 = v3 - 1;
+		v5 = (signed int)(float)((float)(a1[2] - *(float*)(dword_42AFB10 + 108)) * v2);
+		v6 = (float)(a1[0] - *(float*)(dword_42AFB10 + 100)) * v2;
+		if ((signed int)v6 <= v3 - 1)
+		{
+			v4 = (signed int)v6;
+			if ((signed int)v6 < 0)
+				v4 = 0;
+		}
+		v7 = *(DWORD*)(dword_42AFB10 + 1444) - 1;
+		if (v5 <= v7)
+		{
+			v7 = (signed int)(float)((float)(a1[2] - *(float*)(dword_42AFB10 + 108)) * v2);
+			if (v5 < 0)
+				v7 = 0;
+		}
+		v8 = *(DWORD*)(dword_42AFB10 + 128) + 8 * (v4 + v7 * v3);
+		if (!v8)
+			return 0;
+		v9 = *reinterpret_cast<DWORD*>(v8);
+		if (*reinterpret_cast<DWORD*>(v8))
+			v10 = *reinterpret_cast<WORD*>(v9 + 6);
+		else
+			v10 = *reinterpret_cast<WORD*>(v8 + 4);
+		v11 = v10 & 0xC00;
+		if (v11)
+			return v11;
+		if (v9)
+			v13 = *reinterpret_cast<WORD*>(v9 + 6);
+		else
+			v13 = *reinterpret_cast<WORD*>(v8 + 4);
+		return v13;
+	}
+
+	static bool IsBrush(Vector3 pos)
+	{
+		return GetCollisionFlags(pos) & CollisionFlags::Grass;
+	}
+
+	static bool IsNotWall(Vector3 pos)
+	{
+		return !(GetCollisionFlags(pos) & CollisionFlags::Wall);
 	}
 
 	static int FindVFunc(const DWORD& object, const DWORD& address)

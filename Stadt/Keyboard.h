@@ -43,7 +43,7 @@ public:
 		kb.dwExtraInfo = 0;
 		input.type = INPUT_KEYBOARD;
 		input.ki = kb;
-		::SendInput(1, &input, sizeof(input));
+		FNtUserSendInput(1, &input, sizeof(input));
 	}
 
 	static void KeyDown(const WORD& key)
@@ -62,7 +62,7 @@ public:
 		kb.dwExtraInfo = 0;
 		input.type = INPUT_KEYBOARD;
 		input.ki = kb;
-		::SendInput(1, &input, sizeof(input));
+		FNtUserSendInput(1, &input, sizeof(input));
 
 		keys[key] = FGetTickCount();
 	}

@@ -119,12 +119,12 @@ LPVOID NtAllocateVirtualMemoryFunc(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwS
 {
 	if (!NtAllocateVirtualMemory)
 	{
-		//constexpr const char szNtdll[] = { 'n', 't', 'd', 'l', 'l', '.', 'd', 'l', 'l','\0' };
-		std::string szNtdll = XorStr("ntdll.dll");
-		//constexpr const char szNtAllocateVirtualMemory[] = { 'N','t','A','l','l','o','c','a','t','e','V','i','r','t','u','a','l','M','e','m','o','r','y','\0' };
-		std::string szNtAllocateVirtualMemory = XorStr("NtAllocateVirtualMemory");
-		HMODULE hNtdll = reinterpret_cast<HMODULE>(GetModuleBase(/*XorStr*/(szNtdll.c_str())));
-		NtAllocateVirtualMemory = (tNtAllocateVirtualMemory)GetProcedureAddress(hNtdll, szNtAllocateVirtualMemory.c_str());
+		auto skNtdll = skCrypt("ntdll.dll");
+		HMODULE hNtdll = reinterpret_cast<HMODULE>(GetModuleBase(std::string(skNtdll).c_str()));
+		skNtdll.clear();
+		auto skNtAllocateVirtualMemory = skCrypt("NtAllocateVirtualMemory");
+		NtAllocateVirtualMemory = (tNtAllocateVirtualMemory)GetProcedureAddress(hNtdll, std::string(skNtAllocateVirtualMemory).c_str());
+		skNtAllocateVirtualMemory.clear();
 	}
 
 	void* v10 = lpAddress;

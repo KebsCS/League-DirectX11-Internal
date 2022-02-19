@@ -228,6 +228,12 @@
     <ClInclude Include="Prediction.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="skCrypter.h">
+      <Filter>Libs</Filter>
+    </ClInclude>
+    <ClInclude Include="MissionInfo.h">
+      <Filter>Game\Classes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

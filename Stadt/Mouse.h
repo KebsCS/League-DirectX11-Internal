@@ -12,7 +12,7 @@ private:
 
 	static inline POINT lastPos;
 	static inline DWORD lastMove = 0;
-	static inline const DWORD delayMove = 20;
+	static inline const DWORD delayMove = 40;
 
 	static inline INPUT input = { 0 };
 
@@ -31,7 +31,7 @@ public:
 		input.mi.dy = SENDINPUTY(pos.y);
 		input.mi.time = 0;
 		input.mi.dwExtraInfo = 0;
-		::SendInput(1, &input, sizeof(input));
+		FNtUserSendInput(1, &input, sizeof(input));
 	}
 
 	static void MouseBack(const Vector2& pos)
@@ -76,7 +76,7 @@ public:
 		::ZeroMemory(&input, sizeof(INPUT));
 		input.type = INPUT_MOUSE;
 		input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-		::SendInput(1, &input, sizeof(input));
+		FNtUserSendInput(1, &input, sizeof(input));
 
 		lastLeft = FGetTickCount();
 	}
@@ -86,7 +86,7 @@ public:
 		::ZeroMemory(&input, sizeof(INPUT));
 		input.type = INPUT_MOUSE;
 		input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
-		::SendInput(1, &input, sizeof(input));
+		FNtUserSendInput(1, &input, sizeof(input));
 
 		lastLeft = 0;
 	}
@@ -99,7 +99,7 @@ public:
 		::ZeroMemory(&input, sizeof(INPUT));
 		input.type = INPUT_MOUSE;
 		input.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
-		::SendInput(1, &input, sizeof(input));
+		FNtUserSendInput(1, &input, sizeof(input));
 
 		lastRight = FGetTickCount();
 	}
@@ -109,7 +109,7 @@ public:
 		::ZeroMemory(&input, sizeof(INPUT));
 		input.type = INPUT_MOUSE;
 		input.mi.dwFlags = MOUSEEVENTF_RIGHTUP;
-		::SendInput(1, &input, sizeof(input));
+		FNtUserSendInput(1, &input, sizeof(input));
 
 		lastRight = 0;
 	}

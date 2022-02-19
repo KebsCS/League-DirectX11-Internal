@@ -18,7 +18,13 @@ public:
 
 	Vector3(float xx, float yy, float zz) : x(xx), y(yy), z(zz) {}
 	Vector3();
-	//operator float* ();
+	operator float* () {
+		return &x;
+	}
+
+	operator const float* () const {
+		return &x;
+	}
 
 	bool IsValid() const;
 	[[nodiscard]] Vector3 ToGround() const;

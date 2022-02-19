@@ -59,9 +59,9 @@ void Syscall<T>::Create(std::vector<BYTE>& index, LPCSTR& func, uintptr_t& offse
 {
 	if (!hNtdll)
 	{
-		//constexpr const char szNtdll[] = { 'n', 't', 'd', 'l', 'l', '.', 'd', 'l', 'l','\0' };
-		std::string szNtdll = XorStr("ntdll.dll");
-		hNtdll = reinterpret_cast<HMODULE>(GetModuleBase((szNtdll.c_str())));
+		auto skNtdll = skCrypt("ntdll.dll");
+		hNtdll = reinterpret_cast<HMODULE>(GetModuleBase(std::string(skNtdll).c_str()));
+		skNtdll.clear();
 	}
 
 #ifdef _WIN64 // idk shellcode is fine but doesnt work

@@ -4,6 +4,7 @@
 #include <mutex>
 
 #include "XorString.h"
+#include "skCrypter.h"
 
 #define NtCurrentProcess (HANDLE)0xFFFFFFFF
 

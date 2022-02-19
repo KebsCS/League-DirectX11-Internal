@@ -218,6 +218,7 @@
     <ClInclude Include="Matrix4x4.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="MinHook.h" />
+    <ClInclude Include="MissionInfo.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="Ntdefs.h" />
     <ClInclude Include="Ntfuncs.h" />
@@ -228,6 +229,7 @@
     <ClInclude Include="Prediction.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="SelfProtection.h" />
+    <ClInclude Include="skCrypter.h" />
     <ClInclude Include="SpellCastInfo.h" />
     <ClInclude Include="SpellData.h" />
     <ClInclude Include="SpellInfo.h" />

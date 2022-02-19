@@ -3,7 +3,6 @@
 #include "Ntfuncs.h"
 #include "Syscall.h"
 
-//constexpr const char szRtlInterlockedCompareExchange64[] = { 'R', 't', 'l', 'I', 'n', 't', 'e', 'r', 'l', 'o', 'c','k','e','d','C','o','m','p','a','r','e','E','x','c','h','a','n','g','e','6','4','\0' };
 std::string szRtlInterlockedCompareExchange64 = XorStr("RtlInterlockedCompareExchange64");
 LPCSTR RtlInterlockedCompareExchange64 = szRtlInterlockedCompareExchange64.c_str();// szRtlInterlockedCompareExchange64;
 
@@ -40,6 +39,7 @@ HANDLE FOpenThread(DWORD dwDesiredAccess, DWORD dwThreadId)
 DWORD FSuspendThread(HANDLE hThread)
 {
 	ULONG ulPreviousSuspendCount = NULL;
+
 	NTSTATUS ntStatus = Syscall<NTSTATUS>({ 0xBC,0x01,0x07 }, RtlInterlockedCompareExchange64, 0x170, { 0x08 })
 		(hThread, &ulPreviousSuspendCount);
 	return ulPreviousSuspendCount;
@@ -48,6 +48,7 @@ DWORD FSuspendThread(HANDLE hThread)
 DWORD FResumeThread(HANDLE hThread)
 {
 	ULONG ulPreviousSuspendCount = NULL;
+
 	NTSTATUS ntStatus = Syscall<NTSTATUS>({ 0x52,0x00,0x07 }, RtlInterlockedCompareExchange64, 0x170, { 0x08 })
 		(hThread, &ulPreviousSuspendCount);
 	return ulPreviousSuspendCount;
@@ -92,6 +93,7 @@ LPVOID FVirtualAllocEx(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD  
 SIZE_T FVirtualQueryEx(HANDLE hProcess, LPCVOID lpAddress, PMEMORY_BASIC_INFORMATION lpBuffer, SIZE_T dwLength)
 {
 	ULONG ReturnLength;
+
 	NTSTATUS ntStatus = Syscall<NTSTATUS>({ 0x50 }, RtlInterlockedCompareExchange64, 0x170, { 0x14 })
 		(hProcess, lpAddress, lpBuffer, MemoryBasicInformation, dwLength, &ReturnLength);
 	return ReturnLength;
@@ -212,8 +214,9 @@ HMODULE LoadDll(LPCSTR lpFileName)
 {
 	if (!hNtdll)
 	{
-		std::string szNtdll = XorStr("ntdll.dll");
-		hNtdll = reinterpret_cast<HMODULE>(GetModuleBase((szNtdll.c_str())));
+		auto skNtdll = skCrypt("ntdll.dll");
+		hNtdll = reinterpret_cast<HMODULE>(GetModuleBase(std::string(skNtdll).c_str()));
+		skNtdll.clear();
 	}
 	if (!_LdrLoadDll) // can be a syscall, todo
 	{
@@ -372,4 +375,47 @@ BOOL WINAPI FSetProcessDEPPolicy() // PROCESS_DEP_ENABLE
 	policy.Enable = 1;
 	policy.Permanent = TRUE;
 	return FSetProcessMitigationPolicy(ProcessDEPPolicy, &policy, sizeof(policy));
+}
+
+// https://github.com/Hypercall/MouseController/blob/master/MouseController/MouseController.cpp
+BOOL WINAPI FNtUserSendInput(UINT cInputs, LPINPUT pInputs, int cbSize)
+{
+	static LPVOID NtUserSendInput_Addr = NULL;
+	static BYTE NtUserSendInput_Bytes[30];
+	if (!NtUserSendInput_Addr)
+	{
+		auto skNtUserSendInput = skCrypt("NtUserSendInput");
+		auto skwin32u = skCrypt("win32u.dll");
+		auto skuser32 = skCrypt("user32.dll");
+
+		// windows 8.1 / windows 10
+		NtUserSendInput_Addr = GetProcedureAddress(GetModuleBase(std::string(skwin32u).c_str()), std::string(skNtUserSendInput).c_str());
+		if (!NtUserSendInput_Addr)
+		{
+			NtUserSendInput_Addr = GetProcedureAddress(GetModuleBase(std::string(skuser32).c_str()), std::string(skNtUserSendInput).c_str());
+			//if (!NtUserSendInput_Addr)
+			//{
+			//	// Windows 7 or lower detected
+			//	NtUserSendInput_Addr = GetProcedureAddress(GetModuleBase("user32"), "SendInput");
+			//	if (!NtUserSendInput_Addr)
+			//		return FALSE;
+			//}
+		}
+		skNtUserSendInput.clear();
+		skwin32u.clear();
+		skuser32.clear();
+		memcpy(NtUserSendInput_Bytes, NtUserSendInput_Addr, 30);
+	}
+
+	LPVOID NtUserSendInput_Spoof = FVirtualAllocEx(NtCurrentProcess, 0, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	//LPVOID NtUserSendInput_Spoof = VirtualAlloc(0, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE); // allocate space for syscall
+	if (!NtUserSendInput_Spoof)
+		return FALSE;
+	memcpy(NtUserSendInput_Spoof, NtUserSendInput_Bytes, 30); // copy syscall
+	NTSTATUS Result = reinterpret_cast<NTSTATUS(NTAPI*)(UINT, LPINPUT, int)>(NtUserSendInput_Spoof)(cInputs, pInputs, cbSize); // calling spoofed function
+	ZeroMemory(NtUserSendInput_Spoof, 0x1000); // clean address
+	//FVirtualFree(NtUserSendInput_Spoof, 0, MEM_RELEASE); // free it
+	LI_FN(VirtualFreeEx)((HANDLE)-1, NtUserSendInput_Spoof, NULL, MEM_RELEASE);
+	return (Result > 0); // return the status
+
 }

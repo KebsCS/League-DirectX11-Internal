@@ -27,6 +27,8 @@
 #include <mutex>
 #include <sstream>
 #include <numbers>
+#include <queue>
+
 
 #define DIRECTINPUT_VERSION 0x0800
 #include <d3d11.h>

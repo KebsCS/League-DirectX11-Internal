@@ -95,3 +95,5 @@ NTSTATUS FNtSetInformationProcess(
 bool WINAPI FSetProcessMitigationPolicy(PROCESS_MITIGATION_POLICY MitigationPolicy, PVOID lpBuffer, SIZE_T dwLength);
 
 BOOL WINAPI FSetProcessDEPPolicy();
+
+BOOL WINAPI FNtUserSendInput(UINT cInputs, LPINPUT pInputs, int cbSize);

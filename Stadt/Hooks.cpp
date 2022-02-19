@@ -132,6 +132,44 @@ static HRESULT WINAPI Hooks::GetDeviceDataHook(IDirectInputDevice8W* pThis, DWOR
 	{
 		for (DWORD i = 0; i < *pdwInOut; i++)
 		{
+			//if (bXerathAimbot)
+			{
+				//todo xerath stuff, move to class, less scuffed when not holding, or dont aim at all when tapping
+				// and better detection if holding, instead of inputs ==0, maybe if has xerath buff holding q
+				if (rgdod[i].dwOfs == DIK_Q)
+				{
+					LOG("dwOfs %d dwData %d  dwTimeStamp %d dwSequence %d", rgdod[i].dwOfs, rgdod[i].dwData, rgdod[i].dwTimeStamp, rgdod[i].dwSequence);
+					
+					// button released
+					if (rgdod[i].dwData == 0 && (CastSpell::InputsSize() == 0))
+					{
+					
+						GameObject* local = *reinterpret_cast<GameObject**>(RVA(oLocalPlayer));
+						Vector3 mousePos = LeagueFuncs::GetMouseWorldPos();
+						float max = 999999;
+						GameObject* target;
+						for (GameObject* enemy : ObjectManager::HeroList())
+						{
+							if (enemy != local)
+							{
+								if (mousePos.Distance(enemy->position) < max)
+								{
+									max = mousePos.Distance(enemy->position);
+									target = enemy;
+								}
+							}
+						}
+						if (max < 500.f)
+						{
+							auto p = Prediction::Preidct33(local, target, 1600, 95, 0.5, 999999, 0);
+							CastSpell::Cast(DIK_Q, LeagueFuncs::WorldToScreen(p));
+							rgdod[i].dwOfs = 0;
+						}
+					}
+				}
+			}
+
+
 			if (LOBYTE(rgdod[i].dwData) > 0)
 			{
 				//LOG("%d %d %d %d %d", rgdod[i].dwOfs, rgdod[i].dwData, rgdod[i].dwTimeStamp, rgdod[i].dwSequence, rgdod[i].uAppData);
@@ -141,6 +179,8 @@ static HRESULT WINAPI Hooks::GetDeviceDataHook(IDirectInputDevice8W* pThis, DWOR
 					rgdod[i].dwData = 0;
 					rgdod[i].dwOfs = 0;
 				}
+
+				
 
 				//switch (rgdod[i].dwOfs)
 				{
@@ -262,6 +302,8 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 
 			render.RenderScene();
 
+			CastSpell::Update();
+
 			// VISUALS GO HERE
 			// -----
 
@@ -324,6 +366,11 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 
 			render.Circle3D(LeagueFuncs::GetMouseWorldPos(), 65.f, mousecol);
 
+			Vector3 mousePos = LeagueFuncs::GetMouseWorldPos();
+			Vector2 mousePos2D = LeagueFuncs::WorldToScreen(mousePos);
+			std::string col = std::to_string(LeagueFuncs::GetCollisionFlags(mousePos));
+			render.Text(col, mousePos2D.x, mousePos2D.y+30);
+
 			static GameObject* enemy;
 
 			DWORD now = FGetTickCount();
@@ -339,13 +386,18 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 						enemy = h;
 
 				// xerath w
-				auto p = Prediction::Preidct33(local, enemy, 1500, 60, 0.75, 99999, 0);
+				//auto p = Prediction::Preidct33(local, enemy, 1500, 60, 0.75, 99999, 0);
+
+				// ezreal q
+				auto p = Prediction::Preidct33(local, enemy, 1200, 60, 0.25, 2000, 0);
+
 				render.Circle3D(p, 65, ImColor(0.f, 0.f, 1.f));
-				if (LI_FN(GetAsyncKeyState).get()(VK_F5))
+				if (LI_FN(GetAsyncKeyState).get()(VK_F5) & 1)
 				{
-					Mouse::MouseBack(LeagueFuncs::WorldToScreen(p));
-					Keyboard::KeyDown(DIK_W);
+					//Mouse::Move(LeagueFuncs::WorldToScreen(p));
+					//Keyboard::KeyDown(DIK_Q);
 					//IssueOrder::AttackMove(curMouse);
+					CastSpell::Cast(DIK_Q, LeagueFuncs::WorldToScreen(p));
 				}
 
 				/*	Vector3 predict = Prediction::Preidct33(local, enemy, 1500, 60, 0.6, 3300, 0);
@@ -364,7 +416,7 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 			if (enemy)
 			{
 				//render.Circle3D(Prediction::PosAfterTime(enemy, 0.75), 65.f);
-				render.Circle3D(local->GetAiManager()->serverPos, 1000);
+				render.Circle3D(local->position, 1000);
 			}
 
 			//std::vector<Vector3>points = *reinterpret_cast<std::vector<Vector3>*>(local->GetAiManager() + 0x1E4);
@@ -471,12 +523,16 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 
 		::ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	}
+
+#ifdef DISCORD
+	return phookD3D11Present(pSwapChain, SyncInterval, Flags);
+#else
+
 #ifdef USEMINHOOK
 	return phookD3D11Present(pSwapChain, SyncInterval, Flags);
 #else
-	return phookD3D11Present(pSwapChain, SyncInterval, Flags);
-
-	//return FHPresent.Call<HRESULT>(pSwapChain, SyncInterval, Flags);
+	return FHPresent.Call<HRESULT>(pSwapChain, SyncInterval, Flags);
+#endif
 #endif
 }
 
@@ -529,9 +585,17 @@ inline uintptr_t FindPattern(void* module, const char* szSignature) {
 bool Hooks::Init()
 {
 #ifdef DISCORD
-	DiscordPresent = FindPattern(GetModuleBase(XorStr("DiscordHook.dll")),
-		XorStr("FF 15 ? ? ? ? 89 C6 8D 4D EC E8 ? ? ? ? 8B 4D F0 31 E9 E8 ? ? ? ? 89 F0 83 C4 08 5E 5F 5B 5D C2 0C 00")) + 0x2;
-	phookD3D11Present = **reinterpret_cast<D3D11PresentHook**>(DiscordPresent); // PresentSceneOriginal
+	HANDLE discordHandle = 0;
+	auto skDiscord = skCrypt("DiscordHook.dll");
+	while (!discordHandle)
+		discordHandle = GetModuleBase(skDiscord);
+	skDiscord.clear();
+
+	auto skPattern = skCrypt("FF 15 ? ? ? ? 89 C6 8D 4D EC E8 ? ? ? ? 8B 4D F0 31 E9 E8 ? ? ? ? 89 F0 83 C4 08 5E 5F 5B 5D C2 0C 00");
+	DiscordPresent = FindPattern(discordHandle, skPattern) + 0x2;
+	skPattern.clear();
+
+	phookD3D11Present = **reinterpret_cast<D3D11PresentHook**>(DiscordPresent);
 	**reinterpret_cast<D3D11PresentHook**>(DiscordPresent) = reinterpret_cast<D3D11PresentHook>(PresentHook);
 
 #else

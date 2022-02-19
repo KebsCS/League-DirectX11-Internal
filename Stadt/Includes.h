@@ -5,6 +5,7 @@
 #include "stb_image.h"
 
 #include "XorString.h"
+#include "skCrypter.h"
 
 #include "json.h"
 
@@ -15,7 +16,7 @@
 #include "x86RetSpoof.h"
 
 #define DEVELOPER
-#define DISCORD
+//#define DISCORD
 
 #include "Console.h"
 
