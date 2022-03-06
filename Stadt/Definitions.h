@@ -182,5 +182,16 @@ enum GameMap : unsigned
 	HowlingAbyss = 12
 };
 
+enum SpellState : unsigned
+{
+	Ready = 0,
+	NotAvailable = 4,
+	Surpressed = 8,
+	NotLearned = 12,
+	Processing = 24,
+	Cooldown = 32,
+	NoMana = 64,
+};
+
 constexpr float levelExp[18] = { 0.f, 280.f, 660.f, 1140.f, 1720.f, 2400.f, 3180.f, 4060.f,
 5040.f, 6120.f, 7300.f, 8580.f, 9960.f, 11440.f, 13020.f, 14700.f, 16480.f, 18360.f };

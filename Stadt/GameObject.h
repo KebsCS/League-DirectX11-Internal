@@ -162,6 +162,19 @@ public:
 		DWORD statOwner = (DWORD)this + 584;
 		return x86RetSpoof::invokeThiscall<double>(statOwner, RVA(oGetStatTotal), RVA(oSpoofGadget), type, outputType);
 	}
+
+	//83 EC 14 8B 44 24 1C 55
+	int GetSpellState(SpellSlotID slot)
+	{
+		return 0;//todo
+		//DWORD spellbook = *(DWORD*)((DWORD)this + 0x2370);//VFuncCall<DWORD>(this, oVFunc::GetSpellbook);
+		//LOG("spellbook %d", spellbook);
+		//byte zero = 0;
+
+		//return (x86RetSpoof::invokeThiscall<int>(std::uintptr_t(spellbook), RVA(0x4DD880), RVA(oSpoofGadget),
+		//	(int)slot, &zero));
+	}
+
 };
 
 enum class StatType : unsigned

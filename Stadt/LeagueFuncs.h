@@ -204,7 +204,7 @@ namespace LeagueFuncs
 			}
 			i++;
 		}
-		//LOG("Function not found");
+		LOG("Function not found %d",i);
 		return -1;
 #endif
 	}

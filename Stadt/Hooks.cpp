@@ -355,6 +355,10 @@ static HRESULT WINAPI Hooks::PresentHook(IDXGISwapChain* pSwapChain, UINT SyncIn
 				}
 			}*/
 
+			//LOG("spellstate q %d", local->GetSpellState(SpellSlotID::Q));
+
+			LeagueFuncs::FindVFunc(((DWORD)local + 0x21b8), 0x0);
+
 			for (auto& h : ObjectManager::HeroList())
 				render.Circle3D(h->GetAiManager()->serverPos, h->GetBoundingRadius(), ImColor(0.f, 1.f, 0.f));
 
