@@ -12,3 +12,11 @@ A bunch of ideas packed into a league internal, done just for fun, maybe someone
 - Discord hook
 - Downloads game images and compresses them
 - Uses: imgui, clipperlib, skCrypter, x86RetSpoof, lazy_importer, jsoncpp, stb, optional MinHook
+
+## Screenshots
+
+![JarvanUlt](https://i.imgur.com/641zOOB.png)
+
+![OnProcessSpellCast](https://i.imgur.com/Fo1M1yL.png)
+
+![WardRange](https://i.imgur.com/866Bxsg.png)
